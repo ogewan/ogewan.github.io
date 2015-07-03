@@ -1,0 +1,20 @@
+---
+title:  "comix-ngn: Dev Diary 1"
+date:   2015-07-02 23:30:00
+description: Brace yourselves.
+---
+![Winter is coming](http://static.guim.co.uk/sys-images/Media/Pix/pictures/2010/7/22/1279820420032/George-RR-Martin-A-Game-O-006.jpg "It gets cold in Chicago")
+
+Remember in First Blood, when I said a compulsion drove me to make this blog? Well one consequence of postponing the inevitable is that I am cognitively backloged with posts that I should have made about a month ago. So I am not as much starting as I am really just offloading here. I might as well start at the beginning.
+
+Comix-ngn is simply an SPA (Single Page Application) that creates webcomics. It originally grew out of me simply practicing and learning Angular. Back then it was dubbed Comic-ng  , which if you are familiar with Angular you know that the majority of its modules and plugins start with ng. It worked well with Angular, you can see a "semi"-working example in the Angular branch. It is simply kept for legacy purposes.
+
+After reading the muut development blogs and learning about microlibs I decided, that I would completely rewrite comic-ng to get rid of all its external dependecies and make the overall package tiny for speed and optimization. While the original comic-ng (8 KB raw) was smaller than comix-ngn (37 KB raw) now, it depended on the following: angular (144 KB), angular-route (4 KB ), angular-touch (3.5 KB), bootstrap (35 KB), bootstrap carousel (19 KB)(which depends on jQuery), jQuery (84 KB), and the bootstrap (122 KB) and bootstrap carousel (1.6 KB) css files. In total 413 KB of minned libraries.
+![Sonic Sez](http://i2.ytimg.com/vi/YGVl-Hc2jE0/mqdefault.jpg "That's no good")
+In contrast, raw comix-ngn is 37 KB, 24 KB minified, there isn't even a question here about. Granted learning Angular is a valuable skill, I feel the pure JS route helps me be a better programmer overall, rather getting stuck in a framework. 
+
+Furthermore, with regards to the purpose of this application, Image Handling, to say the least, it neccessitates that it be small and powerful. It is going to be managing hundreds of images effortlessly, and images are already 65% of website bloat. This is in a world where 413 KB of external libraries is a "good deal". I've seen professional sites with 2 MB worth of Javascript.
+
+And Comix-ngn has to excel in a hostile environment such as this, requiring the least memory, being the least intrusive, and barely adding any load latency all the while being powerful enough to outperform a server on client machines of "unpredictable" configurations.
+
+![Metal Sonic Sez](http://orig05.deviantart.net/4fda/f/2013/080/c/e/metal_sonic_challenge_accepted_by_socomsoldier3-d5yselx.png "No problem")
