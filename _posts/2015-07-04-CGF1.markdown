@@ -1,0 +1,18 @@
+---
+title:  "direction.js (comix-ngn): Dev Future Diary 1"
+date:   2015-07-02 23:30:00
+description: MUURRRRRIIIICAAAA and coding...
+---
+![Murica](http://fcdn.mtbr.com/attachments/airborne/813385d1372934924-happy-4th-july-murica.jpg "Happy Murica Day")
+
+A little note on the title. In Comix-ngn: Dev Diary 1, I said a lot of what I wanted to post in the past was backlogged to come out now. At the same time, further delaying posts that I want to do now would simply excacerbate the problem. So this a future diary.
+![Mirai Nikki](https://lh3.ggpht.com/HeC5WUzV-zCKE4F3sncsHxDU18pTX87jyvlzHDUnXuIrg0zx-Rt3tJzzcw3ljsvEmFDq=w1264 "Fuuuutuurrreeee")
+So these are blogs about what is going on with development currently. Now then, on with the show.
+
+Since the transfer from comic-ng to comix-ngn, I've been using Microframeworks to add specific fuctionality. [Microframeworks are nice, but far from perfect], so I end up writing my own microlibs. While it takes more time, these solutions are tailor made for comix-ngn and give me more practice with pure js. This is the purpose for direction.js, a canvas carousel framework I whipped up to replace comix-ngn's default carousel handler, Swipe. While I won't get rid of swipe entirely, merely turning it into a plugin, direction is designed specifially for comix-ngn. Not to mention its entirety 2 KB smaller, nearly by half the size of Swipe's base js, which only grows with the extra code and CSS I have to add to make it work.
+
+The funny thing is comix-ngn is currently ~8 times the size of direction.js, and if you simply wanted a carousel, direction.js would actually be **better suited to the task**
+
+![President Obama](http://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2014/07/z1.jpg)
+
+[Microframeworks are nice, but far from perfect]: http://addyosmani.com/blog/prosconsmicroframeworks/
