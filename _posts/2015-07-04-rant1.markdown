@@ -1,5 +1,5 @@
 ---
-title:  "How I feel when some one says "Just use jQuery"(rant)"
+title:  "How I feel when some one says 'Just use jQuery'(rant)"
 date:   2015-07-04 21:30:00
 description: DOES ANYONE ON THIS **** INTERNET USE JAVASCRIPT!!!!
 ---
