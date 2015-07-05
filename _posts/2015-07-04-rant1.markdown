@@ -1,0 +1,17 @@
+---
+title:  "How I feel when some one says "Just use jQuery"(rant)"
+date:   2015-07-04 21:30:00
+description: DOES ANYONE ON THIS **** INTERNET USE JAVASCRIPT!!!!
+---
+![Researchin](http://i.snag.gy/uWIwA.jpg "How I spend my Saturday nights")
+
+Le me reading up on [Stack Overflow on animated scrolling] for direction.js.
+
+![Le me](http://new3.funnyjunk.com/thumbnails/comments/Flap+a+table+_5da5b93c82873db52d1d5541af224bdb.jpeg "Need to trim my stache")
+
+Suffice it to say it started to look like this:
+![jQuery](http://www.doxdesk.com/img/updates/20091116-so-large.gif "humanity.faith=-1")
+
+![I give a shit about jQuery](https://i.imgflip.com/nsrxe.jpg "DO YOU?!")
+
+[Stack Overflow on animated scrolling]: http://stackoverflow.com/questions/17733076/smooth-scroll-anchor-links-without-jquery
