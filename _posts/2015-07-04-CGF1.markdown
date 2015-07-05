@@ -1,6 +1,6 @@
 ---
 title:  "direction.js (comix-ngn): Dev Future Diary 1"
-date:   2015-07-02 23:30:00
+date:   2015-07-04 20:30:00
 description: MUURRRRRIIIICAAAA and coding...
 ---
 ![Murica](http://fcdn.mtbr.com/attachments/airborne/813385d1372934924-happy-4th-july-murica.jpg "Happy Murica Day")
