@@ -1,35 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>{{ site.name }}{% if page.title %} - {{ page.title }}{% endif %}</title>
-  <link rel="shortcut icon" href="/assets/images/favicon.ico">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="alternate" type="application/rss+xml" title="My Blog" href="/rss.xml">
-  <link rel="stylesheet" href="/assets/css/highlight.css">
-  <!--<link rel="stylesheet" href="/assets/css/tufte.css">-->
-</head>
-<body>
+        <title>{{ site.name }}{% if page.title %} - {{ page.title }}{% endif %}</title>
+        <link rel="shortcut icon" href="/assets/images/favicon.ico">
+        <link rel="stylesheet" href="/assets/css/style.css">
+        <!--<link rel="alternate" type="application/rss+xml" title="My Blog" href="/rss.xml">-->
+        <link rel="stylesheet" href="/assets/css/highlight.css">
+        <!--<link rel="stylesheet" href="/assets/css/tufte.css">-->
+    </head>
+    <body>
 
-  {% include navigation.html %}
+        {% include navigation.html %}
 
-    {% if page.profile %}
-    {% include profile.html %}
-    {% endif %}
+        {% if page.profile %}
+        {% include profile.html %}
+        {% endif %}
 
-    <section id="wrapper" class="{% if page.profile %}home{% endif %}">
-        {{ content }}
-    </section>
+        <section id="wrapper" class="{% if page.profile %}home{% endif %}">
+            {{ content }}
+        </section>
 
-    <script>
-        var $ssrc=["//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js","/assets/js/main.js","/assets/js/highlight.js"],dfr=function(){for(var b,a=0;a<$ssrc.length;a++)b=document.createElement("script"),b.src=$ssrc[a],document.body.appendChild(b),0<=$ssrc[a].indexOf("highlight.js")&&($ssrc[a].addEventListener?$ssrc[a].addEventListener("load",hljs.initHighlightingOnLoad,0):$ssrc[a].attachEvent?$ssrc[a].attachEvent("onload",hljs.initHighlightingOnLoad):$ssrc[a].onload=hljs.initHighlightingOnLoad);(function(a,
-b,f,g,c,d,e){a.GoogleAnalyticsObject=c;a[c]=a[c]||function(){(a[c].q=a[c].q||[]).push(arguments)};a[c].l=1*new Date;d=b.createElement(f);e=b.getElementsByTagName(f)[0];d.async=1;d.src=g;e.parentNode.insertBefore(d,e)})(window,document,"script","//www.google-analytics.com/analytics.js","ga");ga("create","{{ site.google_analytics }}","auto");ga("send","pageview")};
-!function(){window.addEventListener?window.addEventListener("load",dfr,0):window.attachEvent?window.attachEvent("onload",dfr):window.onload=dfr}();
-    </script>
-</body>
+        <script>var $ccss=["/assets/css/solarized-light.min.css","/assets/css/solarized-dark.min.css","/assets/css/style.css"],$ssrc=["//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"],$jqde=["/assets/js/main.js","/assets/js/highlight.js"];dfr=function(){for(var e,t=0;t<$ssrc.length;t++)e=document.createElement("script"),e.src=$ssrc[t],document.body.appendChild(e),0>$ssrc[t].indexOf("highlight.js")||($ssrc[t].addEventListener?$ssrc[t].addEventListener("load",hljs.initHighlightingOnLoad,0):$ssrc[t].attachEvent?$ssrc[t].attachEvent("onload",hljs.initHighlightingOnLoad):$ssrc[t].onload=hljs.initHighlightingOnLoad),jqdepd(),!function(e,t,s,n,d,a,i){e.GoogleAnalyticsObject=d,e[d]=e[d]||function(){(e[d].q=e[d].q||[]).push(arguments)},e[d].l=1*new Date,a=t.createElement(s),i=t.getElementsByTagName(s)[0],a.async=1,a.src=n,i.parentNode.insertBefore(a,i)}(window,document,"script","//www.google-analytics.com/analytics.js","ga"),ga("create","{{ site.google_analytics }}","auto"),ga("send","pageview")},jqdepd=function(){if(void 0===window.jQuery)return setTimeout(jqdepd,300);for(var e,t=0;t<$jqde.length;t++)e=document.createElement("script"),e.src=$jqde[t],document.body.appendChild(e)},!function(){var e=new Date,t=document.createElement("link");t.setAttribute("rel","stylesheet"),e.getHours()>=7&&e.getHours()<19?t.setAttribute("href",$ccss[0]):t.setAttribute("href",$ccss[1]),document.head.appendChild(t),window.addEventListener?window.addEventListener("load",dfr,0):window.attachEvent?window.attachEvent("onload",dfr):window.onload=dfr}();
+        </script>
+    </body>
 </html>
 
 
