@@ -163,6 +163,12 @@ html {
   margin: 1em;
 }
 /*custom css*/
+#post-meta div span.dark {
+  color: #8Eb0d5;
+}
+body {
+  color: #a3b4b6;
+}
 nav.main-nav {
   background-color: #002b36;
   color: #839496;
@@ -170,7 +176,7 @@ nav.main-nav {
 #post-list a {
   color: #b58900;
 }
-.profile h1 {
+.profile h1, .post h1 {
   color: #d33682;
 }
 #post-list h2 {

@@ -170,7 +170,7 @@ nav.main-nav {
 #post-list a {
   color: #653015;
 }
-.profile h1 {
+.profile h1, .post h1 {
   color: #af111c;
 }
 #post-list h2 {
