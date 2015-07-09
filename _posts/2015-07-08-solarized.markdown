@@ -7,4 +7,4 @@ description: Hold your Colour.
 
 When I chose this jekyll theme for my site, I did so with the intension of customizing the CSS into my own personal scheme. Originally, it was supposed to be dark and brooding because I like sites like those. Easy on the eyes. After reading the internet, I decided it would be better to create some sort of dynamic CSS that adjusted the website to the time of day, Dark at Night, light at Day.
 
-Immeadeatly, I set out to make a javascript solution. However, Last night I decided it would be a glorious waste of time at the moment and instead decided to just use Solarized. Now the website simply switches which theme it uses, either Solarized-Dark or Solarized-Light based on the local time of the client browser.
+Immediately, I set out to make a javascript solution. However, Last night I decided it would be a glorious waste of time at the moment and instead decided to just use Solarized. Now the website simply switches which theme it uses, either Solarized-Dark or Solarized-Light based on the local time of the client browser.
