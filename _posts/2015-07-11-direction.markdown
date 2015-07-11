@@ -7,4 +7,4 @@ description: It doesn't DO anything.
 
 Remember Direction? Yeah me neither. Now it has a site and a demo, thanks [sbrl](https://github.com/seun40/direction.js/issues/1).
 
-Demo is here: http://seun40.github.io/direction.js/, or just press the project link
+Demo is here: [http://seun40.github.io/direction.js/](http://seun40.github.io/direction.js/), or just press the project link
