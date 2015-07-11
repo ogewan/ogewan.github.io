@@ -1,6 +1,6 @@
 ---
 title:  "Without Direction"
-date:   2015-07-02 23:30:00
+date:   2015-07-11 16:30:00
 description: It doesn't DO anything.
 ---
 ![No Direction](http://www.calebwilde.com/wp-content/uploads/2011/05/confusing-street-sign1.jpg "It's actually 40 MPH on even days, and 50 MPH on Prime Days")
