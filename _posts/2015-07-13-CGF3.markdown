@@ -1,0 +1,8 @@
+---
+title:  "Are we there yet?: DDFuture 3"
+date:   2015-07-13 15:00:00
+description: I'm the map.
+---
+![Map](http://www.minecraftopia.com/images/blocks/map.png "I'm the MAP!")
+
+![MapUr.Js](https://github.com/ogewan/MapUr.js) is my newest project. Its goal is to read in a JS file, and later html and CSS, and spit out a visual map of the script. This will show the scripts initial and continuous effects, the objects it creates and its memory usage. It should be useful as both a debugging tool and an educational tool.
