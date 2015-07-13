@@ -1,0 +1,8 @@
+---
+title:  "comix-ngn v1.0 Ducreux: DDFuture 2"
+date:   2015-07-13 13:10:00
+description: Mom's spaghetti, it's ready.
+---
+![Yeah](http://i.imgur.com/C2uPscN.gif "It's Ready")
+
+After two agnonizing months, [comix-ngn v1.0](https://github.com/ogewan/comix-ngn/releases) has been released. All of the features I wanted to add are added. Their might be minor bugs here and there, but that's what the issue system is for.
