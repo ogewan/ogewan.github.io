@@ -10,13 +10,13 @@ highlighter: pygments
 paginate: 20
 baseurl: /
 domain_name: 'github.io'
-google_analytics: 'UA-XXXXXXXX-X'
+google_analytics: 'UA-65112108-2'
 disqus_shortname: 'your-disqus-shortname'
 
 # Details for the RSS feed generator
 url:            'http://seun40.github.io/'
 author:         'Seun Ogedengbe'
-authorTwitter:  ''
+authorTwitter:  '@shOgeWan'
 
 permalink:       /:year/:title/
 
