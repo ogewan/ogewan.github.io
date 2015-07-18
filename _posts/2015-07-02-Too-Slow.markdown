@@ -5,7 +5,7 @@ description: The latency is too damn high!!!
 ---
 ![Gotta 2 Go Fast](http://i.imgur.com/NUgGReZ.png "loading Green Hill Zone")
 
-So developing comix-ngn, I've been researching Web Page Optimization and FPOF(Front-end Points of Failure). This site, the result of a free jekyll theme, follows the convention of websites these days of being poorly programmed. It looks pretty, but my internet disconnected while posting this and it takes SECONDS TO REALIZE that jquery isn't there. Seconds being equivalent to years, especially when I'm rapidly testing stuff.
+So developing comix-ngn, I've been researching Web Page Optimization and [FSPOF(Front-end Single Points of Failure)](http://www.stevesouders.com/blog/2010/06/01/frontend-spof/). This site, the result of a free jekyll theme, follows the convention of websites these days of being poorly programmed. It looks pretty, but my internet disconnected while posting this and it takes SECONDS TO REALIZE that jQuery isn't there. Seconds being equivalent to years, especially when I'm rapidly testing stuff.
 
 ![Years](http://i.imgur.com/o3Gs5lz.gif "Don't leave me hangin")
 
