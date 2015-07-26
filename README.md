@@ -1,1 +1,0 @@
-<http://ogewan.github.io/>
