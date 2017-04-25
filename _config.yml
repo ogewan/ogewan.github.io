@@ -4,7 +4,7 @@ meta_description: "It took me 22 years to make this...Voila"
 
 aboutPage: true
 
-markdown: redcarpet
+markdown: kramdown
 highlighter: pygments
 
 paginate: 20
