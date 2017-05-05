@@ -1,0 +1,77 @@
+---
+title:  "New Technology"
+date:   2017-05-05 12:00:00
+description: If you are reading this, then I have already eaten the tacos.
+---
+![Advanced Technology](http://vignette3.wikia.nocookie.net/airmech/images/f/f0/Sombrero_Full.png/revision/latest?cb=20130615131543 "$15.3 B USD spent on a robot wearing a sombrero")
+Scheduling Github Pages Posts with Trello
+====
+Ingredients:
+----
+- 1 [Trello](https://trello.com/) account
+- 1 [Github](https://github.com/) account
+- 1 [Zapier](https://zapier.com/) account
+- 1 Trello board
+- 3* Trello lists
+- [ButlerforTrello](https://butlerfortrello.com/)
+- A [Github Pages](https://pages.github.com/) Repo
+**ButlerForTrello will automatically create the butler list*
+
+Directions:
+----
+1. Signup for a Trello and Zapier account. This guide assumes you already have a Github Page set up. If not, go [here](https://pages.github.com/).
+2. On any Trello Board added 2 lists. In my case, I named them "blog_scheduler" and "blog_post" for simplicity, but they can be named whatever you want.
+3. Go to [ButlerforTrello](https://butlerfortrello.com/) and authenticate the app. This bot automates a lot of Trello operations based on triggers. Go to dashboard and select "Edit Board" in the board where you made the 2 lists.
+   - If not already done, click "Invite Butler". This will allow the Butler Bot access to that particular board.
+4. Add the following 2 commands:
+
+    ```
+    the moment a card in list "blog_scheduler" is due, move the card to list "blog_post", and set due in 24 hours
+
+    the moment a card in list "blog_post" is due, archive the card
+    ```
+
+5. These cards will be how we store Blog Posts in Trello. Since Trello also uses Markdown for Formatting, they should be similar to how Github will render them. If successfully added, these commands should show up as cards in the newly created "Butler" list. You can also directly add them as commands as cards here, with the command as the card name.
+When moved into the "blog_post" list, they will not be posted immediately, so we have to wait to clear them. This is why we delay that by waiting a day to archive it.
+6. Login to Zapier and select "Make a Zap".
+7. As the trigger, search for and select Trello. Press "Show More Options" and select "Card Moved to List".
+8. Thanks to the setup in steps 2-4, this Zap will trigger when a card is moved from "blog_scheduler" to "blog_post", which will happen as soon as the due date on the card is reached. Unfortunately, Zapier is slow compared to ButlerforTrello, so the Zap will be delayed.
+9. Press save and continue and select a Trello account; if you haven't already, log in to Trello and authenticate Zapier. Select the board where the lists are located, and the "posting list" (when cards are moved into this list, they are posted). In my case this is "blog_post. Press continue and test this step.
+10. For the action, search for and select Code. Choose "Run JavaScript" and save and continue.
+11. For Input Data, add two variables. I have *input* and *name* respectively. For *input*, select the "Insert Field" button and wait for it to populate. Select "Card Desc". If this does not show up, make sure your test was successful in step 9. This will form the content of the file actually committed to Github. The *name* variable can be any unique identifier. This will be what the file is called. I used the "Insert Field" and selected "Card name".
+12. Inside Code, paste the following: 
+
+    ```
+    var result = (new Buffer(input.input).toString('base64'));
+    var auth = (new Buffer('username:password').toString('base64'));
+
+    fetch('https://api.github.com/repos/owner/repo/contents/path' + input.name,
+    {
+        method: 'put',
+        body: JSON.stringify({
+            message: 'Update',
+            content: result
+        }), headers: {
+            'Authorization': 'Basic ' + auth
+        }
+    }
+    ).then(function (res) {
+        return res.json();
+    }).then(function (json) {
+        var output = { result: json };
+        callback(null, output);
+    }).catch(callback);`
+    ```
+    Where *username* and *password* are your credentials for Github, *owner* is your Github ID, *repo* is the repository the file is     being added to (in my case *username*.github.io), and *path* is the directory in which the file should be posted. Path + input.name     should be full path to where the new file should be. See the [doc](https://developer.github.com/v3/repos/contents/#create-a-file) for more details.
+    - There are two ways to have a Github Pages site, a project site on the gh-pages branch or the master branch of a user site titled *username*.github.io. If the former case, you will need to add this line of code under
+     
+     ```message: 'Update',``` : ```branch: 'gh-pages',```
+
+13. Press continue. If the test succeeds, press finish and turn the Zap on.
+14. In order to truly test the system, make a card in the "blog_scheduler" list with any title and some markdown content as its description. 
+
+    Remember, Trello's Markdown is slightly different from Github's Markdown. Test the file in Github's Preview before posting it on Trello.
+
+    The description will serve as the content for the markdown file in Github. Add a due date for the near future; preferably in the next minute for ensure some leeway. Once the card is moved to "blog_post", it will take a couple of minutes for Zapier to pick it up. *Zapier's free account checks for updates every 15 minutes.* 
+
+    Ignore if Zapier warns of a time out error, as the free account only has a timeout of 1 second. Instead, check to see if a new commit has been added to your Github repositiory. If it has, congrats you now have Scheduled Github Pages posts and it only took 13 simple steps.
