@@ -15,12 +15,13 @@ Ingredients:
 - 3* Trello lists
 - [ButlerforTrello](https://butlerfortrello.com/)
 - A [Github Pages](https://pages.github.com/) Repo
+
 **ButlerForTrello will automatically create the butler list*
 
 Directions:
 ----
 1. Signup for a Trello and Zapier account. This guide assumes you already have a Github Page set up. If not, go [here](https://pages.github.com/).
-2. On any Trello Board added 2 lists. In my case, I named them "blog_scheduler" and "blog_post" for simplicity, but they can be named whatever you want.
+2. On any Trello Board add 2 lists. In my case, I named them "blog_scheduler" and "blog_post" for simplicity, but they can be named whatever you want.
 3. Go to [ButlerforTrello](https://butlerfortrello.com/) and authenticate the app. This bot automates a lot of Trello operations based on triggers. Go to dashboard and select "Edit Board" in the board where you made the 2 lists.
    - If not already done, click "Invite Butler". This will allow the Butler Bot access to that particular board.
 4. Add the following 2 commands:
@@ -31,7 +32,7 @@ Directions:
     the moment a card in list "blog_post" is due, archive the card
     ```
 
-5. These cards will be how we store Blog Posts in Trello. Since Trello also uses Markdown for Formatting, they should be similar to how Github will render them. If successfully added, these commands should show up as cards in the newly created "Butler" list. You can also directly add them as commands as cards here, with the command as the card name.
+5. These cards will be how we store Blog Posts in Trello. Since Trello also uses Markdown for formatting, they should be similar to how Github will render them. If successfully added, these commands should show up as cards in the newly created "Butler" list. You can also directly add them as commands as cards here, with the command as the card name.
 When moved into the "blog_post" list, they will not be posted immediately, so we have to wait to clear them. This is why we delay that by waiting a day to archive it.
 6. Login to Zapier and select "Make a Zap".
 7. As the trigger, search for and select Trello. Press "Show More Options" and select "Card Moved to List".
