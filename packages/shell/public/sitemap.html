@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio · dev sitemap</title>
+  <meta name="robots" content="noindex" />
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: oklch(0.06 0.02 275);
+      color: oklch(0.97 0.005 280);
+    }
+    body { margin: 0; padding: 48px 32px; max-width: 760px; margin-inline: auto; line-height: 1.6; }
+    h1 {
+      font-size: 32px; font-weight: 300; letter-spacing: -0.03em;
+      margin: 0 0 8px;
+    }
+    h2 {
+      font-size: 12px; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: oklch(0.6 0.01 280);
+      margin: 32px 0 8px; display: flex; align-items: center; gap: 8px;
+    }
+    h2::before {
+      content: ""; display: inline-block;
+      width: 6px; height: 1px; background: oklch(0.84 0.12 210);
+    }
+    p { color: oklch(0.78 0.008 280); margin: 0 0 8px; font-size: 14px; }
+    .meta { color: oklch(0.6 0.01 280); font-size: 12px; font-family: ui-monospace, Menlo, monospace; letter-spacing: 0.08em; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li {
+      padding: 10px 14px; margin-block: 2px;
+      border: 1px solid oklch(0.98 0.005 280 / 0.06);
+      border-radius: 10px;
+      background: oklch(0.16 0.018 285 / 0.42);
+      backdrop-filter: blur(10px);
+      display: flex; align-items: baseline; gap: 12px;
+    }
+    li:hover { border-color: oklch(0.84 0.12 210 / 0.4); }
+    a {
+      color: oklch(0.84 0.12 210); text-decoration: none;
+      flex: 1; font-family: ui-monospace, Menlo, monospace;
+    }
+    a:hover { text-shadow: 0 0 12px oklch(0.84 0.12 210 / 0.35); }
+    .label { color: oklch(0.78 0.008 280); font-size: 13px; }
+    .scene {
+      font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+      color: oklch(0.6 0.01 280); letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    footer {
+      margin-top: 48px; padding-top: 16px;
+      border-top: 1px solid oklch(0.98 0.005 280 / 0.06);
+      color: oklch(0.6 0.01 280); font-size: 11px;
+      font-family: ui-monospace, Menlo, monospace; letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Portfolio · dev sitemap</h1>
+  <p>Untracked dev navigation. Click anywhere to jump to that route on the running Vite server.</p>
+  <p class="meta">SERVED AT /sitemap.html · NOT IN PRODUCTION</p>
+
+  <h2>Production routes (English)</h2>
+  <ul>
+    <li><a href="/en/">/en/</a> <span class="label">Home</span> <span class="scene">earth</span></li>
+    <li><a href="/en/about">/en/about</a> <span class="label">About</span> <span class="scene">about</span></li>
+    <li><a href="/en/projects">/en/projects</a> <span class="label">Projects</span> <span class="scene">projects</span></li>
+    <li><a href="/en/contact">/en/contact</a> <span class="label">Contact</span> <span class="scene">contact</span></li>
+    <li><a href="/en/colophon">/en/colophon</a> <span class="label">Colophon</span> <span class="scene">colophon</span></li>
+  </ul>
+
+  <h2>Production routes (Spanish — same routing, no content yet)</h2>
+  <ul>
+    <li><a href="/es/">/es/</a> <span class="label">Inicio</span> <span class="scene">earth</span></li>
+    <li><a href="/es/about">/es/about</a> <span class="label">Acerca</span> <span class="scene">about</span></li>
+    <li><a href="/es/projects">/es/projects</a> <span class="label">Proyectos</span> <span class="scene">projects</span></li>
+    <li><a href="/es/contact">/es/contact</a> <span class="label">Contacto</span> <span class="scene">contact</span></li>
+    <li><a href="/es/colophon">/es/colophon</a> <span class="label">Colofón</span> <span class="scene">colophon</span></li>
+  </ul>
+
+  <h2>Dev-only routes (tree-shaken from production)</h2>
+  <ul>
+    <li><a href="/en/_dev/tokens">/en/_dev/tokens</a> <span class="label">Token + primitive showcase</span> <span class="scene">projects (pinned)</span></li>
+    <li><a href="/en/_dev/celestial">/en/_dev/celestial</a> <span class="label">Scene cycler + focus API</span> <span class="scene">manual</span></li>
+    <li><a href="/en/_dev/celestial?neb=01">/en/_dev/celestial?neb=01</a> <span class="label">Pin Carina nebula</span> <span class="scene">contact</span></li>
+    <li><a href="/en/_dev/celestial?neb=02">/en/_dev/celestial?neb=02</a> <span class="label">Pin Lagoon nebula</span> <span class="scene">contact</span></li>
+    <li><a href="/en/_dev/celestial?neb=03">/en/_dev/celestial?neb=03</a> <span class="label">Pin Pillars nebula</span> <span class="scene">contact</span></li>
+    <li><a href="/en/_dev/celestial?neb=04">/en/_dev/celestial?neb=04</a> <span class="label">Pin Veil nebula</span> <span class="scene">contact</span></li>
+  </ul>
+
+  <h2>Project detail + redirect (Phase 4)</h2>
+  <ul>
+    <li><a href="/en/projects/portfolio">/en/projects/portfolio</a> <span class="label">In-shell case study (this repo)</span> <span class="scene">projects</span></li>
+    <li><a href="/en/projects/atlas-console">/en/projects/atlas-console</a> <span class="label">In-shell case study (Atlas)</span> <span class="scene">projects</span></li>
+    <li><a href="/en/projects/atlas-console/redirect">/en/projects/atlas-console/redirect</a> <span class="label">External-site redirect shim</span> <span class="scene">projects</span></li>
+    <li><a href="/en/projects/aperture/redirect">/en/projects/aperture/redirect</a> <span class="label">Aperture redirect shim</span> <span class="scene">projects</span></li>
+  </ul>
+
+  <h2>Edge cases</h2>
+  <ul>
+    <li><a href="/">/</a> <span class="label">Root → redirects to /en/</span> <span class="scene">redirect</span></li>
+    <li><a href="/en/does-not-exist">/en/does-not-exist</a> <span class="label">404 fallback</span> <span class="scene">none</span></li>
+    <li><a href="/404.html">/404.html</a> <span class="label">GH Pages SPA redirect file</span> <span class="scene">none</span></li>
+  </ul>
+
+  <footer>SITEMAP · UNTRACKED · DELETE WHEN DONE</footer>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio</title>
+  <meta name="theme-color" content="#05070d" />
+  <style>
+    html, body { height: 100%; margin: 0; background: oklch(0.06 0.02 275); color: oklch(0.78 0.008 280); font-family: ui-sans-serif, system-ui, sans-serif; }
+    .wrap { display: grid; place-items: center; height: 100%; padding: 24px; }
+    .msg { font-family: ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.01 280); }
+  </style>
+</head>
+<body>
+  <noscript><div class="wrap"><div class="msg">Portfolio · JavaScript required for SPA routing.</div></div></noscript>
+  <script>
+    /*
+     * GitHub Pages SPA fallback. Pages serves this file for any URL the static
+     * host can't resolve to a real file (i.e. every SPA deep link). We stash
+     * the deep link in sessionStorage and bounce to /, where the React app's
+     * useGitHubPagesRedirectReplay() hook reads it back and replays it into
+     * history. This is the rafrex/spa-github-pages trick, simplified.
+     *
+     * Note: don't preserve hash on purpose — the SPA owns hash state itself.
+     */
+    (function () {
+      try {
+        var deeplink = window.location.pathname + window.location.search + window.location.hash;
+        sessionStorage.setItem('portfolio:redirect', deeplink);
+      } catch (_) { /* sessionStorage unavailable; nothing to do */ }
+      // Bounce to the site root, preserving the origin.
+      var base = '/';
+      window.location.replace(base);
+    })();
+  </script>
+  <div class="wrap"><div class="msg">Redirecting…</div></div>
+</body>
+</html>

@@ -137,6 +137,9 @@ importers:
       '@portfolio/content':
         specifier: workspace:*
         version: link:../content
+      '@portfolio/manifest-builder':
+        specifier: workspace:*
+        version: link:../manifest-builder
       '@portfolio/ui':
         specifier: workspace:*
         version: link:../ui
