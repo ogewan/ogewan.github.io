@@ -46,3 +46,6 @@ yarn-error.log*
 .cache/
 *.tsbuildinfo
 mockup/
+
+# Local dev sitemap — untracked by intent
+packages/shell/public/sitemap.html
