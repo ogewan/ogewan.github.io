@@ -1,0 +1,22 @@
+schema_version: 1
+title: Full Project
+summary: A project entry with every field populated, used to exercise enrichment and URL resolution.
+tech:
+  - typescript
+  - react
+  - three.js
+categories:
+  - graphics
+  - web
+status: shipped
+featured: true
+order: 1
+started_at: '2023-09-15'
+ended_at: '2024-04-30'
+pages_url: https://example.github.io/full-project/
+demo_video: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+screenshots:
+  - assets/shot-01.png
+  - assets/shot-02.png
+  - https://example.com/external.png
+docs_link: https://example.com/full-project/docs/

@@ -1,0 +1,7 @@
+schema_version: 1
+title: Minimal Project
+summary: A project entry with only the required fields populated.
+tech:
+  - typescript
+status: active
+started_at: '2024-06-01'

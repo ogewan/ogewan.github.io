@@ -1,0 +1,6 @@
+schema_version: 1
+summary: This file is missing the required title field and should fail validation.
+tech:
+  - typescript
+status: active
+started_at: '2024-01-01'
