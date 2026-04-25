@@ -1,0 +1,25 @@
+import { Link } from './Link';
+
+# Link
+
+Cyan anchor with thin underline, bloom on hover, composite focus ring. `external`
+prop sets `target="_blank"`, `rel="noreferrer noopener"`, and appends a ↗ glyph
+so the affordance is legible without relying on color alone.
+
+## Internal
+
+<Link href="/en/about">Read the about page</Link>
+
+## External
+
+<Link href="https://anthropic.com" external>Anthropic</Link>
+
+## In-shell routing
+
+For react-router transitions, wrap the router's `Link` with this className:
+
+```tsx
+import { Link as RouterLink } from 'react-router';
+// and compose:
+<RouterLink to="/en/projects" className={linkClassName}>Work</RouterLink>
+```

@@ -1,0 +1,28 @@
+import { Text } from './Text';
+
+# Text
+
+Five variants covering the non-display portion of the type scale.
+
+<Text variant="lead">
+  Lead. Inter Tight 400 / 20 / 1.5 / secondary. Intro paragraphs under a heading.
+</Text>
+
+<Text>
+  Body. Inter Tight 400 / 16 / 1.6 / primary. Default running prose. Survives
+  Spanish expansion (+15–25%) without reflowing layouts.
+</Text>
+
+<Text variant="small">
+  Small. Inter Tight 400 / 14 / 1.55 / secondary. Captions, metadata.
+</Text>
+
+<Text variant="label">Route 01 · Earth orbit · UTC 2026-04-24</Text>
+
+<Text variant="micro">COMMIT 3a9c2f · BUILD 441 · R3F · ANGULAR</Text>
+
+## Notes
+
+- `label` and `micro` are JetBrains Mono, tracked and uppercased — "instrument
+  readout" voice. Never use them for prose.
+- `as` prop changes the tag; styling is tag-independent. Default is `<p>`.

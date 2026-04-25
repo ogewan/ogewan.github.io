@@ -1,0 +1,24 @@
+import { Container } from './Container';
+
+# Container
+
+Centered, max-width-bounded wrapper with consistent gutter.
+
+## reading (880px)
+
+Magazine measure. Use for prose routes: project detail, about, colophon.
+
+<Container width="reading">…</Container>
+
+## wide (1280px, default)
+
+Default. Hero, projects grid, shell chrome.
+
+<Container>…</Container>
+
+## full
+
+No max-width. For full-bleed sections — hero media strip, celestial backdrop
+container. Still applies gutter unless you override.
+
+<Container width="full">…</Container>

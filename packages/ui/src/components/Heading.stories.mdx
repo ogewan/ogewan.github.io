@@ -1,0 +1,33 @@
+import { Heading } from './Heading';
+
+# Heading
+
+Semantic level (h1–h4) decoupled from visual variant. Use `level` for the HTML
+element and `variant` for the type style — they default to the same value so
+`<Heading level={2} />` renders an `<h2>` at the h2 scale.
+
+## Display
+
+Masthead only. Space Grotesk 300, clamp(56, 9vw, 128).
+
+<Heading level={1} variant="display">Built at the shoreline.</Heading>
+
+## H1
+
+Route headlines. Space Grotesk 400, clamp(40, 5.2vw, 72).
+
+<Heading level={1}>Selected work, 2021–2026.</Heading>
+
+## H2 — H4
+
+Section headings. See `tokens.html § 04` for full scale.
+
+<Heading level={2}>Scenes shift as routes change.</Heading>
+<Heading level={3}>A polyglot React + R3F + Angular portfolio</Heading>
+<Heading level={4}>Persistent celestial shell</Heading>
+
+## Notes
+
+- Display, h1, h2 ship with `text-wrap: balance`; h3/h4 get the browser default.
+- Tracking is negative for display/h1/h2/h3 to compensate for Space Grotesk's
+  wide default set-width. Don't override.

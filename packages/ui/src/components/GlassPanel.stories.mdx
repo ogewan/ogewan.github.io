@@ -1,0 +1,37 @@
+import { GlassPanel } from './GlassPanel';
+
+# GlassPanel
+
+Four variants map to the glass surface tiers from tokens.html § 03. Each composes
+backdrop blur + saturation + 1px inner hairline + specular top edge + drop shadow.
+
+## Chrome
+
+Persistent UI — nav, rail, page chrome. 16px blur / 150% saturate.
+
+<GlassPanel variant="chrome" className="p-6">Chrome</GlassPanel>
+
+## Panel (default)
+
+Cards and content panels. 14px blur / 140% saturate.
+
+<GlassPanel className="p-6">Panel</GlassPanel>
+
+## Inset
+
+Recessed fields — inputs, search. 10px blur, no specular top.
+
+<GlassPanel variant="inset" className="p-4">Inset</GlassPanel>
+
+## Elevated
+
+Modals, popovers, menus. 20px blur / 160% saturate, stronger specular.
+
+<GlassPanel variant="elev" className="p-6">Elevated</GlassPanel>
+
+## Notes
+
+- All variants pair with the design-system focus ring; tab through any interactive
+  child and the ring renders above the blur layer correctly.
+- `as` prop lets you semantically render as `<section>`, `<aside>`, `<nav>`, etc.
+  Styling is independent of tag.

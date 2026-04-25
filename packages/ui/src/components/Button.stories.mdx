@@ -1,0 +1,29 @@
+import { Button } from './Button';
+
+# Button
+
+44×44 minimum tap target, composite focus ring on glass-dark, three visual variants.
+
+## Primary
+
+Top-level CTAs: "Book a call", "View work", "Send a brief". Cyan outline, cyan label.
+
+<Button variant="primary">View work →</Button>
+
+## Secondary (default)
+
+Default affordance. Glass panel background, neutral label, cyan on hover.
+
+<Button>Ver trabajo →</Button>
+
+## Ghost
+
+Dense toolbars only. Transparent, cyan on hover.
+
+<Button variant="ghost">Cancel</Button>
+
+## Notes
+
+- Disabled state: `disabled` HTML attribute, opacity 0.5, `cursor-not-allowed`.
+- Reduced-motion: hover transition collapses to 1ms via `--dur-fast` automatically.
+- All buttons include `focus-visible:[box-shadow:var(--focus-ring)]` — never relies on browser default.

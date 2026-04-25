@@ -1,5 +1,8 @@
+@import '@portfolio/ui/theme.css';
 @import 'tailwindcss';
 
-@theme {
-  /* Design tokens land here in Phase 2. */
-}
+/* Tailwind v4 auto-detects class usage in files it can see. Workspace packages
+   aren't on that path by default, so we register the UI source explicitly. */
+@source "../../ui/src/**/*.{ts,tsx}";
+
+/* Page-level styles and shell-only rules belong below this line. */
