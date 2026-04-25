@@ -1,0 +1,35 @@
+schema_version: 1
+
+title: Portfolio SPA
+summary: Polyglot React + R3F + Angular Elements portfolio at username.github.io. Persistent celestial scene (Earth → black hole) keyed to routes, YAML-driven repo detection, English/Spanish i18n, dark Frutiger Aero aesthetic.
+tech:
+  - react
+  - r3f
+  - three
+  - angular
+  - typescript
+  - vite
+  - tailwind
+  - maplibre
+  - pnpm
+  - github-actions
+categories:
+  - web
+  - portfolio
+  - showcase
+status: wip
+featured: true
+order: 1
+
+started_at: 2026-04-24
+
+# pages_url intentionally omitted — this repo IS the portfolio site, so an
+# in-shell detail page is the right destination. The detail page links to
+# /colophon for the full architecture story.
+
+screenshots:
+  - docs/screenshots/hero.png
+  - docs/screenshots/projects-grid.png
+  - docs/screenshots/colophon.png
+
+docs_link: https://github.com/username/portfolio#readme
