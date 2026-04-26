@@ -51,3 +51,8 @@ mockup/
 
 # Local dev sitemap — untracked by intent
 packages/shell/public/sitemap.html
+
+# Architecture writeup + next-chat continuation prompt — local-only meta-docs.
+# Phase 8 may decide to track ARCHITECTURE.md and link it from the colophon page.
+ARCHITECTURE.md
+CONTINUE.md
