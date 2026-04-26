@@ -53,8 +53,10 @@
         "note": "NOTE"
       },
       "entries": {
-        "v04": "Real shell pages, location rail, projects from manifest, View Transitions",
+        "v06": "Launch hardening: meta tags, sitemap, self-hosted webfonts, view-transition CSS, screenshot prefetch",
+        "v05": "GitHub Actions build-and-deploy, real manifest with fixture fallback, .portfolio.yml template",
         "v04i18n": "i18next, MapLibre, Turnstile/Calendly, scroll-route nav, hero idle preload",
+        "v04": "Real shell pages, location rail, projects from manifest, View Transitions",
         "v03": "Persistent celestial backdrop (placeholders), focus API",
         "v02": "Design tokens, primitives, /_dev/tokens showcase",
         "v01": "Manifest builder + Zod schema + vitest suite",

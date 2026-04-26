@@ -14,7 +14,14 @@
  * oklch values (see tokens.html § 02 Contrast table).
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Self-hosted webfonts via @fontsource-variable. Each package ships a single
+   variable .woff2 covering the full weight axis — far smaller than five static
+   weights per family. The variable family names are suffixed " Variable", so
+   the type-family tokens below reference both the variable and the static
+   names (in case a static fallback is ever wired in). */
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/inter-tight';
+@import '@fontsource-variable/jetbrains-mono';
 
 /* @theme static emits every declared variable regardless of utility usage. The
    tokens are a small, finite set and the celestial/Angular packages plus the
@@ -22,9 +29,10 @@
    drop those references. Cost: a few hundred bytes of CSS. */
 @theme static {
   /* ===== TYPE FAMILIES ===== */
-  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-display: 'Space Grotesk Variable', 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter Tight Variable', 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --font-sans: var(--font-body);
 
   /* ===== TYPE SCALE ===== */
@@ -157,6 +165,33 @@
     opacity: 0;
   }
 }
+
+/* ===== VIEW TRANSITIONS ===== */
+
+/* Default crossfade for routes that don't opt in to a custom morph. The
+   browser's built-in fade-out + fade-in covers most cases; we just slow it
+   to match the design system's --dur-route. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-route);
+  animation-timing-function: var(--ease-smooth);
+}
+
+/* Project card → detail shared-element morph. Both surfaces tag the same
+   element with `view-transition-name: card-<slug>`; the browser handles the
+   geometry tween between the card's frame on /projects and the detail page's
+   <h1> on /projects/<slug>. We just choose the curve and let glass cross-fade
+   smoothly. */
+::view-transition-group(*) {
+  animation-duration: var(--dur-route);
+  animation-timing-function: var(--ease-glass);
+}
+
+/* When the card morphs into the detail headline, the OLD card is image-replaced
+   by its glass-paneled snapshot, and the NEW headline is replaced by its own
+   text snapshot. Letting both run their default fade keeps the brief's "subtle,
+   not flashy" intent. Reduced motion already collapses --dur-route to 1ms via
+   the @media block above, so no separate suppression is needed. */
 
 /* Base body defaults — applied once by the shell's root stylesheet */
 html {

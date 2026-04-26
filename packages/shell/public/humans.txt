@@ -1,0 +1,20 @@
+/* TEAM */
+Designer · Engineer: <your-name>
+Pronouns: they / them
+Site: <username>.github.io
+Mastodon: <handle>@<instance>
+Location: Mountain View, CA · approximate
+
+/* THANKS */
+The open-source authors of React, React Three Fiber, Angular, MapLibre,
+Vite, Tailwind, Octokit, Zod, i18next, and a hundred other things this
+site stands on. Pentagram, Coursey, and Ted Chiang for the visual and
+prose vocabulary. NASA and ESA/Hubble for the imagery references that
+the celestial backdrop will eventually resolve into.
+
+/* SITE */
+Last update: 2026-04-26
+Standards: HTML5, WCAG 2.2 AA, OKLCH color, View Transitions
+Languages: English · Español
+IDE: VS Code · Cursor
+Stack: react · r3f · angular · maplibre · vite · tailwind v4 · pnpm · gh actions

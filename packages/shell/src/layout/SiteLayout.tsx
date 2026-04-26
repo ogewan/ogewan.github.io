@@ -4,6 +4,7 @@ import { SiteHeader } from './SiteHeader';
 import { SiteFooter } from './SiteFooter';
 import { LocationRail } from '../components/LocationRail';
 import { useFocusOnRouteChange } from './useFocusOnRouteChange';
+import { useDocumentMeta } from './useDocumentMeta';
 
 // Pages where the right-side location rail is visible. Brief: Home and About
 // only. Detail/redirect pages don't show the rail because the camera focus
@@ -20,6 +21,7 @@ interface SiteLayoutProps {
 export function SiteLayout({ children }: SiteLayoutProps) {
   const location = useLocation();
   useFocusOnRouteChange();
+  useDocumentMeta();
   const showRail = shouldShowRail(location);
 
   return (

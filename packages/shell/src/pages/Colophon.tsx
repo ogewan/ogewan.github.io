@@ -28,7 +28,7 @@ export function Colophon() {
     const tail =
       'font-family: serif; font-style: italic; color: oklch(0.78 0.008 280); font-size: 13px;';
     console.log('%cOpen channel.', big);
-    console.log('%c/colophon · v0.4 · 2026-04-25', meta);
+    console.log('%c/colophon · v0.7 · 2026-04-26', meta);
     console.log('%cif you’re reading this, you’re my kind of person. ✦', tail);
   }, []);
 
@@ -41,7 +41,7 @@ export function Colophon() {
         >
           <span aria-hidden="true">←</span> {t('crumbBack')}
         </TransitionLink>
-        <Text variant="micro">05 · /colophon · v0.4</Text>
+        <Text variant="micro">05 · /colophon · v0.7</Text>
       </div>
 
       <Text variant="label" className="mb-3 inline-flex items-center gap-2">
@@ -167,6 +167,8 @@ export function Colophon() {
               </tr>
             </thead>
             <tbody>
+              <ChangeRow ver="0.7" date="2026-04-26" note={t('sections.changelog.entries.v06')} />
+              <ChangeRow ver="0.6" date="2026-04-26" note={t('sections.changelog.entries.v05')} />
               <ChangeRow
                 ver="0.5"
                 date="2026-04-25"

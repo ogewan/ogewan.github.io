@@ -1,10 +1,14 @@
 import { useEffect } from 'react';
+import { manifest } from '../data/manifest';
 
 // Hero-idle preloader. Mounted only on Home — fires once per session during
 // the lens-flare "settled" window to warm the heavy lazy chunks the user is
 // about to wheel-scroll into:
 //   - The Angular timeline bundle (about 60 KB gz) used on /about.
 //   - The MapLibre + Turnstile lazy chunks used on /contact.
+//   - The first screenshot of every project (Phase 8 addition; only fires
+//     once the real manifest is in place — fixture's images are local
+//     placeholder gradients, not URLs).
 //
 // Bail-outs (skip preload):
 //   - sessionStorage flag already set (already done this session)
@@ -60,9 +64,29 @@ function warmContactChunks() {
   }
 }
 
+function prefetchProjectScreenshots() {
+  // Only prefetch real http(s) URLs — fixture entries have placeholder
+  // gradient strings, not URLs. Cap at the first 3 projects' first screenshot
+  // each so we don't burn bandwidth on a long manifest. Project cards already
+  // use IntersectionObserver to lazy-prefetch beyond that.
+  const seen = new Set<string>();
+  for (const entry of manifest.slice(0, 3)) {
+    const first = entry.screenshots?.[0];
+    if (!first || !/^https?:\/\//.test(first)) continue;
+    if (seen.has(first)) continue;
+    seen.add(first);
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.as = 'image';
+    link.href = first;
+    document.head.appendChild(link);
+  }
+}
+
 function runPreload() {
   preloadAngularBundle();
   warmContactChunks();
+  prefetchProjectScreenshots();
   try {
     sessionStorage.setItem(SESSION_FLAG, '1');
   } catch {

@@ -4,6 +4,7 @@ import { initReactI18next } from 'react-i18next';
 
 import enCommon from '@portfolio/content/locales/en/common.json';
 import enNav from '@portfolio/content/locales/en/nav.json';
+import enMeta from '@portfolio/content/locales/en/meta.json';
 import enHome from '@portfolio/content/locales/en/home.json';
 import enAbout from '@portfolio/content/locales/en/about.json';
 import enProjects from '@portfolio/content/locales/en/projects.json';
@@ -15,6 +16,7 @@ import enNotFound from '@portfolio/content/locales/en/notFound.json';
 
 import esCommon from '@portfolio/content/locales/es/common.json';
 import esNav from '@portfolio/content/locales/es/nav.json';
+import esMeta from '@portfolio/content/locales/es/meta.json';
 import esHome from '@portfolio/content/locales/es/home.json';
 import esAbout from '@portfolio/content/locales/es/about.json';
 import esProjects from '@portfolio/content/locales/es/projects.json';
@@ -35,6 +37,7 @@ const resources = {
   en: {
     common: enCommon,
     nav: enNav,
+    meta: enMeta,
     home: enHome,
     about: enAbout,
     projects: enProjects,
@@ -47,6 +50,7 @@ const resources = {
   es: {
     common: esCommon,
     nav: esNav,
+    meta: esMeta,
     home: esHome,
     about: esAbout,
     projects: esProjects,
@@ -69,6 +73,7 @@ void i18n
     ns: [
       'common',
       'nav',
+      'meta',
       'home',
       'about',
       'projects',

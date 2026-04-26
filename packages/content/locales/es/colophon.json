@@ -54,8 +54,10 @@
         "note": "NOTA"
       },
       "entries": {
-        "v04": "Páginas reales, riel de ubicación, proyectos desde manifest, View Transitions",
+        "v06": "Hardening de lanzamiento: meta tags, sitemap, fuentes auto-hospedadas, CSS de view transitions, prefetch de screenshots",
+        "v05": "GitHub Actions build-and-deploy, manifest real con fallback a fixture, plantilla .portfolio.yml",
         "v04i18n": "i18next, MapLibre, Turnstile/Calendly, navegación por scroll, preload en hero",
+        "v04": "Páginas reales, riel de ubicación, proyectos desde manifest, View Transitions",
         "v03": "Backdrop celestial persistente (placeholders), focus API",
         "v02": "Design tokens, primitives, /_dev/tokens showcase",
         "v01": "Manifest builder + Zod schema + suite de vitest",

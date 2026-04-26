@@ -92,8 +92,11 @@ export function SiteHeader() {
                   end={item.slug === ''}
                   className={({ isActive: routerActive }) => {
                     const active = routerActive || isActive(location.pathname, locale, item.slug);
+                    // min-h-11 forces the 44px tap target on mobile (where
+                    // items stack vertically and need to be thumb-sized);
+                    // desktop reverts to natural padding for the slim chrome.
                     return (
-                      'inline-flex items-center gap-2 px-3 py-1.5 rounded-sm font-mono text-micro tracking-[0.14em] uppercase ' +
+                      'inline-flex items-center gap-2 px-3 py-1.5 min-h-11 md:min-h-0 rounded-sm font-mono text-micro tracking-[0.14em] uppercase ' +
                       'transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)] ' +
                       (active
                         ? 'text-cyan border border-[color:oklch(0.84_0.12_210/0.3)] bg-[color:oklch(0.84_0.12_210/0.06)] '
@@ -121,10 +124,11 @@ export function SiteHeader() {
             <span className={locale === 'es' ? 'text-cyan' : 'text-fg-muted'}>ES</span>
           </button>
 
-          {/* Mobile hamburger — only shown below md breakpoint */}
+          {/* Mobile hamburger — only shown below md breakpoint. 44×44 minimum
+              tap target per the brief. */}
           <button
             type="button"
-            className={`md:hidden inline-flex items-center justify-center w-10 h-10 rounded-sm border border-glass-hairline-inner ${focusRingClassName}`}
+            className={`md:hidden inline-flex items-center justify-center w-11 h-11 rounded-sm border border-glass-hairline-inner ${focusRingClassName}`}
             aria-expanded={menuOpen}
             aria-label={t('ariaToggleMenu')}
             onClick={() => setMenuOpen((v) => !v)}
@@ -147,7 +151,7 @@ export function SiteHeader() {
           className={`pointer-events-auto ${focusRingClassName} no-underline`}
         >
           <span className="text-fg-muted">SYS</span>{' '}
-          <span className="text-fg-primary">portfolio-0.4</span>
+          <span className="text-fg-primary">portfolio-0.7</span>
         </Link>
       </Text>
     </header>

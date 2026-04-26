@@ -2,9 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#05070d" />
-    <title>Portfolio</title>
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Cross-document View Transitions: opt in for same-origin navigations
+         (e.g. /projects/<slug>/redirect → external pages_url). Browsers that
+         don't support the API ignore this header. -->
+    <meta name="view-transition" content="same-origin" />
+
+    <title>Portfolio · console UX, ground systems, the room</title>
+    <meta
+      name="description"
+      content="Polyglot portfolio of a frontend engineer working on consoles, ground systems, and instruments for people who can't look away from the work."
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Portfolio · console UX, ground systems, the room" />
+    <meta
+      property="og:description"
+      content="Polyglot portfolio of a frontend engineer working on consoles, ground systems, and instruments."
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_ES" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Portfolio · console UX, ground systems, the room" />
+    <meta
+      name="twitter:description"
+      content="Polyglot portfolio of a frontend engineer working on consoles and ground systems."
+    />
+
+    <!-- Hint to search engines that this site has a Spanish alternate. The
+         live <link rel="alternate" hreflang> tags get rewritten by the
+         per-locale meta hook on every route change. -->
+    <link rel="alternate" hreflang="en" href="/en/" />
+    <link rel="alternate" hreflang="es" href="/es/" />
+    <link rel="alternate" hreflang="x-default" href="/en/" />
   </head>
   <body>
     <div id="root"></div>

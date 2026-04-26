@@ -152,7 +152,7 @@ export function LocationRail() {
                 }
                 onClick={() => handleSelect(node)}
                 onKeyDown={(e) => handleKey(e, i)}
-                className={`flex items-center justify-center w-10 h-10 rounded-full ${focusRingClassName} cursor-pointer`}
+                className={`flex items-center justify-center w-11 h-11 rounded-full ${focusRingClassName} cursor-pointer`}
               >
                 <span aria-hidden="true" className={dotShape} />
                 {isVisitor ? (

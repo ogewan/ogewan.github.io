@@ -31,7 +31,7 @@
         >
           <span class="dot" aria-hidden="true"></span>
           <span class="when">{{ node.when }}</span>
-          <span class="title">{{ dict().nodes[node.i18nKey]?.title }}</span>
+          <span class="title">{{ dict().nodes[node.i18nKey].title }}</span>
           @if (node.current) {
             <span class="active-tag">{{ dict().chrome.active }}</span>
           }
@@ -39,15 +39,15 @@
 
         @if (expandedId() === node.id) {
           <div [id]="'panel-' + node.id" class="panel" role="region">
-            @if (dict().nodes[node.i18nKey]?.role) {
+            @if (dict().nodes[node.i18nKey].role) {
               <p class="role">
-                <span class="role-name">{{ dict().nodes[node.i18nKey]?.role }}</span>
-                @if (dict().nodes[node.i18nKey]?.org) {
-                  <span class="org"> · {{ dict().nodes[node.i18nKey]?.org }}</span>
+                <span class="role-name">{{ dict().nodes[node.i18nKey].role }}</span>
+                @if (dict().nodes[node.i18nKey].org) {
+                  <span class="org"> · {{ dict().nodes[node.i18nKey].org }}</span>
                 }
               </p>
             }
-            <p class="body">{{ dict().nodes[node.i18nKey]?.body }}</p>
+            <p class="body">{{ dict().nodes[node.i18nKey].body }}</p>
             <ul class="tags" role="list">
               @for (tag of node.tags; track tag) {
                 <li class="tag">{{ tag }}</li>
