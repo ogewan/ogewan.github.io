@@ -1,0 +1,73 @@
+# .portfolio.yml — canonical template
+#
+# Drop this file at the root of any public repo you want surfaced on the
+# portfolio. The manifest builder fetches it via GitHub's GraphQL API on
+# every workflow run; unknown keys fail validation, so use this template
+# as the source of truth for which fields exist.
+#
+# Schema source: packages/manifest-builder/src/schema.ts (Zod, .strict()).
+
+# Schema version — currently always 1. Bumped only on breaking schema changes.
+schema_version: 1
+
+# Required string. 1–120 chars. Card heading + detail page <h1>.
+title: Atlas Console
+
+# Required string. 10–280 chars. Card body + detail-page lead. Tweet-length-cap
+# keeps cards visually even.
+summary: Real-time mission console for crewed launches. P99 latency ≤ 16ms across 28 consoles in 2 ground stations.
+
+# Required string array, ≥1 entry. Free-form (not enum) — the shell shows
+# usage frequency so typos surface during review.
+tech:
+  - react
+  - r3f
+  - typescript
+  - protobuf
+  - rust
+
+# Optional string array, default []. Free-form. Used for the /projects filter pills.
+categories:
+  - aerospace
+  - real-time
+
+# Required enum: active | shipped | archived | experimental | wip
+# - active: in active development, currently used
+# - shipped: launched and stable, no longer actively iterated
+# - archived: dormant or end-of-life
+# - experimental: prototype / spike, may not survive
+# - wip: work-in-progress, not yet shipped
+# `in-progress` is NOT a valid value — use `wip`.
+status: active
+
+# Optional boolean, default false. Featured entries sort first and span the
+# full grid width on /projects.
+featured: true
+
+# Optional integer. Among featured entries, lower numbers sort first. Useful
+# for pinning a specific project as the hero card. Among non-featured entries,
+# secondary sort is by GitHub `pushed_at` descending.
+order: 1
+
+# Required ISO calendar date (YYYY-MM-DD). Day-level precision; full timestamps fail.
+started_at: 2024-03-15
+
+# Optional ISO calendar date (YYYY-MM-DD). Set this when a project ships or wraps.
+# ended_at: 2025-08-20
+
+# Optional URL. If set, the project card's primary affordance becomes
+# `Live · domain.so ↗` and the detail page gets an "Open live site" button
+# that triggers a cross-document View Transition. Omit to keep readers in-shell.
+pages_url: https://atlas-console.example.com
+
+# Optional URL. Surfaces a play button on the detail-page Walkthrough section.
+demo_video: https://www.youtube.com/watch?v=...
+
+# Optional repo-relative paths. Resolved to raw.githubusercontent.com URLs by
+# the manifest builder. Hero-image candidates rendered on the detail page.
+screenshots:
+  - docs/screenshots/console-launch.png
+  - docs/screenshots/console-anomaly.png
+
+# Optional URL. Long-form writeup link surfaced as a "Writeup ↗" action.
+docs_link: https://atlas-console.example.com/docs/architecture

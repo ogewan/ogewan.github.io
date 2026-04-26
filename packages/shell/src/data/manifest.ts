@@ -1,15 +1,22 @@
 import type { ManifestEntry } from '@portfolio/manifest-builder';
 import fixture from './manifest.fixture.json';
 
-// In Phase 4 the shell consumes a hand-written fixture so the project grid has
-// real content to render before the GitHub Actions pipeline lands. Phase 7
-// will swap this import to read the real manifest.json that the workflow
-// commits to the repo root, with the fixture kept as a fallback for local
-// dev when the manifest hasn't been generated yet.
+// Phase 7: prefer the real manifest.json that the GH Actions workflow commits
+// to the repo root. Fall back to the hand-written fixture during local dev
+// when the workflow hasn't run (or the file has been removed deliberately).
 //
-// The cast is safe because the fixture was authored against ManifestEntry
-// directly; if the schema drifts, the typecheck catches it at build time.
-export const manifest: readonly ManifestEntry[] = fixture as ManifestEntry[];
+// `import.meta.glob` is resolved at build time by Vite. If the matching file
+// exists, it's emitted as a static import and the values object has one entry;
+// if not, the object is empty and we fall through to the fixture. This keeps
+// the fallback dynamic-import-free (no async boundary in the shell).
+const realManifests = import.meta.glob('../../../../manifest.json', {
+  eager: true,
+  import: 'default',
+}) as Record<string, readonly ManifestEntry[]>;
+const realManifest = Object.values(realManifests)[0];
+
+export const manifest: readonly ManifestEntry[] =
+  realManifest ?? (fixture as readonly ManifestEntry[]);
 
 export function findEntryBySlug(slug: string): ManifestEntry | undefined {
   return manifest.find((entry) => entry.slug === slug);

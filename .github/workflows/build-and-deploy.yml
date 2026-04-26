@@ -1,0 +1,117 @@
+name: Build and deploy
+
+# One workflow, four entry points:
+#   - push to main           — deploy after a code change.
+#   - schedule (Sun 02:00 UTC) — weekly manifest refresh against showcased repos
+#                                 in case nothing else triggered a build.
+#   - workflow_dispatch       — manual run from the Actions tab.
+#   - repository_dispatch (manifest-update)
+#                             — external repos POST when their .portfolio.yml
+#                                 changes; see README §"Trigger from a showcased
+#                                 repo" for the snippet.
+#
+# Every run does the same thing: regenerate the manifest, commit it back if
+# changed (with [skip ci] so the resulting commit doesn't loop), build all
+# packages, deploy the shell's dist/ to GitHub Pages.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [manifest-update]
+
+permissions:
+  # contents: write — push the refreshed manifest.json back to main.
+  # pages + id-token: write — required by actions/deploy-pages.
+  contents: write
+  pages: write
+  id-token: write
+
+# Only one Pages deploy at a time. Don't cancel an in-flight deploy if a new
+# commit arrives — let the current artifact finish uploading.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Push back to main from inside the workflow needs the workflow's
+          # GITHUB_TOKEN to be persisted on the local clone (default behavior,
+          # but spelled out for clarity).
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build manifest-builder
+        run: pnpm --filter @portfolio/manifest-builder build
+
+      - name: Refresh manifest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITHUB_USERNAME is the login the manifest-builder scans repos for.
+          # Set it as a repository variable (Settings → Variables) so it can
+          # differ from the workflow runner's owner.
+          GITHUB_USERNAME: ${{ vars.GITHUB_USERNAME || github.repository_owner }}
+        run: node packages/manifest-builder/dist/cli.js
+
+      - name: Commit manifest if changed
+        run: |
+          if [ -n "$(git status --porcelain manifest.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add manifest.json
+            git commit -m "chore(manifest): refresh [skip ci]"
+            git push
+          else
+            echo "manifest.json unchanged; skipping commit"
+          fi
+
+      - name: Build Angular elements bundle
+        run: pnpm --filter @portfolio/ng-elements build
+
+      - name: Build shell
+        env:
+          # VITE_BASE_URL: '/' for user/org pages (<owner>.github.io). For
+          # project pages the workflow consumer should set this to '/<repo>/'
+          # via repository variables. Default is safe for both worlds.
+          VITE_BASE_URL: ${{ vars.VITE_BASE_URL || '/' }}
+          VITE_MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
+          VITE_TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+          VITE_CALENDLY_URL: ${{ secrets.CALENDLY_URL }}
+        run: pnpm --filter @portfolio/shell build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/shell/dist
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

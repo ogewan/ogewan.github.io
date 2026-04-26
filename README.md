@@ -33,7 +33,58 @@ All vars are read at build time by Vite. Missing values degrade gracefully — t
 | `VITE_TURNSTILE_SITE_KEY` | `/contact` Calendly gate         | Cloudflare Turnstile site key. Schedule panel shows hint without it. |
 | `VITE_CALENDLY_URL`       | `/contact` Calendly inline embed | Full Calendly URL (`https://calendly.com/<your-handle>/<event>`).    |
 
-In production, set these as repository secrets (Phase 7's GH Actions workflow injects them into the build).
+In production, set these as repository secrets (the GH Actions workflow injects them into the build).
+
+## Deployment
+
+The site auto-deploys from `main` via [.github/workflows/build-and-deploy.yml](.github/workflows/build-and-deploy.yml). One workflow handles four entry points: `push` to `main`, weekly `schedule` (Sunday 02:00 UTC), `workflow_dispatch` (manual run), and `repository_dispatch` (external POST from a showcased repo whose `.portfolio.yml` changed). Every run regenerates the manifest, commits it back if it changed (with `[skip ci]`), then builds and deploys to GitHub Pages.
+
+### One-time setup
+
+1. **Enable Pages**: Settings → Pages → Source → "GitHub Actions".
+2. **Set repository secrets**: Settings → Secrets and variables → Actions → Secrets:
+   - `MAPTILER_KEY` — for the `/contact` map
+   - `TURNSTILE_SITE_KEY` — for the Calendly gate
+   - `CALENDLY_URL` — full inline-embed URL
+3. **Set repository variables** (Settings → Secrets and variables → Actions → Variables):
+   - `GITHUB_USERNAME` — login the manifest builder scans for `.portfolio.yml`. Defaults to the repo owner if unset.
+   - `VITE_BASE_URL` — defaults to `/` (root user/org pages). Set to `/<repo>/` for project pages.
+4. The workflow's auto-provided `GITHUB_TOKEN` covers the manifest GraphQL query and the commit-back; no PAT needed.
+
+### Trigger from a showcased repo
+
+When a `.portfolio.yml` in a separate repo changes, that repo can POST a `repository_dispatch` event to this one to refresh the manifest immediately. Drop this workflow file into the showcased repo at `.github/workflows/dispatch-portfolio.yml`:
+
+```yaml
+name: Notify portfolio of .portfolio.yml change
+
+on:
+  push:
+    branches: [main]
+    paths: ['.portfolio.yml']
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger portfolio rebuild
+        env:
+          # PAT with `repo` scope on the portfolio repo. Store as a secret
+          # named PORTFOLIO_DISPATCH_TOKEN in this repo's settings.
+          GH_TOKEN: ${{ secrets.PORTFOLIO_DISPATCH_TOKEN }}
+        run: |
+          gh api \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/<owner>/<portfolio-repo>/dispatches \
+            -f event_type=manifest-update
+```
+
+Replace `<owner>/<portfolio-repo>` with this repo's path. The PAT needs `repo` scope on this repo (a fine-grained token scoped to "Actions: Read and write" works too).
+
+### Manifest contract
+
+`.portfolio.yml` schema is enforced by [packages/manifest-builder/src/schema.ts](packages/manifest-builder/src/schema.ts). The canonical template lives at [.github/PORTFOLIO_YML_TEMPLATE.yml](.github/PORTFOLIO_YML_TEMPLATE.yml) — drop a copy at the root of any public repo you want surfaced on the portfolio. Unknown keys fail validation, so misspellings (`techs`, `catagory`) surface in CI.
 
 ## Project structure
 
@@ -52,7 +103,7 @@ portfolio/
 
 ## Status
 
-Phase 6 — i18n + geospatial + contact integrations. Subsequent phases: GitHub Actions deploy (Phase 7), launch hardening (Phase 8), real R3F celestial scenes (Phase 9).
+Phase 7 — GitHub Actions + Pages deploy. Subsequent phases: launch hardening (Phase 8), real R3F celestial scenes (Phase 9).
 
 ## License
 
