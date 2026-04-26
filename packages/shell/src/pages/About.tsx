@@ -1,6 +1,7 @@
 import { useParams } from 'react-router';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TransitionLink } from '../components/TransitionLink';
+import { TimelineWrapper } from '../components/TimelineWrapper';
 
 // About page real layout. Phase 5 will replace the timeline placeholder with
 // the Angular Elements custom timeline. Other sections render with
@@ -81,13 +82,11 @@ export function About() {
       >
         <Text variant="lead" className="mb-6">
           {isEs
-            ? 'Línea de tiempo interactiva — cargada bajo demanda como Angular Element en la fase 5.'
-            : 'Interactive timeline — loaded on-demand as an Angular Element in Phase 5.'}
+            ? 'Línea de tiempo interactiva — Angular Element cargado bajo demanda. Filtra por categoría, expande cualquier nodo para la versión larga.'
+            : 'Interactive timeline — Angular Element loaded on demand. Filter by category, expand any node for the long version.'}
         </Text>
-        <GlassPanel variant="inset" className="p-6 min-h-[280px] flex items-center justify-center">
-          <Text variant="micro" className="text-fg-muted">
-            {isEs ? '〘 Angular timeline · pendiente 〙' : '〘 Angular timeline · pending 〙'}
-          </Text>
+        <GlassPanel variant="inset" className="p-6">
+          <TimelineWrapper locale={locale} />
         </GlassPanel>
       </Section>
 

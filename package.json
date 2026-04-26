@@ -11,8 +11,9 @@
   },
   "packageManager": "pnpm@10.28.2",
   "scripts": {
-    "dev": "pnpm --filter @portfolio/shell dev",
-    "build": "pnpm --filter @portfolio/shell build",
+    "dev": "pnpm --parallel --filter \"@portfolio/shell\" --filter \"@portfolio/ng-elements\" run \"/^(dev|build:watch)$/\"",
+    "dev:shell": "pnpm --filter @portfolio/shell dev",
+    "build": "pnpm --filter @portfolio/ng-elements build && pnpm --filter @portfolio/shell build",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -50,7 +51,10 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",
-      "@tailwindcss/oxide"
+      "@tailwindcss/oxide",
+      "@parcel/watcher",
+      "lmdb",
+      "msgpackr-extract"
     ]
   }
 }

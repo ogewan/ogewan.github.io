@@ -1,0 +1,7 @@
+// Empty global stylesheet — the timeline component carries its own scoped
+// styles. The host page's design tokens (theme.css) are inherited via CSS
+// custom properties on the :root so we don't need to import them here.
+//
+// This file exists only because Angular CLI requires at least one entry in
+// the "styles" array; emitting an empty CSS file is cheaper than disabling
+// the styles pipeline.

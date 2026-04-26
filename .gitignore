@@ -23,6 +23,8 @@ coverage/
 # Angular artifacts
 .angular/
 packages/ng-elements/dist/
+# ng-elements bundle is copied into the shell's public/ at build time
+packages/shell/public/ng-elements/
 
 # Editor and IDE
 .vscode/

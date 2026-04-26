@@ -2,16 +2,34 @@
   "name": "@portfolio/ng-elements",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts"
-  },
+  "description": "Angular Elements bundle: portfolio-timeline custom element",
+  "main": "./dist/ng-elements/ng-elements.js",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "build": "ng build && node scripts/concat-bundle.mjs",
+    "build:watch": "ng build --watch --configuration development",
+    "typecheck": "node -e \"console.log('ng-elements typecheck deferred to ng build (Angular template type-checking requires ngc, not plain tsc)')\"",
+    "ng": "ng"
+  },
+  "exports": {
+    "./bundle": "./dist/ng-elements/ng-elements.js",
+    "./bundle.css": "./dist/ng-elements/ng-elements.css"
+  },
+  "dependencies": {
+    "@angular/animations": "^19.0.0",
+    "@angular/common": "^19.0.0",
+    "@angular/compiler": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/elements": "^19.0.0",
+    "@angular/platform-browser": "^19.0.0",
+    "@portfolio/content": "workspace:*",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.6.0",
+    "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.3"
+    "@angular-devkit/build-angular": "^19.0.0",
+    "@angular/cli": "^19.0.0",
+    "@angular/compiler-cli": "^19.0.0",
+    "typescript": "~5.6.3"
   }
 }

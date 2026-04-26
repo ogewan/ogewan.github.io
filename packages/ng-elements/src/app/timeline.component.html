@@ -1,0 +1,61 @@
+<section class="timeline" [attr.data-locale]="localeSignal()">
+  <header class="head">
+    <h2 class="heading">{{ dict().chrome.heading }}</h2>
+    <p class="subtitle">{{ dict().chrome.subtitle }}</p>
+  </header>
+
+  <div class="filters" role="group" aria-label="Filter milestones">
+    @for (f of filters(); track f.key) {
+      <button
+        type="button"
+        class="filter-pill"
+        [class.is-active]="currentFilter() === f.key"
+        [attr.aria-pressed]="currentFilter() === f.key"
+        (click)="applyFilter(f.key)"
+      >
+        {{ f.label }}
+      </button>
+    }
+  </div>
+
+  <ol #nodeList class="node-list" role="list" aria-label="Timeline">
+    @for (node of visibleNodes(); track trackById($index, node); let i = $index) {
+      <li class="node" [class.is-current]="node.current" [class.is-expanded]="expandedId() === node.id">
+        <button
+          type="button"
+          class="node-button"
+          [attr.aria-expanded]="expandedId() === node.id"
+          [attr.aria-controls]="'panel-' + node.id"
+          (click)="toggleExpanded(node.id)"
+          (focus)="focusedIndex.set(i)"
+        >
+          <span class="dot" aria-hidden="true"></span>
+          <span class="when">{{ node.when }}</span>
+          <span class="title">{{ dict().nodes[node.i18nKey]?.title }}</span>
+          @if (node.current) {
+            <span class="active-tag">{{ dict().chrome.active }}</span>
+          }
+        </button>
+
+        @if (expandedId() === node.id) {
+          <div [id]="'panel-' + node.id" class="panel" role="region">
+            @if (dict().nodes[node.i18nKey]?.role) {
+              <p class="role">
+                <span class="role-name">{{ dict().nodes[node.i18nKey]?.role }}</span>
+                @if (dict().nodes[node.i18nKey]?.org) {
+                  <span class="org"> · {{ dict().nodes[node.i18nKey]?.org }}</span>
+                }
+              </p>
+            }
+            <p class="body">{{ dict().nodes[node.i18nKey]?.body }}</p>
+            <ul class="tags" role="list">
+              @for (tag of node.tags; track tag) {
+                <li class="tag">{{ tag }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </li>
+    }
+  </ol>
+</section>
