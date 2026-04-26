@@ -1,4 +1,4 @@
-import { forwardRef, type HTMLAttributes, type ElementType, type Ref } from 'react';
+import { createElement, forwardRef, type HTMLAttributes, type ElementType } from 'react';
 import { cn } from './cn.js';
 
 export type GlassVariant = 'chrome' | 'panel' | 'inset' | 'elev';
@@ -28,16 +28,14 @@ const VARIANT_CLASS: Record<GlassVariant, string> = {
   elev: 'bg-glass-elev [backdrop-filter:blur(20px)_saturate(160%)] [-webkit-backdrop-filter:blur(20px)_saturate(160%)] border border-glass-hairline-inner [box-shadow:var(--glass-hairline-box-elev)] rounded-md',
 };
 
+// Polymorphic via `as`. Renders through createElement instead of JSX so the
+// JSX intrinsic intersection narrowed by R3F's ThreeElements augmentation
+// doesn't infer `ref`/`className` to `never`. See Container.tsx for the same
+// reason.
 export const GlassPanel = forwardRef<HTMLElement, GlassPanelProps>(function GlassPanel(
   { variant = 'panel', as, className, ...rest },
   ref,
 ) {
-  const Tag = (as ?? 'div') as ElementType;
-  return (
-    <Tag
-      ref={ref as Ref<HTMLElement>}
-      className={cn(VARIANT_CLASS[variant], className)}
-      {...rest}
-    />
-  );
+  const Tag: ElementType = as ?? 'div';
+  return createElement(Tag, { ref, className: cn(VARIANT_CLASS[variant], className), ...rest });
 });

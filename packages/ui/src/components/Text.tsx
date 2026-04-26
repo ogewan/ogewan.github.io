@@ -1,4 +1,4 @@
-import { forwardRef, type HTMLAttributes, type ElementType, type Ref } from 'react';
+import { createElement, forwardRef, type HTMLAttributes, type ElementType } from 'react';
 import { cn } from './cn.js';
 
 export type TextVariant = 'lead' | 'body' | 'small' | 'label' | 'micro';
@@ -25,16 +25,11 @@ const VARIANT_CLASS: Record<TextVariant, string> = {
   micro: 'font-mono font-medium text-micro tracking-[0.1em] uppercase text-fg-muted',
 };
 
+// Polymorphic via `as`. Renders through createElement (see Container.tsx).
 export const Text = forwardRef<HTMLElement, TextProps>(function Text(
   { variant = 'body', as, className, ...rest },
   ref,
 ) {
-  const Tag = (as ?? 'p') as ElementType;
-  return (
-    <Tag
-      ref={ref as Ref<HTMLElement>}
-      className={cn(VARIANT_CLASS[variant], className)}
-      {...rest}
-    />
-  );
+  const Tag: ElementType = as ?? 'p';
+  return createElement(Tag, { ref, className: cn(VARIANT_CLASS[variant], className), ...rest });
 });
