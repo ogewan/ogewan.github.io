@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { useCelestialFocus } from '../../CelestialContext.js';
@@ -23,10 +22,7 @@ import earthCloudsUrl from '../../textures/earth-clouds-2k.webp';
 // on the day side so the night silhouette stays clean.
 //
 // Optional cloud layer lives at radius 1.005 with its own slower drift. Gated
-// on `!degraded` (mobile, save-data, or slow-connection users skip it). The
-// 2k cloud texture is alpha-premultiplied; the mesh uses standard material
-// with `transparent: true` and `depthWrite: false` to layer on top of the
-// shader-material Earth without z-fighting.
+// on `!degraded` (mobile, save-data, or slow-connection users skip it).
 //
 // Two rotation modes via `useCelestialFocus()`:
 //   - 'auto'    — useFrame increments rotation Y at ~6× real time (visible at
@@ -34,13 +30,34 @@ import earthCloudsUrl from '../../textures/earth-clouds-2k.webp';
 //   - 'focused' — gsap tweens X/Y rotation so the target lat/lng faces the
 //                 camera over ~2s. Auto-rotation pauses until setAuto().
 //
-// Texture loading via drei's useTexture suspends the scene tree; the parent
-// CelestialBackdrop's <Suspense fallback={<ReducedMotionBackdrop>}> covers
-// the load window so first paint is never blank.
+// Texture loading: we skip drei's `useTexture` because it suspends forever if
+// any texture fails to decode (which can happen with placeholder webp stubs
+// on browsers that are picky about lossless WebP minimums). Instead we load
+// imperatively via THREE.TextureLoader, and start with procedural DataTexture
+// fallbacks so the scene renders the moment it mounts. Real textures swap in
+// when they finish loading; if loading fails the procedural fallback stays.
 
 const AUTO_ROTATION_RATE = 0.025; // rad/sec ≈ 1.43°/sec at session timescale
 const CLOUD_DRIFT_RATE = 0.015;
 const FOCUS_TWEEN_DURATION_SEC = 2;
+
+// Build a 1×1 RGBA DataTexture used as the procedural fallback while real
+// textures load (or if they fail). The shader samples the same color at every
+// UV; the day/night terminator and atmospheric rim still render correctly.
+function makeSolidTexture(rgba: [number, number, number, number]): THREE.DataTexture {
+  const data = new Uint8Array(rgba);
+  const tex = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat);
+  tex.needsUpdate = true;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function configureSurfaceTexture(tex: THREE.Texture) {
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.anisotropy = 4;
+  tex.needsUpdate = true;
+}
 
 export function EarthScene() {
   const [x, y, z] = SCENE_ANCHORS.earth.origin;
@@ -51,25 +68,55 @@ export function EarthScene() {
   const cloudsRef = useRef<THREE.Mesh>(null);
   const focusTweenRef = useRef<gsap.core.Tween | null>(null);
 
-  // Object form returns a record so each texture is non-nullable in the type
-  // (matches noUncheckedIndexedAccess). drei suspends until all three load.
-  const { dayMap, nightMap, cloudsMap } = useTexture({
-    dayMap: earthDayUrl,
-    nightMap: earthNightUrl,
-    cloudsMap: earthCloudsUrl,
-  });
+  // Procedural fallbacks: Earth-blue day, deep-navy night, fully transparent
+  // cloud (so the cloud sphere reads as invisible until a real cloud texture
+  // arrives). These render immediately on mount.
+  const fallbackDay = useMemo(() => makeSolidTexture([58, 120, 163, 255]), []);
+  const fallbackNight = useMemo(() => makeSolidTexture([12, 24, 48, 255]), []);
+  const fallbackClouds = useMemo(() => makeSolidTexture([255, 255, 255, 0]), []);
 
-  // Clamp anisotropy on the day/night maps so high-DPI screens don't see UV
-  // streaking near the poles. drei's useTexture defaults to ClampToEdge wrap;
-  // for an equirectangular map we want repeating along longitude.
+  const [dayMap, setDayMap] = useState<THREE.Texture>(fallbackDay);
+  const [nightMap, setNightMap] = useState<THREE.Texture>(fallbackNight);
+  const [cloudsMap, setCloudsMap] = useState<THREE.Texture>(fallbackClouds);
+
+  // Imperative texture load with per-texture error tolerance. If a file fails
+  // to decode (placeholder stubs in the wrong format, missing files, etc.)
+  // the corresponding fallback stays in place silently. console.warn surfaces
+  // the first failure for debugging without breaking the scene.
   useEffect(() => {
-    for (const tex of [dayMap, nightMap]) {
-      tex.colorSpace = THREE.SRGBColorSpace;
+    const loader = new THREE.TextureLoader();
+    let cancelled = false;
+    const load = (url: string, onLoad: (t: THREE.Texture) => void) => {
+      loader.load(
+        url,
+        (tex) => {
+          if (cancelled) return;
+          onLoad(tex);
+        },
+        undefined,
+        (err) => {
+          if (cancelled) return;
+          console.warn(`[celestial] texture load failed: ${url}`, err);
+        },
+      );
+    };
+    load(earthDayUrl, (tex) => {
+      configureSurfaceTexture(tex);
+      setDayMap(tex);
+    });
+    load(earthNightUrl, (tex) => {
+      configureSurfaceTexture(tex);
+      setNightMap(tex);
+    });
+    load(earthCloudsUrl, (tex) => {
       tex.wrapS = THREE.RepeatWrapping;
-      tex.anisotropy = 4;
-    }
-    cloudsMap.wrapS = THREE.RepeatWrapping;
-  }, [dayMap, nightMap, cloudsMap]);
+      tex.needsUpdate = true;
+      setCloudsMap(tex);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Sun direction is computed once on mount. Updating per-frame would let the
   // terminator track real time, but the sun moves only ~15°/hour (0.067°/sec)
@@ -84,8 +131,8 @@ export function EarthScene() {
       sunDirection: { value: sunDir },
       rimColor: { value: new THREE.Color('#5dc1d6') },
       rimIntensity: { value: 1.0 },
-      // Night side gets a small color boost so the placeholder textures don't
-      // disappear into pure black; real Black Marble imagery is bright enough
+      // Night side gets a small color boost so placeholder textures don't
+      // disappear into pure black. Real Black Marble imagery is bright enough
       // not to need this, but the constant doesn't hurt the final image.
       nightBoost: { value: 1.4 },
     }),

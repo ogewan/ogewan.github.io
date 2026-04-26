@@ -154,14 +154,19 @@
 
 /* Visitor-marker sonar pulse on the LocationRail. Source-of-truth is
    mockup/project/hero.html — a ring scaling outward as it fades. Reduced motion
-   freezes a static ring at the design's specified scale + opacity. */
+   freezes a static ring at the design's specified scale + opacity.
+   Animates only the `scale:` CSS property so the consuming element's
+   `-translate-x-1/2 -translate-y-1/2` Tailwind utilities (which write to the
+   separate `translate:` property in v4) stay applied. If we used the
+   `transform:` shorthand here, the browser would compose the static translate
+   AND the keyframe transform, doubling the offset. */
 @keyframes pulseRing {
   0% {
-    transform: translate(-50%, -50%) scale(0.6);
+    scale: 0.6;
     opacity: 0.85;
   }
   100% {
-    transform: translate(-50%, -50%) scale(2.6);
+    scale: 2.6;
     opacity: 0;
   }
 }
