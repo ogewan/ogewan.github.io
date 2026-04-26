@@ -1,20 +1,21 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
+import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TransitionLink } from '../components/TransitionLink';
 
 // Colophon — six sections per the user's mockup (type section dropped):
 // 01 Stack · 02 Build notes · 03 Perf & access · 04 Changelog · 05 Credits ·
 // 06 License & source. The black-hole backdrop is wired by CelestialBackdrop.
-// Phase 6 will move the body content into MDX files in @portfolio/content;
-// for Phase 4 the prose lives inline so the layout grammar is real.
+// Phase 6 migrated visible strings to react-i18next; the body content stays
+// inline JSX (no MDX) per the phase scope decision.
 //
 // The DevTools console easter egg below ports the mockup's stylised greeting.
 
 export function Colophon() {
   const params = useParams<{ locale?: string }>();
   const locale = params.locale ?? 'en';
-  const isEs = locale === 'es';
+  const { t } = useTranslation(['colophon', 'common']);
 
   // Console easter egg — fires once per page load.
   useEffect(() => {
@@ -38,75 +39,69 @@ export function Colophon() {
           to={`/${locale}/`}
           className="font-mono text-micro tracking-[0.14em] uppercase no-underline border-b-0"
         >
-          <span aria-hidden="true">←</span> {isEs ? 'Volver al inicio' : 'Back to home'}
+          <span aria-hidden="true">←</span> {t('crumbBack')}
         </TransitionLink>
         <Text variant="micro">05 · /colophon · v0.4</Text>
       </div>
 
       <Text variant="label" className="mb-3 inline-flex items-center gap-2">
         <span aria-hidden="true" className="inline-block h-px w-[6px] bg-cyan" />
-        {isEs ? '05 / Colofón · cómo se hizo este sitio' : '05 / Colophon · how this site was made'}
+        {t('eyebrow')}
       </Text>
       <Heading level={1} variant="h1" tabIndex={-1}>
-        {isEs ? (
-          <>
-            Acerca de este <em className="not-italic text-fg-secondary">sitio.</em>
-          </>
-        ) : (
-          <>
-            About this <em className="not-italic text-fg-secondary">site.</em>
-          </>
-        )}
+        <Trans
+          i18nKey="headline"
+          t={t}
+          components={{ em: <em className="not-italic text-fg-secondary" /> }}
+        />
       </Heading>
       <Text variant="lead" className="mt-6 max-w-[640px]">
-        {isEs
-          ? 'Un colofón pequeño para un sitio pequeño. Stack, decisiones, performance, changelog, créditos, licencia.'
-          : 'A small colophon for a small site. Stack, decisions, performance, changelog, credits, license.'}
+        {t('lead')}
       </Text>
 
       <Section
-        order="01"
-        title={isEs ? 'Stack' : 'Stack'}
-        subtitle={isEs ? 'Lo que está corriendo, aproximadamente.' : "What's running, roughly."}
+        order={t('sections.stack.order')}
+        title={t('sections.stack.title')}
+        subtitle={t('sections.stack.subtitle')}
       >
         <GlassPanel className="p-6">
           <dl className="grid grid-cols-[140px_1fr] gap-y-4 font-mono text-small">
-            <Spec label="Framework">
+            <Spec label={t('sections.stack.labels.framework')}>
               <Pill>React 19</Pill>
               <Pill>React Router v7</Pill>
               <Pill>Vite 6</Pill>
             </Spec>
-            <Spec label="3D">
+            <Spec label={t('sections.stack.labels.threeD')}>
               <Pill>R3F · Three.js</Pill>
-              <span className="text-fg-muted">phase 9 · placeholders today</span>
+              <span className="text-fg-muted">{t('sections.stack.notes.threeD')}</span>
             </Spec>
-            <Spec label="Polyglot">
+            <Spec label={t('sections.stack.labels.polyglot')}>
               <Pill>Angular Elements</Pill>
-              <span className="text-fg-muted">timeline · phase 5</span>
+              <span className="text-fg-muted">{t('sections.stack.notes.polyglot')}</span>
             </Spec>
-            <Spec label="Style">
+            <Spec label={t('sections.stack.labels.style')}>
               <Pill>Tailwind v4</Pill>
               <Pill>OKLCH tokens</Pill>
             </Spec>
-            <Spec label="i18n">
+            <Spec label={t('sections.stack.labels.i18n')}>
               <Pill>react-i18next</Pill>
-              <span className="text-fg-muted">phase 6</span>
+              <span className="text-fg-muted">{t('sections.stack.notes.i18n')}</span>
             </Spec>
-            <Spec label="Hosting">
+            <Spec label={t('sections.stack.labels.hosting')}>
               <Pill>GitHub Pages</Pill>
               <Pill>GH Actions</Pill>
             </Spec>
-            <Spec label="Privacy">
-              <span className="text-fg-secondary">no analytics · no cookies</span>
+            <Spec label={t('sections.stack.labels.privacy')}>
+              <span className="text-fg-secondary">{t('sections.stack.notes.privacy')}</span>
             </Spec>
           </dl>
         </GlassPanel>
       </Section>
 
       <Section
-        order="02"
-        title={isEs ? 'Notas de build' : 'Build notes'}
-        subtitle={isEs ? 'Cómo encajan las páginas.' : 'How the pages fit together.'}
+        order={t('sections.build.order')}
+        title={t('sections.build.title')}
+        subtitle={t('sections.build.subtitle')}
       >
         <GlassPanel variant="inset" className="p-6 overflow-x-auto">
           <pre className="font-mono text-micro leading-[1.7] text-fg-secondary">
@@ -117,7 +112,7 @@ export function Colophon() {
 │   ├── celestial/            — persistent backdrop, 5 scene states (CSS placeholders)
 │   ├── ng-elements/          — Angular Elements timeline (phase 5)
 │   ├── manifest-builder/     — Zod schema + GraphQL CLI (phase 1, run by GH Actions phase 7)
-│   └── content/              — i18n strings + MDX (phase 6)
+│   └── content/              — i18n strings + locales/{en,es} (phase 6)
 ├── manifest.json             — generated by manifest-builder
 └── .github/workflows/        — build-and-deploy + dispatch-receiver (phase 7)`}
           </pre>
@@ -125,14 +120,14 @@ export function Colophon() {
       </Section>
 
       <Section
-        order="03"
-        title={isEs ? 'Perf y accesibilidad' : 'Perf & access'}
-        subtitle={isEs ? 'Recibos sobre afirmaciones.' : 'Receipts over claims.'}
+        order={t('sections.perf.order')}
+        title={t('sections.perf.title')}
+        subtitle={t('sections.perf.subtitle')}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <GlassPanel className="p-5">
             <Text variant="label" className="mb-3 block">
-              {isEs ? 'Core Web Vitals · objetivo' : 'Core Web Vitals · target'}
+              {t('sections.perf.cwvHeading')}
             </Text>
             <ul className="font-mono text-small">
               <PerfRow k="LCP" v="≤ 1.5s" />
@@ -144,68 +139,57 @@ export function Colophon() {
           </GlassPanel>
           <GlassPanel className="p-5">
             <Text variant="label" className="mb-3 block">
-              {isEs ? 'WCAG 2.2 AA' : 'WCAG 2.2 AA'}
+              {t('sections.perf.wcagHeading')}
             </Text>
             <ul className="font-mono text-small">
-              <PerfRow k="Keyboard" v="✓ all interactive" />
-              <PerfRow k="Focus" v="✓ visible on glass" />
-              <PerfRow k="Reduced motion" v="✓ full branch" />
-              <PerfRow k="Contrast" v="AA min, mostly AAA" />
-              <PerfRow k="Screen reader" v="✓ live route announce" />
+              <PerfRow k="Keyboard" v={t('sections.perf.wcag.keyboard')} />
+              <PerfRow k="Focus" v={t('sections.perf.wcag.focus')} />
+              <PerfRow k="Reduced motion" v={t('sections.perf.wcag.motion')} />
+              <PerfRow k="Contrast" v={t('sections.perf.wcag.contrast')} />
+              <PerfRow k="Screen reader" v={t('sections.perf.wcag.screenReader')} />
             </ul>
           </GlassPanel>
         </div>
       </Section>
 
       <Section
-        order="04"
-        title="Changelog"
-        subtitle={isEs ? 'Versiones, terso.' : 'Versions, terse.'}
+        order={t('sections.changelog.order')}
+        title={t('sections.changelog.title')}
+        subtitle={t('sections.changelog.subtitle')}
       >
         <GlassPanel className="p-6">
           <table className="w-full font-mono text-small">
             <thead>
               <tr className="text-fg-muted">
-                <th className="text-left pb-3 px-2 w-20">VER</th>
-                <th className="text-left pb-3 px-2 w-32">DATE</th>
-                <th className="text-left pb-3 px-2">NOTE</th>
+                <th className="text-left pb-3 px-2 w-20">{t('sections.changelog.headers.ver')}</th>
+                <th className="text-left pb-3 px-2 w-32">{t('sections.changelog.headers.date')}</th>
+                <th className="text-left pb-3 px-2">{t('sections.changelog.headers.note')}</th>
               </tr>
             </thead>
             <tbody>
               <ChangeRow
-                ver="0.4"
+                ver="0.5"
                 date="2026-04-25"
-                note="Real shell pages, location rail, projects from manifest, View Transitions"
+                note={t('sections.changelog.entries.v04i18n')}
               />
-              <ChangeRow
-                ver="0.3"
-                date="2026-04-25"
-                note="Persistent celestial backdrop (placeholders), focus API"
-              />
-              <ChangeRow
-                ver="0.2"
-                date="2026-04-24"
-                note="Design tokens, primitives, /_dev/tokens showcase"
-              />
-              <ChangeRow
-                ver="0.1"
-                date="2026-04-24"
-                note="Manifest builder + Zod schema + vitest suite"
-              />
-              <ChangeRow ver="0.0" date="2026-04-24" note="Initial monorepo scaffold" />
+              <ChangeRow ver="0.4" date="2026-04-25" note={t('sections.changelog.entries.v04')} />
+              <ChangeRow ver="0.3" date="2026-04-25" note={t('sections.changelog.entries.v03')} />
+              <ChangeRow ver="0.2" date="2026-04-24" note={t('sections.changelog.entries.v02')} />
+              <ChangeRow ver="0.1" date="2026-04-24" note={t('sections.changelog.entries.v01')} />
+              <ChangeRow ver="0.0" date="2026-04-24" note={t('sections.changelog.entries.v00')} />
             </tbody>
           </table>
         </GlassPanel>
       </Section>
 
       <Section
-        order="05"
-        title={isEs ? 'Créditos e influencias' : 'Credits & influences'}
-        subtitle={isEs ? 'Personas y referencias.' : 'People & references.'}
+        order={t('sections.credits.order')}
+        title={t('sections.credits.title')}
+        subtitle={t('sections.credits.subtitle')}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <CreditGroup
-            label={isEs ? 'Influencias' : 'Influences'}
+            label={t('sections.credits.groups.influences')}
             items={[
               'Ted Chiang · prose discipline',
               'Pentagram · type confidence',
@@ -213,7 +197,7 @@ export function Colophon() {
             ]}
           />
           <CreditGroup
-            label={isEs ? 'Open source' : 'Open source'}
+            label={t('sections.credits.groups.openSource')}
             items={[
               'React · Three.js · Tailwind',
               'Vite · pnpm · Vitest',
@@ -221,7 +205,7 @@ export function Colophon() {
             ]}
           />
           <CreditGroup
-            label={isEs ? 'Imaginería' : 'Imagery'}
+            label={t('sections.credits.groups.imagery')}
             items={[
               'NASA · Blue/Black Marble',
               'ESA/Hubble · nebulae references',
@@ -229,7 +213,7 @@ export function Colophon() {
             ]}
           />
           <CreditGroup
-            label={isEs ? 'Tipografías' : 'Typefaces'}
+            label={t('sections.credits.groups.typefaces')}
             items={[
               'Space Grotesk · Florian Karsten',
               'Inter Tight · Rasmus Andersson',
@@ -240,17 +224,13 @@ export function Colophon() {
       </Section>
 
       <Section
-        order="06"
-        title={isEs ? 'Licencia y fuente' : 'License & source'}
-        subtitle={isEs ? 'Usa el código, no los casos.' : 'Use the code, not the case studies.'}
+        order={t('sections.license.order')}
+        title={t('sections.license.title')}
+        subtitle={t('sections.license.subtitle')}
       >
         <GlassPanel className="p-6 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-center">
           <div>
-            <Text className="text-fg-primary">
-              {isEs
-                ? 'MIT. El código es libre — los casos de estudio son míos. Si los usas, dame crédito y haz el tuyo.'
-                : 'MIT. Code is free — case studies are mine. If you use them, credit me and make your own.'}
-            </Text>
+            <Text className="text-fg-primary">{t('sections.license.body')}</Text>
             <Text variant="micro" className="mt-2 block">
               SPDX-License-Identifier: MIT
             </Text>
@@ -262,7 +242,7 @@ export function Colophon() {
               rel="noreferrer noopener"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-glass-hairline-inner bg-glass-elev text-fg-primary hover:text-cyan font-mono text-small uppercase tracking-[0.14em]"
             >
-              View source <span aria-hidden="true">↗</span>
+              {t('common:external.viewSource')} <span aria-hidden="true">↗</span>
             </a>
             <a
               href="https://opensource.org/licenses/MIT"
@@ -270,7 +250,7 @@ export function Colophon() {
               rel="noreferrer noopener"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-glass-hairline-inner bg-glass-elev text-fg-primary hover:text-cyan font-mono text-small uppercase tracking-[0.14em]"
             >
-              Read MIT <span aria-hidden="true">↗</span>
+              {t('common:external.readMit')} <span aria-hidden="true">↗</span>
             </a>
           </div>
         </GlassPanel>

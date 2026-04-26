@@ -15,6 +15,9 @@ export default tseslint.config(
       '**/.vite/**',
       '**/.angular/**',
       '**/coverage/**',
+      // gitignored build artifacts dropped into the shell's public/ at build time
+      'packages/shell/public/ng-elements/**',
+      'packages/shell/public/sitemap.html',
     ],
   },
 
@@ -47,7 +50,11 @@ export default tseslint.config(
   },
 
   {
-    files: ['packages/manifest-builder/**/*.ts', '**/*.config.{ts,js,mjs}'],
+    files: [
+      'packages/manifest-builder/**/*.ts',
+      'packages/ng-elements/scripts/**/*.{js,mjs}',
+      '**/*.config.{ts,js,mjs}',
+    ],
     languageOptions: {
       globals: { ...globals.node },
     },

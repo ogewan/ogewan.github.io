@@ -1,0 +1,66 @@
+{
+  "_meta": "machine-translated, pending native review",
+  "crumbBack": "Volver al inicio",
+  "eyebrow": "04 / Contacto · canal abierto",
+  "headline": "Canal abierto. <em>Dos formas de entrar.</em>",
+  "lead": "Briefs por email. Llamadas por Calendly. Sin formulario, sin cuestionario — solo escribe.",
+  "sections": {
+    "direct": {
+      "order": "01",
+      "title": "Directo",
+      "channels": {
+        "email": {
+          "label": "Email",
+          "title": "hello@example.com",
+          "subtitle": "Mejor para briefs · respuesta en 48h"
+        },
+        "calendly": {
+          "label": "Calendly",
+          "title": "Reservar 30 min",
+          "subtitle": "Mar/Jue · 14:00–17:00 PT · video"
+        }
+      }
+    },
+    "schedule": {
+      "order": "02",
+      "title": "Agendar",
+      "verifyHeading": "Verifica para agendar",
+      "verifyBody": "Un check rápido de Cloudflare Turnstile, después se carga el embed de Calendly.",
+      "verifying": "Verificando…",
+      "verifiedHeading": "Verificado",
+      "calendlyMissing": "URL de Calendly no configurada. Define VITE_CALENDLY_URL para habilitar el agendamiento.",
+      "turnstileMissing": "Site key de Turnstile no configurada. Define VITE_TURNSTILE_SITE_KEY para habilitar el agendamiento.",
+      "ariaCalendar": "Embed de agendamiento de Calendly"
+    },
+    "ground": {
+      "order": "03",
+      "title": "Estación terrestre",
+      "labels": {
+        "city": "CIUDAD",
+        "tz": "TZ",
+        "hours": "HORARIO",
+        "lang": "IDIOMA"
+      },
+      "values": {
+        "cityPrimary": "Mountain View, CA",
+        "cityNote": "south bay · aproximado",
+        "tz": "UTC-8 · America/Los_Angeles",
+        "hours": "09:00–18:00 PT · Lun–Jue",
+        "lang": "EN · ES"
+      },
+      "visitorLine": "Pareces estar cerca de {{city}} — la distancia a la estación es aproximada."
+    },
+    "map": {
+      "order": "04",
+      "title": "Trayectoria",
+      "ariaMap": "Mapa mundial mostrando la estación terrestre y la ubicación del visitante",
+      "missingKey": "Mapa deshabilitado. Define VITE_MAPTILER_KEY para habilitarlo.",
+      "loading": "Cargando mapa…",
+      "youMarker": "Tú",
+      "stationMarker": "Estación",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar"
+    }
+  },
+  "note": "Nota: ubicación aproximada solamente. Para coordenadas exactas, escríbeme."
+}

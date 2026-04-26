@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Container, Heading, Text, focusRingClassName } from '@portfolio/ui';
 import { manifest, allCategories } from '../data/manifest';
 import { ProjectCard } from '../components/ProjectCard';
@@ -13,7 +14,7 @@ type CategoryFilter = 'all' | string;
 export function Projects() {
   const params = useParams<{ locale?: string }>();
   const locale = params.locale ?? 'en';
-  const isEs = locale === 'es';
+  const { t } = useTranslation(['projects']);
 
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const [view, setView] = useState<ViewMode>('grid');
@@ -24,7 +25,7 @@ export function Projects() {
   );
 
   const filterPills: Array<{ key: CategoryFilter; label: string; count: number }> = [
-    { key: 'all', label: isEs ? 'Todo' : 'All', count: manifest.length },
+    { key: 'all', label: t('filterAll'), count: manifest.length },
     ...allCategories.map((c) => ({
       key: c,
       label: c,
@@ -38,18 +39,14 @@ export function Projects() {
         <div>
           <Text variant="label" className="mb-3 inline-flex items-center gap-2">
             <span aria-hidden="true" className="inline-block h-px w-[6px] bg-cyan" />
-            {isEs
-              ? '03 / Trabajos seleccionados · 2021 — 2026'
-              : '03 / Selected work · 2021 — 2026'}
+            {t('eyebrow')}
           </Text>
           <Heading level={1} variant="h1" tabIndex={-1}>
-            {isEs ? 'Cosas en órbita.' : 'Things in orbit.'}
+            {t('headline')}
           </Heading>
         </div>
         <Text variant="small" className="max-w-sm">
-          {isEs
-            ? 'Trabajo seleccionado del último lustro. Filtra por categoría; alterna entre cuadrícula y lista para escanear más rápido.'
-            : 'Selected work from the last five years. Filter by category; switch to list view for dense scanning.'}
+          {t('description')}
         </Text>
       </header>
 
@@ -82,7 +79,7 @@ export function Projects() {
         </ul>
 
         <div className="flex items-center gap-2 font-mono text-micro tracking-[0.14em] uppercase text-fg-muted">
-          <span>{isEs ? 'Vista' : 'View'}</span>
+          <span>{t('viewLabel')}</span>
           {(['grid', 'list'] as const).map((m) => (
             <button
               key={m}
@@ -97,7 +94,7 @@ export function Projects() {
                 ` ${focusRingClassName}`
               }
             >
-              {m}
+              {t(m === 'grid' ? 'viewGrid' : 'viewList')}
             </button>
           ))}
         </div>
@@ -140,11 +137,11 @@ export function Projects() {
               >
                 {entry.pages_url ? (
                   <>
-                    Live <span aria-hidden="true">↗</span>
+                    {t('list.live')} <span aria-hidden="true">↗</span>
                   </>
                 ) : (
                   <>
-                    Read <span aria-hidden="true">→</span>
+                    {t('list.read')} <span aria-hidden="true">→</span>
                   </>
                 )}
               </a>

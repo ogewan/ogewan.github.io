@@ -1,8 +1,10 @@
 import type { TimelineLocaleDict } from './timeline-types.js';
 
-// Per-locale strings. Phase 6 will move these into @portfolio/content/locales/
-// alongside the rest of the i18n bundles, but for Phase 5 we keep timeline
-// content here so the Angular component has a single import to read from.
+// Per-locale strings for the Angular Elements timeline. Intentionally NOT
+// migrated to react-i18next during Phase 6 — the timeline lives in an Angular
+// custom element that consumes its strings via the `locale` attribute and a
+// dedicated dict, not via react-i18next's React context. Keeping the source
+// here means the polyglot boundary stays sealed.
 //
 // Spanish is machine-translated, pending native review. Same disclaimer
 // applies to all es-* locale strings produced before Phase 8 polish.

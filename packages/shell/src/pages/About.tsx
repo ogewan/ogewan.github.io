@@ -1,19 +1,19 @@
 import { useParams } from 'react-router';
+import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TransitionLink } from '../components/TransitionLink';
 import { TimelineWrapper } from '../components/TimelineWrapper';
 
-// About page real layout. Phase 5 will replace the timeline placeholder with
-// the Angular Elements custom timeline. Other sections render with
-// representative placeholder copy in EN/ES.
+// About page real layout. Phase 5 wired the Angular Elements timeline; Phase 6
+// migrated the rest of the strings to react-i18next.
 //
 // Sections, mirroring the mockup grammar:
-//   01 Posture · 02 Trajectory (timeline placeholder) · 03 What I work on /
-//   how I work · 04 Currently · 05 Speaking & writing · 06 Shelf · CTA
+//   01 Posture · 02 Trajectory (timeline) · 03 What I work on / how I work ·
+//   04 Currently · 05 Speaking & writing · 06 Shelf · CTA
 export function About() {
   const params = useParams<{ locale?: string }>();
   const locale = params.locale ?? 'en';
-  const isEs = locale === 'es';
+  const { t } = useTranslation(['about']);
 
   return (
     <Container width="reading" className="pb-20">
@@ -23,113 +23,83 @@ export function About() {
           to={`/${locale}/`}
           className="font-mono text-micro tracking-[0.14em] uppercase no-underline border-b-0"
         >
-          <span aria-hidden="true">←</span> {isEs ? 'Volver al inicio' : 'Back to home'}
+          <span aria-hidden="true">←</span> {t('crumbBack')}
         </TransitionLink>
-        <Text variant="micro">02 · /about · v0.4</Text>
+        <Text variant="micro">{t('crumbBadge')}</Text>
       </div>
 
       {/* Head */}
       <Text variant="label" className="mb-3 inline-flex items-center gap-2">
         <span aria-hidden="true" className="inline-block h-px w-[6px] bg-cyan" />
-        {isEs ? '02 / Acerca' : '02 / About'}
+        {t('eyebrow')}
       </Text>
       <Heading level={1} variant="display" tabIndex={-1} className="max-w-[18ch]">
-        {isEs ? (
-          <>
-            Hago instrumentos para gente que no puede dejar de mirar el{' '}
-            <em className="not-italic text-fg-secondary">trabajo.</em>
-          </>
-        ) : (
-          <>
-            I make instruments for people who can&apos;t look away from the{' '}
-            <em className="not-italic text-fg-secondary">work.</em>
-          </>
-        )}
+        <Trans
+          i18nKey="headline"
+          t={t}
+          components={{ em: <em className="not-italic text-fg-secondary" /> }}
+        />
       </Heading>
 
       <GlassPanel className="mt-10 p-6">
         <dl className="grid grid-cols-[140px_1fr] gap-y-3 gap-x-6 font-mono text-small">
-          <dt className="text-fg-muted">{isEs ? 'Nombre' : 'Name'}</dt>
+          <dt className="text-fg-muted">{t('profile.name')}</dt>
           <dd className="text-fg-primary">&lt;your-name&gt;</dd>
-          <dt className="text-fg-muted">{isEs ? 'Pronombres' : 'Pronouns'}</dt>
+          <dt className="text-fg-muted">{t('profile.pronouns')}</dt>
           <dd className="text-fg-primary">they / them</dd>
-          <dt className="text-fg-muted">{isEs ? 'Idiomas' : 'Languages'}</dt>
+          <dt className="text-fg-muted">{t('profile.languages')}</dt>
           <dd className="text-fg-primary">English · Español</dd>
-          <dt className="text-fg-muted">Stack</dt>
+          <dt className="text-fg-muted">{t('profile.stack')}</dt>
           <dd className="text-fg-primary">React · R3F · TypeScript · Rust · GLSL</dd>
-          <dt className="text-fg-muted">Email</dt>
+          <dt className="text-fg-muted">{t('profile.email')}</dt>
           <dd className="text-fg-primary">hello@example.com</dd>
         </dl>
       </GlassPanel>
 
       {/* Section spacing */}
-      <Section order="01" title={isEs ? 'Postura' : 'Posture'}>
-        <Text>
-          {isEs
-            ? 'Trabajo donde el código se encuentra con el espacio físico — consolas, sistemas en tierra, herramientas para la sala. La interfaz debería desaparecer en el trabajo.'
-            : 'I work where code meets the physical room — consoles, ground systems, instruments for the team in the room. The interface should disappear into the work.'}
-        </Text>
-        <PullQuote>
-          {isEs
-            ? 'La interfaz debería desaparecer en el trabajo.'
-            : 'The interface should disappear into the work.'}
-        </PullQuote>
+      <Section order={t('sections.posture.order')} title={t('sections.posture.title')}>
+        <Text>{t('sections.posture.body')}</Text>
+        <PullQuote>{t('sections.posture.quote')}</PullQuote>
       </Section>
 
-      <Section
-        order="02"
-        title={isEs ? 'Trayectoria · 2014 → presente' : 'Trajectory · 2014 → present'}
-      >
+      <Section order={t('sections.trajectory.order')} title={t('sections.trajectory.title')}>
         <Text variant="lead" className="mb-6">
-          {isEs
-            ? 'Línea de tiempo interactiva — Angular Element cargado bajo demanda. Filtra por categoría, expande cualquier nodo para la versión larga.'
-            : 'Interactive timeline — Angular Element loaded on demand. Filter by category, expand any node for the long version.'}
+          {t('sections.trajectory.body')}
         </Text>
         <GlassPanel variant="inset" className="p-6">
           <TimelineWrapper locale={locale} />
         </GlassPanel>
       </Section>
 
-      <Section
-        order="03"
-        title={isEs ? 'En qué trabajo / cómo trabajo' : 'What I work on / how I work'}
-      >
+      <Section order={t('sections.work.order')} title={t('sections.work.title')}>
         <Heading level={4} className="mt-2 mb-2">
-          {isEs ? 'En qué trabajo.' : 'What I work on.'}
+          {t('sections.work.subhead1')}
         </Heading>
-        <Text>
-          {isEs
-            ? 'Consolas para sistemas en tierra. Visualización en tiempo real. Sistemas de diseño que sobreviven a 5 años de iteración. Auditorías de rendimiento. Trabajo de R3F y GLSL cuando la imagen tiene que cargar significado.'
-            : 'Consoles for ground systems. Real-time visualization. Design systems that survive five years of iteration. Performance audits. R3F and GLSL work when the image has to carry meaning.'}
-        </Text>
+        <Text>{t('sections.work.body1')}</Text>
         <Heading level={4} className="mt-6 mb-2">
-          {isEs ? 'Cómo trabajo.' : 'How I work.'}
+          {t('sections.work.subhead2')}
         </Heading>
-        <Text>
-          {isEs
-            ? 'Embedded en el equipo, no a distancia. Specs antes de pixels. Lee la sala antes de escribir el código. El color es reservado, los movimientos son tranquilos. Fechas reales en commits reales.'
-            : 'Embedded with the team, not at arm’s length. Specs before pixels. Read the room before writing the code. Color reserved, animation quiet. Real dates on real commits.'}
-        </Text>
+        <Text>{t('sections.work.body2')}</Text>
       </Section>
 
-      <Section order="04" title={isEs ? 'Actualmente · Nov 2025' : 'Currently · Nov 2025'}>
+      <Section order={t('sections.currently.order')} title={t('sections.currently.title')}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <CurrentlyCard
-            label={isEs ? 'Leyendo' : 'Reading'}
+            label={t('sections.currently.reading')}
             value="The Mushroom at the End of the World — Anna Tsing"
           />
           <CurrentlyCard
-            label={isEs ? 'Construyendo' : 'Building'}
+            label={t('sections.currently.building')}
             value="Atlas Console v3.2 — telemetry rewrite"
           />
           <CurrentlyCard
-            label={isEs ? 'Escuchando' : 'Listening'}
+            label={t('sections.currently.listening')}
             value="Obsidian Soundfields — field recordings"
           />
         </div>
       </Section>
 
-      <Section order="05" title={isEs ? 'Charlas y escritura' : 'Speaking & writing'}>
+      <Section order={t('sections.speaking.order')} title={t('sections.speaking.title')}>
         <ul className="space-y-3">
           <TalkRow
             year="2025"
@@ -152,7 +122,7 @@ export function About() {
         </ul>
       </Section>
 
-      <Section order="06" title={isEs ? 'Lo que tengo en el estante' : 'What I keep on the shelf'}>
+      <Section order={t('sections.shelf.order')} title={t('sections.shelf.title')}>
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
           <ShelfRow num="01" title="Ways of Seeing" author="John Berger · 1972" />
           <ShelfRow num="02" title="The Design of Everyday Things" author="Don Norman · 1988" />
@@ -171,13 +141,9 @@ export function About() {
       >
         <div>
           <Text variant="label" className="mb-2 block">
-            CTA
+            {t('cta.label')}
           </Text>
-          <Heading level={3}>
-            {isEs
-              ? 'Disponible para un problema con forma de consola en Q3 2026.'
-              : 'Available for a console-shaped problem in Q3 2026.'}
-          </Heading>
+          <Heading level={3}>{t('cta.headline')}</Heading>
         </div>
         <div className="flex gap-3">
           <TransitionLink
@@ -185,7 +151,7 @@ export function About() {
             unstyled
             className="inline-flex items-center gap-2 px-5 py-3 rounded-sm border border-[color:oklch(0.84_0.12_210/0.4)] bg-glass-panel text-cyan font-mono text-small uppercase tracking-[0.14em]"
           >
-            {isEs ? 'Enviar un brief' : 'Send a brief'} <span aria-hidden="true">→</span>
+            {t('cta.button')} <span aria-hidden="true">→</span>
           </TransitionLink>
         </div>
       </GlassPanel>

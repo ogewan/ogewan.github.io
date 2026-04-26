@@ -1,0 +1,65 @@
+{
+  "crumbBack": "Back to home",
+  "eyebrow": "04 / Contact · open channel",
+  "headline": "Open channel. <em>Two ways in.</em>",
+  "lead": "Briefs by email. Calls by Calendly. No form, no questionnaire — just write.",
+  "sections": {
+    "direct": {
+      "order": "01",
+      "title": "Direct",
+      "channels": {
+        "email": {
+          "label": "Email",
+          "title": "hello@example.com",
+          "subtitle": "Best for briefs · 48h reply window"
+        },
+        "calendly": {
+          "label": "Calendly",
+          "title": "Book 30-min intro",
+          "subtitle": "Tue/Thu · 14:00–17:00 PT · video"
+        }
+      }
+    },
+    "schedule": {
+      "order": "02",
+      "title": "Schedule",
+      "verifyHeading": "Verify to schedule",
+      "verifyBody": "A quick Cloudflare Turnstile check, then the Calendly inline embed loads.",
+      "verifying": "Verifying…",
+      "verifiedHeading": "Verified",
+      "calendlyMissing": "Calendly URL not configured. Set VITE_CALENDLY_URL to enable scheduling.",
+      "turnstileMissing": "Turnstile site key not configured. Set VITE_TURNSTILE_SITE_KEY to enable scheduling.",
+      "ariaCalendar": "Calendly scheduling embed"
+    },
+    "ground": {
+      "order": "03",
+      "title": "Ground station",
+      "labels": {
+        "city": "CITY",
+        "tz": "TZ",
+        "hours": "HOURS",
+        "lang": "LANG"
+      },
+      "values": {
+        "cityPrimary": "Mountain View, CA",
+        "cityNote": "south bay · approximate",
+        "tz": "UTC-8 · America/Los_Angeles",
+        "hours": "09:00–18:00 PT · Mon–Thu",
+        "lang": "EN · ES"
+      },
+      "visitorLine": "You appear to be near {{city}} — distance to ground station is approximate."
+    },
+    "map": {
+      "order": "04",
+      "title": "Trajectory",
+      "ariaMap": "World map showing ground station and visitor location",
+      "missingKey": "Map disabled. Set VITE_MAPTILER_KEY to enable.",
+      "loading": "Loading map…",
+      "youMarker": "You",
+      "stationMarker": "Ground station",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    }
+  },
+  "note": "Note: approximate location only. For exact coordinates, write to me."
+}

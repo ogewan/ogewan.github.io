@@ -1,15 +1,23 @@
+import { lazy, Suspense } from 'react';
 import { useParams } from 'react-router';
+import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TransitionLink } from '../components/TransitionLink';
+import { SchedulePanel } from '../components/contact/SchedulePanel';
+import { useVisitorLocation } from '../components/useVisitorLocation';
 
-// Phase 4 Contact placeholder. The real Calendly embed (gated by Cloudflare
-// Turnstile), MapLibre map, and ground-station live clock arrive in Phase 6.
-// What's here now: real layout grammar, two-row Direct list, ground-station
-// stub. The nebula backdrop is already wired by CelestialBackdrop.
+// Phase 6 contact page. Calendly inline embed lives behind a Cloudflare
+// Turnstile challenge (SchedulePanel). MapLibre map below the fold shows the
+// visitor + Mountain View ground station — lazy-imported so its ~70 KB gz
+// doesn't ride on every other route's bundle.
+
+const ContactMap = lazy(() => import('../components/contact/ContactMap'));
+
 export function Contact() {
   const params = useParams<{ locale?: string }>();
   const locale = params.locale ?? 'en';
-  const isEs = locale === 'es';
+  const { t } = useTranslation(['contact']);
+  const visitor = useVisitorLocation();
 
   return (
     <Container width="reading" className="pb-24">
@@ -18,93 +26,91 @@ export function Contact() {
           to={`/${locale}/`}
           className="font-mono text-micro tracking-[0.14em] uppercase no-underline border-b-0"
         >
-          <span aria-hidden="true">←</span> {isEs ? 'Volver al inicio' : 'Back to home'}
+          <span aria-hidden="true">←</span> {t('crumbBack')}
         </TransitionLink>
         <Text variant="micro">04 · /contact · NEB-0?</Text>
       </div>
 
       <Text variant="label" className="mb-3 inline-flex items-center gap-2">
         <span aria-hidden="true" className="inline-block h-px w-[6px] bg-cyan" />
-        {isEs ? '04 / Contacto · canal abierto' : '04 / Contact · open channel'}
+        {t('eyebrow')}
       </Text>
       <Heading level={1} variant="h1" tabIndex={-1}>
-        {isEs ? (
-          <>
-            Canal abierto. <em className="not-italic text-fg-secondary">Dos formas de entrar.</em>
-          </>
-        ) : (
-          <>
-            Open channel. <em className="not-italic text-fg-secondary">Two ways in.</em>
-          </>
-        )}
+        <Trans
+          i18nKey="headline"
+          t={t}
+          components={{ em: <em className="not-italic text-fg-secondary" /> }}
+        />
       </Heading>
       <Text variant="lead" className="mt-6 max-w-[640px]">
-        {isEs
-          ? 'Briefs por email. Llamadas por Calendly. Sin formulario, sin cuestionario — solo escribe.'
-          : 'Briefs by email. Calls by Calendly. No form, no questionnaire — just write.'}
+        {t('lead')}
       </Text>
 
-      <Section order="01" title={isEs ? 'Directo' : 'Direct'}>
+      <Section order={t('sections.direct.order')} title={t('sections.direct.title')}>
         <ul className="border-y border-glass-hairline-inner">
           <ChannelRow
-            label="Email"
-            title="hello@example.com"
-            subtitle={
-              isEs ? 'Mejor para briefs · respuesta en 48h' : 'Best for briefs · 48h reply window'
-            }
+            label={t('sections.direct.channels.email.label')}
+            title={t('sections.direct.channels.email.title')}
+            subtitle={t('sections.direct.channels.email.subtitle')}
             href="mailto:hello@example.com"
             glyph="↗"
           />
           <ChannelRow
-            label="Calendly"
-            title={isEs ? 'Reservar 30 min' : 'Book 30-min intro'}
-            subtitle="Tue/Thu · 14:00–17:00 PT · video"
+            label={t('sections.direct.channels.calendly.label')}
+            title={t('sections.direct.channels.calendly.title')}
+            subtitle={t('sections.direct.channels.calendly.subtitle')}
             href="#schedule"
             glyph="↓"
           />
         </ul>
       </Section>
 
-      <Section order="02" title={isEs ? 'Agendar' : 'Schedule'}>
-        <GlassPanel id="schedule" className="p-6 min-h-[480px] flex flex-col gap-4">
-          <Text variant="label">
-            {isEs ? 'Embed de Calendly · pendiente' : 'Calendly embed · pending'}
-          </Text>
-          <Text variant="small">
-            {isEs
-              ? 'En Phase 6: widget de Calendly inline detrás de un challenge de Cloudflare Turnstile. Las claves API se cargan desde VITE_TURNSTILE_SITE_KEY y VITE_CALENDLY_URL.'
-              : 'In Phase 6: inline Calendly widget gated by a Cloudflare Turnstile challenge. API keys loaded from VITE_TURNSTILE_SITE_KEY and VITE_CALENDLY_URL.'}
-          </Text>
-          <div
-            aria-hidden="true"
-            className="flex-1 rounded-sm border border-dashed border-glass-hairline-inner flex items-center justify-center text-fg-muted"
-          >
-            <Text variant="micro">〘 CAL · TURNSTILE · MAPLIBRE — phase 6 〙</Text>
-          </div>
-        </GlassPanel>
+      <Section order={t('sections.schedule.order')} title={t('sections.schedule.title')}>
+        <SchedulePanel />
       </Section>
 
-      <Section order="03" title={isEs ? 'Estación terrestre' : 'Ground station'}>
+      <Section order={t('sections.ground.order')} title={t('sections.ground.title')}>
         <GlassPanel variant="inset" className="p-5">
           <dl className="grid grid-cols-[120px_1fr] gap-y-2 font-mono text-small">
-            <dt className="text-fg-muted">CITY</dt>
+            <dt className="text-fg-muted">{t('sections.ground.labels.city')}</dt>
             <dd className="text-fg-primary">
-              Mountain View, CA <span className="text-fg-muted">· south bay · approximate</span>
+              {t('sections.ground.values.cityPrimary')}{' '}
+              <span className="text-fg-muted">· {t('sections.ground.values.cityNote')}</span>
             </dd>
-            <dt className="text-fg-muted">TZ</dt>
-            <dd className="text-fg-primary">UTC-8 · America/Los_Angeles</dd>
-            <dt className="text-fg-muted">HOURS</dt>
-            <dd className="text-fg-primary">09:00–18:00 PT · Mon–Thu</dd>
-            <dt className="text-fg-muted">LANG</dt>
-            <dd className="text-fg-primary">EN · ES</dd>
+            <dt className="text-fg-muted">{t('sections.ground.labels.tz')}</dt>
+            <dd className="text-fg-primary">{t('sections.ground.values.tz')}</dd>
+            <dt className="text-fg-muted">{t('sections.ground.labels.hours')}</dt>
+            <dd className="text-fg-primary">{t('sections.ground.values.hours')}</dd>
+            <dt className="text-fg-muted">{t('sections.ground.labels.lang')}</dt>
+            <dd className="text-fg-primary">{t('sections.ground.values.lang')}</dd>
           </dl>
         </GlassPanel>
+        {visitor.state === 'resolved' ? (
+          <Text variant="small" className="mt-4 text-fg-muted">
+            {t('sections.ground.visitorLine', { city: visitor.location.city })}
+          </Text>
+        ) : null}
+      </Section>
+
+      <Section order={t('sections.map.order')} title={t('sections.map.title')}>
+        <Suspense
+          fallback={
+            <GlassPanel
+              variant="inset"
+              className="p-6 min-h-[280px] flex items-center justify-center"
+            >
+              <Text variant="small" className="text-fg-muted">
+                {t('sections.map.loading')}
+              </Text>
+            </GlassPanel>
+          }
+        >
+          <ContactMap />
+        </Suspense>
       </Section>
 
       <Text variant="small" className="mt-12 text-fg-muted">
-        {isEs
-          ? 'Nota: ubicación aproximada solamente. Para coordenadas exactas, escríbeme.'
-          : 'Note: approximate location only. For exact coordinates, write to me.'}
+        {t('note')}
       </Text>
     </Container>
   );

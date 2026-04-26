@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCelestialFocus, type FocusTarget } from '@portfolio/celestial';
 import { focusRingClassName } from '@portfolio/ui';
 import { useVisitorLocation } from './useVisitorLocation';
@@ -12,8 +13,8 @@ import { useVisitorLocation } from './useVisitorLocation';
 // persists in sessionStorage across routes within the same session.
 //
 // Visual: small dots with hover-revealed labels (mono, cyan on hover/focus).
-// The visitor dot uses the amber accent + a pulse ring; canonical cities use
-// the muted fg color. Reduced motion turns the pulse static.
+// The visitor dot uses the amber accent + a sonar-style `pulseRing` keyframe
+// from theme.css; reduced motion freezes the ring at scale(1.6)/opacity(0.4).
 //
 // Keyboard: tab moves between nodes; Enter/Space activates; Up/Down arrow
 // rotates focus within the rail.
@@ -55,6 +56,7 @@ interface RailNode {
 export function LocationRail() {
   const visitor = useVisitorLocation();
   const focus = useCelestialFocus();
+  const { t } = useTranslation(['common']);
 
   // Restore previous session selection if present.
   const [selectedKey, setSelectedKey] = useState<string>(() => {
@@ -96,7 +98,7 @@ export function LocationRail() {
     });
   }
 
-  nodes.push({ key: 'auto', label: 'Auto', type: 'auto', target: null });
+  nodes.push({ key: 'auto', label: t('rail.auto'), type: 'auto', target: null });
 
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -120,7 +122,7 @@ export function LocationRail() {
 
   return (
     <aside
-      aria-label="Location rail"
+      aria-label={t('rail.ariaList')}
       className="hidden md:flex fixed right-6 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-3"
     >
       <ul className="flex flex-col items-center gap-3">
@@ -145,7 +147,9 @@ export function LocationRail() {
                 }}
                 type="button"
                 aria-pressed={isSelected}
-                aria-label={isAuto ? 'Auto rotation' : `Focus on ${node.label}`}
+                aria-label={
+                  isAuto ? t('rail.ariaAuto') : t('rail.ariaFocus', { label: node.label })
+                }
                 onClick={() => handleSelect(node)}
                 onKeyDown={(e) => handleKey(e, i)}
                 className={`flex items-center justify-center w-10 h-10 rounded-full ${focusRingClassName} cursor-pointer`}
@@ -154,7 +158,7 @@ export function LocationRail() {
                 {isVisitor ? (
                   <span
                     aria-hidden="true"
-                    className="absolute inset-[-6px] rounded-full border border-amber opacity-70 motion-safe:animate-[pulse_2.4s_var(--ease-smooth)_infinite]"
+                    className="absolute left-1/2 top-1/2 w-[10px] h-[10px] rounded-full border border-amber -translate-x-1/2 -translate-y-1/2 motion-safe:animate-[pulseRing_2.4s_var(--ease-smooth)_infinite] motion-reduce:scale-[1.6] motion-reduce:opacity-40"
                   />
                 ) : null}
               </button>
@@ -162,7 +166,7 @@ export function LocationRail() {
               <span
                 className={`pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 px-2 py-1 rounded-sm bg-glass-elev backdrop-blur-md border border-glass-hairline-inner font-mono text-micro tracking-[0.14em] uppercase whitespace-nowrap ${isVisitor ? 'text-amber' : 'text-fg-secondary'} opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [transition-property:opacity] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)]`}
               >
-                {isVisitor ? `YOU · ${node.label}` : node.label}
+                {isVisitor ? t('rail.youLabel', { city: node.label }) : node.label}
               </span>
             </li>
           );
@@ -170,7 +174,7 @@ export function LocationRail() {
       </ul>
       {visitor.state === 'failed' ? (
         <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-fg-muted writing-mode-vertical-rl mt-2">
-          NO GEO · AUTO
+          {t('rail.noGeo')}
         </span>
       ) : null}
     </aside>

@@ -1,0 +1,13 @@
+{
+  "eyebrow": "03 / Selected work · 2021 — 2026",
+  "headline": "Things in orbit.",
+  "description": "Selected work from the last five years. Filter by category; switch to list view for dense scanning.",
+  "filterAll": "All",
+  "viewLabel": "View",
+  "viewGrid": "grid",
+  "viewList": "list",
+  "list": {
+    "live": "Live",
+    "read": "Read"
+  }
+}

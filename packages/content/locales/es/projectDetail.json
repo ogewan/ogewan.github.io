@@ -1,0 +1,64 @@
+{
+  "_meta": "machine-translated, pending native review",
+  "crumbBack": "Volver a trabajos",
+  "leadShotPlaceholder": "Toma 01 · placeholder de consola principal",
+  "leadShotCaption": "Foto principal · Atlas Console · sala de control de la estación 02.",
+  "sections": {
+    "background": {
+      "order": "01",
+      "title": "Antecedentes",
+      "body1": "Estaba debugeando una anomalía de refrigerante con los telemetristas cuando me di cuenta: la consola estaba diseñada para la pantalla, no para la sala. Cuatro personas leyendo el mismo gráfico tenían que coordinarse hablando.",
+      "body2": "El brief: una grilla de readouts para directores de vuelo, no un dashboard. Latencia P99 ≤ 16ms en 28 consolas en 2 estaciones."
+    },
+    "pullQuote": "Diseña para la sala, no para la pantalla.",
+    "numbers": {
+      "order": "02",
+      "title": "Por los números",
+      "stats": {
+        "vehicles": "Vehículos · Volando",
+        "consoles": "Consolas · 2 estaciones",
+        "latency": "Latencia P99"
+      }
+    },
+    "approach": {
+      "order": "03",
+      "title": "Enfoque",
+      "body": "Tres compromisos antes de tocar pixels: leer la sala, fijar la grilla, color reservado.",
+      "step1": "Fijar la grilla antes de iluminarla.",
+      "step2": "Cada celda es una pregunta, no un dato.",
+      "step3": "El color es reservado para anomalías.",
+      "step4": "La animación cuenta historias, no las decora."
+    },
+    "walkthrough": {
+      "order": "04",
+      "title": "Recorrido · 2:14",
+      "demoLabel": "Demo · 2:14 · ↗ YouTube",
+      "pending": "Video pendiente."
+    },
+    "spec": {
+      "order": "05",
+      "title": "Spec",
+      "labels": {
+        "stack": "Stack",
+        "status": "Estado",
+        "repo": "Repo",
+        "stars": "Stars",
+        "lastPush": "Último push",
+        "started": "Inicio",
+        "ended": "Fin",
+        "categories": "Categorías"
+      }
+    },
+    "external": {
+      "order": "06",
+      "title": "Externos",
+      "source": "Código fuente",
+      "live": "Sitio en vivo",
+      "docs": "Documentación"
+    }
+  },
+  "pager": {
+    "prev": "← Anterior",
+    "next": "Siguiente →"
+  }
+}

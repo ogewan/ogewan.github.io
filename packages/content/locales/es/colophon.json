@@ -1,0 +1,83 @@
+{
+  "_meta": "machine-translated, pending native review",
+  "crumbBack": "Volver al inicio",
+  "eyebrow": "05 / Colofón · cómo se hizo este sitio",
+  "headline": "Acerca de este <em>sitio.</em>",
+  "lead": "Un colofón pequeño para un sitio pequeño. Stack, decisiones, performance, changelog, créditos, licencia.",
+  "sections": {
+    "stack": {
+      "order": "01",
+      "title": "Stack",
+      "subtitle": "Lo que está corriendo, aproximadamente.",
+      "labels": {
+        "framework": "Framework",
+        "threeD": "3D",
+        "polyglot": "Polyglot",
+        "style": "Estilo",
+        "i18n": "i18n",
+        "hosting": "Hosting",
+        "privacy": "Privacidad"
+      },
+      "notes": {
+        "threeD": "fase 9 · placeholders hoy",
+        "polyglot": "timeline · fase 5",
+        "i18n": "conectado en la fase 6",
+        "privacy": "sin analytics · sin cookies"
+      }
+    },
+    "build": {
+      "order": "02",
+      "title": "Notas de build",
+      "subtitle": "Cómo encajan las páginas."
+    },
+    "perf": {
+      "order": "03",
+      "title": "Perf y accesibilidad",
+      "subtitle": "Recibos sobre afirmaciones.",
+      "cwvHeading": "Core Web Vitals · objetivo",
+      "wcagHeading": "WCAG 2.2 AA",
+      "wcag": {
+        "keyboard": "✓ todo interactivo",
+        "focus": "✓ visible sobre cristal",
+        "motion": "✓ branch completo",
+        "contrast": "AA mínimo, mayormente AAA",
+        "screenReader": "✓ anuncio de ruta en vivo"
+      }
+    },
+    "changelog": {
+      "order": "04",
+      "title": "Changelog",
+      "subtitle": "Versiones, terso.",
+      "headers": {
+        "ver": "VER",
+        "date": "FECHA",
+        "note": "NOTA"
+      },
+      "entries": {
+        "v04": "Páginas reales, riel de ubicación, proyectos desde manifest, View Transitions",
+        "v04i18n": "i18next, MapLibre, Turnstile/Calendly, navegación por scroll, preload en hero",
+        "v03": "Backdrop celestial persistente (placeholders), focus API",
+        "v02": "Design tokens, primitives, /_dev/tokens showcase",
+        "v01": "Manifest builder + Zod schema + suite de vitest",
+        "v00": "Scaffold inicial del monorepo"
+      }
+    },
+    "credits": {
+      "order": "05",
+      "title": "Créditos e influencias",
+      "subtitle": "Personas y referencias.",
+      "groups": {
+        "influences": "Influencias",
+        "openSource": "Open source",
+        "imagery": "Imaginería",
+        "typefaces": "Tipografías"
+      }
+    },
+    "license": {
+      "order": "06",
+      "title": "Licencia y fuente",
+      "subtitle": "Usa el código, no los casos.",
+      "body": "MIT. El código es libre — los casos de estudio son míos. Si los usas, dame crédito y haz el tuyo."
+    }
+  }
+}

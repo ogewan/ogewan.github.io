@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Navigate, Route, Routes } from 'react-router';
+import { Route, Routes } from 'react-router';
 import { CelestialBackdrop, CelestialFocusProvider } from '@portfolio/celestial';
 import { SiteLayout } from './layout/SiteLayout';
 import { Home } from './pages/Home';
@@ -12,6 +12,8 @@ import { Colophon } from './pages/Colophon';
 import { NotFound } from './pages/NotFound';
 import { TokensShowcase } from './pages/dev/TokensShowcase';
 import { CelestialDebug } from './pages/dev/CelestialDebug';
+import { LocaleSync } from './components/LocaleSync';
+import { RootRedirect } from './components/RootRedirect';
 
 // The /_dev branch is only mounted in non-production builds. Tree-shaken
 // completely out of the prod bundle by Vite via the import.meta.env.PROD
@@ -48,8 +50,8 @@ export function App() {
       <div className="relative z-10">
         <SiteLayout>
           <Routes>
-            <Route path="/" element={<Navigate to="/en/" replace />} />
-            <Route path="/:locale">
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="/:locale" element={<LocaleSync />}>
               <Route index element={<Home />} />
               <Route path="about" element={<About />} />
               <Route path="projects" element={<Projects />} />

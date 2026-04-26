@@ -1,0 +1,16 @@
+{
+  "_meta": "machine-translated, pending native review",
+  "items": {
+    "home": "Inicio",
+    "about": "Acerca",
+    "projects": "Proyectos",
+    "contact": "Contacto",
+    "colophon": "Colofón"
+  },
+  "resume": "Currículum",
+  "ariaPrimary": "Principal",
+  "ariaToggleMenu": "Abrir menú",
+  "ariaSwitchTo": "Cambiar a {{language}}",
+  "languageEn": "Inglés",
+  "languageEs": "Español"
+}

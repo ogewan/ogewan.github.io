@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ManifestEntry } from '@portfolio/manifest-builder';
 import { GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TransitionLink } from './TransitionLink';
@@ -32,6 +33,7 @@ interface ProjectCardProps {
 // the project links out (`pages_url`) or in-shell — the only signal is the
 // footer affordance: "Live · domain.so ↗" vs "Read the case study →".
 export function ProjectCard({ entry, locale, feature = false }: ProjectCardProps) {
+  const { t } = useTranslation(['common']);
   const { hueA, hueB } = useMemo(() => {
     const idx = hashSlug(entry.slug) % HUE_PALETTE.length;
     const pair = HUE_PALETTE[idx] ?? HUE_PALETTE[0];
@@ -122,8 +124,7 @@ export function ProjectCard({ entry, locale, feature = false }: ProjectCardProps
               unstyled
               className="text-cyan font-mono text-small inline-flex items-center gap-1 border-b border-[color:oklch(0.84_0.12_210/0.3)] hover:border-b-cyan"
             >
-              {locale === 'es' ? 'Leer el caso' : 'Read the case study'}{' '}
-              <span aria-hidden="true">→</span>
+              {t('readCaseStudy')} <span aria-hidden="true">→</span>
             </TransitionLink>
           )}
         </div>

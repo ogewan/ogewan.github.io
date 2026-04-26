@@ -1,0 +1,24 @@
+{
+  "_meta": "machine-translated, pending native review",
+  "eyebrow": "01 / Tierra",
+  "headline": "Construido en la <em>orilla</em> del software y el espacio.",
+  "lead": "Consolas, sistemas en tierra, herramientas para la gente que no puede dejar de mirar el trabajo. Aquí abajo: trabajos seleccionados, una forma de trabajar, y un canal para abrir.",
+  "ctaWork": "Ver trabajos",
+  "ctaContact": "Agendar una llamada",
+  "currentlyAria": "Actualmente",
+  "currently": {
+    "label": "Actualmente",
+    "long": "Atlas Console · disponible para un problema con forma de consola en Q3 2026.",
+    "short": "Atlas Console",
+    "role": "· Director de técnica"
+  },
+  "selected": {
+    "label": "Seleccionado · 2026",
+    "value": "6 trabajos en órbita",
+    "link": "ver todos →"
+  },
+  "next": {
+    "label": "Siguiente",
+    "value": "Acerca · 02"
+  }
+}

@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate, useParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Text, focusRingClassName } from '@portfolio/ui';
 
 // Five-route nav matching the design chat: 01 Home · 02 About · 03 Work ·
 // 04 Contact · 05 Colophon. URL slugs use 'projects' (so the manifest contract
-// stays clean) but the visible label is 'Work' per the user's mockup direction.
-const NAV_ITEMS: Array<{ slug: string; en: string; es: string; order: string }> = [
-  { slug: '', en: 'Home', es: 'Inicio', order: '01' },
-  { slug: 'about', en: 'About', es: 'Acerca', order: '02' },
-  { slug: 'projects', en: 'Work', es: 'Proyectos', order: '03' },
-  { slug: 'contact', en: 'Contact', es: 'Contacto', order: '04' },
-  { slug: 'colophon', en: 'Colophon', es: 'Colofón', order: '05' },
+// stays clean) but the visible label for that route comes from i18n (`Work`/
+// `Proyectos`). All labels resolve from `nav.json`.
+const NAV_ITEMS: Array<{
+  slug: string;
+  key: 'home' | 'about' | 'projects' | 'contact' | 'colophon';
+  order: string;
+}> = [
+  { slug: '', key: 'home', order: '01' },
+  { slug: 'about', key: 'about', order: '02' },
+  { slug: 'projects', key: 'projects', order: '03' },
+  { slug: 'contact', key: 'contact', order: '04' },
+  { slug: 'colophon', key: 'colophon', order: '05' },
 ];
 
 function isActive(pathname: string, locale: string, slug: string): boolean {
@@ -25,6 +31,7 @@ export function SiteHeader() {
   const otherLocale = locale === 'es' ? 'en' : 'es';
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation(['nav']);
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Close mobile menu when the route changes.
@@ -32,16 +39,22 @@ export function SiteHeader() {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  // Locale switcher: rewrite the current path with the alternate locale prefix.
-  // Falls back to the home of the alternate locale if the current path doesn't
-  // start with the active locale prefix (defensive).
+  // Locale switcher: tell i18next first (so the detector caches to localStorage),
+  // then rewrite the URL so the route layout's LocaleSync no-ops on its own
+  // changeLanguage check. Falls back to the home of the alternate locale if the
+  // current path doesn't start with the active locale prefix (defensive).
   const switchLocale = () => {
     const current = location.pathname;
     const next = current.startsWith(`/${locale}`)
       ? current.replace(`/${locale}`, `/${otherLocale}`)
       : `/${otherLocale}/`;
+    void i18n.changeLanguage(otherLocale);
     navigate(next);
   };
+
+  const switcherAria = t('ariaSwitchTo', {
+    language: t(otherLocale === 'en' ? 'languageEn' : 'languageEs'),
+  });
 
   return (
     <header className="fixed top-4 left-0 right-0 z-50 pointer-events-none">
@@ -49,7 +62,7 @@ export function SiteHeader() {
         <GlassPanel
           variant="chrome"
           as="nav"
-          aria-label="Primary"
+          aria-label={t('ariaPrimary')}
           className="pointer-events-auto flex items-center gap-3 px-3 py-2 max-w-[min(720px,100%-32px)] w-full"
         >
           {/* Resume PDF — left slot, replaces the brand mark per the chat */}
@@ -59,7 +72,7 @@ export function SiteHeader() {
             rel="noreferrer noopener"
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-mono text-micro tracking-[0.14em] uppercase text-fg-secondary border border-glass-hairline-inner hover:text-cyan hover:border-[color:oklch(0.84_0.12_210/0.4)] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)] transition-colors ${focusRingClassName}`}
           >
-            <span>Résumé</span>
+            <span>{t('resume')}</span>
             <span aria-hidden="true">↗</span>
           </a>
 
@@ -90,7 +103,7 @@ export function SiteHeader() {
                   }}
                 >
                   <span aria-hidden="true">{item.order}</span>
-                  <span>{locale === 'es' ? item.es : item.en}</span>
+                  <span>{t(`items.${item.key}`)}</span>
                 </NavLink>
               </li>
             ))}
@@ -101,7 +114,7 @@ export function SiteHeader() {
             type="button"
             onClick={switchLocale}
             className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-sm font-mono text-micro tracking-[0.14em] uppercase border border-glass-hairline-inner hover:border-[color:oklch(0.84_0.12_210/0.4)] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)] transition-colors ${focusRingClassName}`}
-            aria-label={`Switch to ${otherLocale === 'en' ? 'English' : 'Spanish'}`}
+            aria-label={switcherAria}
           >
             <span className={locale === 'en' ? 'text-cyan' : 'text-fg-muted'}>EN</span>
             <span className="text-fg-muted">·</span>
@@ -113,7 +126,7 @@ export function SiteHeader() {
             type="button"
             className={`md:hidden inline-flex items-center justify-center w-10 h-10 rounded-sm border border-glass-hairline-inner ${focusRingClassName}`}
             aria-expanded={menuOpen}
-            aria-label="Toggle menu"
+            aria-label={t('ariaToggleMenu')}
             onClick={() => setMenuOpen((v) => !v)}
           >
             <span aria-hidden="true" className="text-fg-secondary">

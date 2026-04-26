@@ -1,4 +1,5 @@
 import { useParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TransitionLink } from '../components/TransitionLink';
 import { manifest, findEntryBySlug } from '../data/manifest';
@@ -16,6 +17,7 @@ export function ProjectDetail() {
   const locale = params.locale ?? 'en';
   const slug = params.slug ?? '';
   const entry = findEntryBySlug(slug);
+  const { t } = useTranslation(['projectDetail', 'common']);
 
   if (!entry) return <NotFound />;
 
@@ -23,8 +25,6 @@ export function ProjectDetail() {
   const idx = manifest.findIndex((e) => e.slug === slug);
   const prev = idx > 0 ? manifest[idx - 1] : null;
   const next = idx >= 0 && idx < manifest.length - 1 ? manifest[idx + 1] : null;
-
-  const isEs = locale === 'es';
 
   return (
     <Container width="reading" className="pb-24">
@@ -34,7 +34,7 @@ export function ProjectDetail() {
           to={`/${locale}/projects`}
           className="font-mono text-micro tracking-[0.14em] uppercase no-underline border-b-0"
         >
-          <span aria-hidden="true">←</span> {isEs ? 'Volver a trabajos' : 'Back to selected work'}
+          <span aria-hidden="true">←</span> {t('crumbBack')}
         </TransitionLink>
         <Text variant="micro">
           F{String(idx + 1).padStart(2, '0')} · /projects/{entry.slug} · {entry.started_at}
@@ -70,7 +70,7 @@ export function ProjectDetail() {
             rel="noreferrer noopener"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm border border-[color:oklch(0.84_0.12_210/0.4)] bg-glass-panel text-cyan font-mono text-small uppercase tracking-[0.14em]"
           >
-            Live <span aria-hidden="true">↗</span>
+            {t('common:external.live')} <span aria-hidden="true">↗</span>
           </a>
         ) : null}
         <a
@@ -79,7 +79,7 @@ export function ProjectDetail() {
           rel="noreferrer noopener"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm border border-glass-hairline-inner bg-glass-panel text-fg-primary hover:text-cyan font-mono text-small uppercase tracking-[0.14em]"
         >
-          GitHub <span aria-hidden="true">↗</span>
+          {t('common:external.github')} <span aria-hidden="true">↗</span>
         </a>
         {entry.docs_link ? (
           <a
@@ -88,22 +88,22 @@ export function ProjectDetail() {
             rel="noreferrer noopener"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm border border-glass-hairline-inner bg-glass-panel text-fg-primary hover:text-cyan font-mono text-small uppercase tracking-[0.14em]"
           >
-            Writeup <span aria-hidden="true">↗</span>
+            {t('common:external.writeup')} <span aria-hidden="true">↗</span>
           </a>
         ) : null}
       </div>
 
       {/* Tech pills */}
       <ul className="mt-6 flex flex-wrap gap-2">
-        {entry.tech.map((t, i) => (
+        {entry.tech.map((tech, i) => (
           <li
-            key={t}
+            key={tech}
             className={
               'font-mono text-micro tracking-[0.1em] uppercase px-2 py-1 rounded-sm border border-glass-hairline-inner ' +
               (i === 0 ? 'text-cyan border-[color:oklch(0.84_0.12_210/0.3)]' : 'text-fg-muted')
             }
           >
-            {t}
+            {tech}
           </li>
         ))}
       </ul>
@@ -118,85 +118,40 @@ export function ProjectDetail() {
         }}
       >
         <Text variant="label" className="absolute top-4 left-4 text-fg-secondary">
-          Shot 01 · primary console placeholder
+          {t('leadShotPlaceholder')}
         </Text>
       </div>
       <Text variant="small" className="mt-3">
-        {isEs
-          ? 'Foto principal · Atlas Console · sala de control de la estación 02.'
-          : 'Lead shot · Atlas Console · station 02 control room.'}
+        {t('leadShotCaption')}
       </Text>
 
       {/* Sections */}
-      <Section order="01" title={isEs ? 'Antecedentes' : 'Background'}>
-        <Text>
-          {isEs
-            ? 'Estaba debugeando una anomalía de refrigerante con los telemetristas cuando me di cuenta: la consola estaba diseñada para la pantalla, no para la sala. Cuatro personas leyendo el mismo gráfico tenían que coordinarse hablando.'
-            : 'I was debugging a coolant anomaly with the telemetrists when it hit me: the console was designed for the screen, not for the room. Four people reading the same graph had to coordinate by talking.'}
-        </Text>
-        <Text className="mt-4">
-          {isEs
-            ? 'El brief: una grilla de readouts para directores de vuelo, no un dashboard. Latencia P99 ≤ 16ms en 28 consolas en 2 estaciones.'
-            : "The brief: a flight director's readout grid, not a dashboard. P99 latency ≤ 16ms across 28 consoles in 2 ground stations."}
-        </Text>
+      <Section order={t('sections.background.order')} title={t('sections.background.title')}>
+        <Text>{t('sections.background.body1')}</Text>
+        <Text className="mt-4">{t('sections.background.body2')}</Text>
       </Section>
 
-      <PullQuote>
-        {isEs
-          ? 'Diseña para la sala, no para la pantalla.'
-          : 'Design for the room, not the window.'}
-      </PullQuote>
+      <PullQuote>{t('sections.pullQuote')}</PullQuote>
 
-      <Section order="02" title={isEs ? 'Por los números' : 'By the numbers'}>
+      <Section order={t('sections.numbers.order')} title={t('sections.numbers.title')}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatTile big="3" small={isEs ? 'Vehículos · Volando' : 'Vehicles · Currently flying'} />
-          <StatTile
-            big="28"
-            small={isEs ? 'Consolas · 2 estaciones' : 'Consoles · 2 ground stations'}
-          />
-          <StatTile big="14ms" small={isEs ? 'Latencia P99' : 'P99 telemetry-to-paint latency'} />
+          <StatTile big="3" small={t('sections.numbers.stats.vehicles')} />
+          <StatTile big="28" small={t('sections.numbers.stats.consoles')} />
+          <StatTile big="14ms" small={t('sections.numbers.stats.latency')} />
         </div>
       </Section>
 
-      <Section order="03" title={isEs ? 'Enfoque' : 'Approach'}>
-        <Text>
-          {isEs
-            ? 'Tres compromisos antes de tocar pixels: leer la sala, fijar la grilla, color reservado.'
-            : 'Three commitments before touching pixels: read the room, lock the grid, color reserved.'}
-        </Text>
+      <Section order={t('sections.approach.order')} title={t('sections.approach.title')}>
+        <Text>{t('sections.approach.body')}</Text>
         <ol className="mt-6 grid grid-cols-[80px_1fr] gap-x-4 gap-y-4">
-          <ProcessStep
-            num="01"
-            text={
-              isEs ? 'Fijar la grilla antes de iluminarla.' : 'Lock the grid before lighting it.'
-            }
-          />
-          <ProcessStep
-            num="02"
-            text={
-              isEs
-                ? 'Cada celda es una pregunta, no un dato.'
-                : 'Every cell is a question, not a datum.'
-            }
-          />
-          <ProcessStep
-            num="03"
-            text={
-              isEs ? 'El color es reservado para anomalías.' : 'Color is reserved for anomalies.'
-            }
-          />
-          <ProcessStep
-            num="04"
-            text={
-              isEs
-                ? 'La animación cuenta historias, no las decora.'
-                : 'Animation tells stories, never decorates them.'
-            }
-          />
+          <ProcessStep num="01" text={t('sections.approach.step1')} />
+          <ProcessStep num="02" text={t('sections.approach.step2')} />
+          <ProcessStep num="03" text={t('sections.approach.step3')} />
+          <ProcessStep num="04" text={t('sections.approach.step4')} />
         </ol>
       </Section>
 
-      <Section order="04" title={isEs ? 'Recorrido · 2:14' : 'Walkthrough · 2:14'}>
+      <Section order={t('sections.walkthrough.order')} title={t('sections.walkthrough.title')}>
         {entry.demo_video ? (
           <a
             href={entry.demo_video}
@@ -215,39 +170,50 @@ export function ProjectDetail() {
               ▶
             </span>
             <Text variant="micro" className="absolute bottom-4 left-4 text-fg-secondary">
-              {isEs ? 'Demo · 2:14 · ↗ YouTube' : 'Demo · 2:14 · ↗ YouTube'}
+              {t('sections.walkthrough.demoLabel')}
             </Text>
           </a>
         ) : (
-          <Text variant="small">{isEs ? 'Video pendiente.' : 'Walkthrough video pending.'}</Text>
+          <Text variant="small">{t('sections.walkthrough.pending')}</Text>
         )}
       </Section>
 
-      <Section order="05" title="Spec">
+      <Section order={t('sections.spec.order')} title={t('sections.spec.title')}>
         <GlassPanel variant="inset" className="overflow-hidden">
           <table className="w-full font-mono text-small">
             <tbody>
-              <SpecRow label="Stack" value={entry.tech.join(' · ')} />
-              <SpecRow label="Status" value={entry.status} />
-              <SpecRow label="Repo" value={entry.repo_url.replace('https://github.com/', '')} />
-              <SpecRow label="Stars" value={String(entry.stars)} />
-              <SpecRow label="Last push" value={entry.pushed_at.split('T')[0] ?? '—'} />
-              <SpecRow label="Started" value={entry.started_at} />
-              {entry.ended_at ? <SpecRow label="Ended" value={entry.ended_at} /> : null}
-              <SpecRow label="Categories" value={entry.categories.join(' · ') || '—'} />
+              <SpecRow label={t('sections.spec.labels.stack')} value={entry.tech.join(' · ')} />
+              <SpecRow label={t('sections.spec.labels.status')} value={entry.status} />
+              <SpecRow
+                label={t('sections.spec.labels.repo')}
+                value={entry.repo_url.replace('https://github.com/', '')}
+              />
+              <SpecRow label={t('sections.spec.labels.stars')} value={String(entry.stars)} />
+              <SpecRow
+                label={t('sections.spec.labels.lastPush')}
+                value={entry.pushed_at.split('T')[0] ?? '—'}
+              />
+              <SpecRow label={t('sections.spec.labels.started')} value={entry.started_at} />
+              {entry.ended_at ? (
+                <SpecRow label={t('sections.spec.labels.ended')} value={entry.ended_at} />
+              ) : null}
+              <SpecRow
+                label={t('sections.spec.labels.categories')}
+                value={entry.categories.join(' · ') || '—'}
+              />
             </tbody>
           </table>
         </GlassPanel>
       </Section>
 
-      <Section order="06" title={isEs ? 'Externos' : 'External'}>
+      <Section order={t('sections.external.order')} title={t('sections.external.title')}>
         <ul className="border-t border-dashed border-glass-hairline-inner">
-          <OutboundRow href={entry.repo_url} title={isEs ? 'Código fuente' : 'Source on GitHub'} />
+          <OutboundRow href={entry.repo_url} title={t('sections.external.source')} />
           {entry.pages_url ? (
-            <OutboundRow href={entry.pages_url} title={isEs ? 'Sitio en vivo' : 'Live site'} />
+            <OutboundRow href={entry.pages_url} title={t('sections.external.live')} />
           ) : null}
           {entry.docs_link ? (
-            <OutboundRow href={entry.docs_link} title={isEs ? 'Documentación' : 'Documentation'} />
+            <OutboundRow href={entry.docs_link} title={t('sections.external.docs')} />
           ) : null}
         </ul>
       </Section>
@@ -256,12 +222,12 @@ export function ProjectDetail() {
       {(prev || next) && (
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-4">
           {prev ? (
-            <PagerCard locale={locale} entry={prev} side="prev" />
+            <PagerCard locale={locale} entry={prev} side="prev" label={t('pager.prev')} />
           ) : (
             <div aria-hidden="true" />
           )}
           {next ? (
-            <PagerCard locale={locale} entry={next} side="next" />
+            <PagerCard locale={locale} entry={next} side="next" label={t('pager.next')} />
           ) : (
             <div aria-hidden="true" />
           )}
@@ -365,10 +331,12 @@ function PagerCard({
   locale,
   entry,
   side,
+  label,
 }: {
   locale: string;
   entry: { slug: string; title: string };
   side: 'prev' | 'next';
+  label: string;
 }) {
   return (
     <TransitionLink
@@ -380,7 +348,7 @@ function PagerCard({
       }
     >
       <Text variant="label" className="mb-2 block">
-        {side === 'prev' ? '← Previous' : 'Next →'}
+        {label}
       </Text>
       <Heading level={3}>{entry.title}</Heading>
     </TransitionLink>

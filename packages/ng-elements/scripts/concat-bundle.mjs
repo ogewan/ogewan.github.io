@@ -15,7 +15,6 @@
 // multiple loads.
 
 import {
-  cpSync,
   existsSync,
   mkdirSync,
   readFileSync,

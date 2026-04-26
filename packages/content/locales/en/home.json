@@ -1,0 +1,23 @@
+{
+  "eyebrow": "01 / Earth",
+  "headline": "Built at the <em>shoreline</em> of software & space.",
+  "lead": "Consoles, ground systems, instruments for people who can't look away from the work. Below: selected work, a way of working, and a channel to open.",
+  "ctaWork": "View work",
+  "ctaContact": "Book a call",
+  "currentlyAria": "Currently",
+  "currently": {
+    "label": "Currently",
+    "long": "Atlas Console · available for a console-shaped problem in Q3 2026.",
+    "short": "Atlas Console",
+    "role": "· Lead engineer"
+  },
+  "selected": {
+    "label": "Selected · 2026",
+    "value": "6 things in orbit",
+    "link": "see all →"
+  },
+  "next": {
+    "label": "Next",
+    "value": "About · 02"
+  }
+}

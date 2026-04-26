@@ -16,10 +16,24 @@ React 19 + React Three Fiber shell, Angular Elements for one showcase component,
 
 ```bash
 pnpm install
+cp packages/shell/.env.example packages/shell/.env.local   # optional, fill in keys
 pnpm dev
 ```
 
-The shell dev server starts at `http://localhost:5173` and redirects `/` to `/en/`.
+The shell dev server starts at `http://localhost:5173` and redirects `/` to `/<lang>/` (the user's localStorage choice, then `navigator.language`, then `en`).
+
+## Environment variables
+
+All vars are read at build time by Vite. Missing values degrade gracefully — the affected feature renders a hint card instead of breaking.
+
+| Variable                  | Used by                          | Notes                                                                |
+| ------------------------- | -------------------------------- | -------------------------------------------------------------------- |
+| `VITE_BASE_URL`           | Vite                             | Optional. Default `/`. Override for non-root deployment.             |
+| `VITE_MAPTILER_KEY`       | `/contact` MapLibre map          | MapTiler free-tier key. Map renders blank hint without it.           |
+| `VITE_TURNSTILE_SITE_KEY` | `/contact` Calendly gate         | Cloudflare Turnstile site key. Schedule panel shows hint without it. |
+| `VITE_CALENDLY_URL`       | `/contact` Calendly inline embed | Full Calendly URL (`https://calendly.com/<your-handle>/<event>`).    |
+
+In production, set these as repository secrets (Phase 7's GH Actions workflow injects them into the build).
 
 ## Project structure
 
@@ -38,7 +52,7 @@ portfolio/
 
 ## Status
 
-Phase 0 — scaffolding and runnable empty shell. Subsequent phases add the manifest builder, design tokens, celestial scene, real pages, Angular timeline, i18n, geospatial, Actions deploy, and launch polish.
+Phase 6 — i18n + geospatial + contact integrations. Subsequent phases: GitHub Actions deploy (Phase 7), launch hardening (Phase 8), real R3F celestial scenes (Phase 9).
 
 ## License
 

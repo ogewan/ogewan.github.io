@@ -1,0 +1,15 @@
+{
+  "items": {
+    "home": "Home",
+    "about": "About",
+    "projects": "Work",
+    "contact": "Contact",
+    "colophon": "Colophon"
+  },
+  "resume": "Résumé",
+  "ariaPrimary": "Primary",
+  "ariaToggleMenu": "Toggle menu",
+  "ariaSwitchTo": "Switch to {{language}}",
+  "languageEn": "English",
+  "languageEs": "Spanish"
+}
