@@ -53,10 +53,14 @@ export default tseslint.config(
     files: [
       'packages/manifest-builder/**/*.ts',
       'packages/ng-elements/scripts/**/*.{js,mjs}',
+      'scripts/**/*.{js,mjs}',
       '**/*.config.{ts,js,mjs}',
     ],
     languageOptions: {
-      globals: { ...globals.node },
+      // scripts/ files mix Node code (TextureLoader URL imports won't reach
+      // here) with `page.evaluate(() => { ... browser globals ... })` bodies
+      // that Playwright sends to Chromium. Keep both globals in scope.
+      globals: { ...globals.node, ...globals.browser },
     },
   },
 

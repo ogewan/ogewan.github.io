@@ -11,5 +11,18 @@
   "ariaToggleMenu": "Toggle menu",
   "ariaSwitchTo": "Switch to {{language}}",
   "languageEn": "English",
-  "languageEs": "Spanish"
+  "languageEs": "Spanish",
+  "quality": {
+    "ariaLabel": "Backdrop quality",
+    "options": {
+      "quality": "Full",
+      "static": "Still",
+      "simple": "Lite"
+    },
+    "tooltips": {
+      "quality": "Full · live 3D scenes with camera fly-through",
+      "static": "Still · captured snapshots, no motion",
+      "simple": "Lite · simple gradients, lowest cost"
+    }
+  }
 }

@@ -5,6 +5,13 @@ export {
   type CelestialFocusValue,
 } from './CelestialContext.js';
 export {
+  CelestialQualityProvider,
+  useCelestialQuality,
+  CELESTIAL_QUALITIES,
+  type CelestialQuality,
+  type CelestialQualityValue,
+} from './CelestialQualityContext.js';
+export {
   sceneFromPathname,
   SCENE_ORDER,
   type SceneName,

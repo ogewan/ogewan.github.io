@@ -56,3 +56,7 @@ packages/shell/public/sitemap.html
 # Phase 8 may decide to track ARCHITECTURE.md and link it from the colophon page.
 ARCHITECTURE.md
 CONTINUE.md
+
+# Local debugging screenshots from Playwright/Puppeteer runs. Useful for
+# verifying behavior without a real browser; never committed.
+.screenshots/

@@ -156,9 +156,14 @@ export function LocationRail() {
               >
                 <span aria-hidden="true" className={dotShape} />
                 {isVisitor ? (
+                  // Pulse runs in all quality modes. We deliberately do NOT
+                  // gate on `motion-safe:` so OS prefers-reduced-motion can't
+                  // silently disable the rail's primary visual cue. Users who
+                  // want still visuals pick `simple` from the celestial
+                  // quality toggle, which is a deliberate site-level choice.
                   <span
                     aria-hidden="true"
-                    className="absolute left-1/2 top-1/2 w-[10px] h-[10px] rounded-full border border-amber -translate-x-1/2 -translate-y-1/2 motion-safe:animate-[pulseRing_2.4s_var(--ease-smooth)_infinite] motion-reduce:scale-[1.6] motion-reduce:opacity-40"
+                    className="absolute left-1/2 top-1/2 w-[10px] h-[10px] rounded-full border border-amber -translate-x-1/2 -translate-y-1/2 animate-[pulseRing_2.4s_var(--ease-smooth)_infinite]"
                   />
                 ) : null}
               </button>

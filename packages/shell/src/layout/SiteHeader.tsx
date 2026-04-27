@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Text, focusRingClassName } from '@portfolio/ui';
+import { QualitySwitcher } from '../components/QualitySwitcher';
 
 // Five-route nav matching the design chat: 01 Home · 02 About · 03 Work ·
 // 04 Contact · 05 Colophon. URL slugs use 'projects' (so the manifest contract
@@ -111,6 +112,10 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
+
+          {/* Backdrop quality (Full · Still · Lite) — desktop-only chrome.
+              Mobile menu users get the toggle inside the hamburger drawer. */}
+          <QualitySwitcher />
 
           {/* Locale switcher: EN · ES toggle */}
           <button

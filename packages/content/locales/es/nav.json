@@ -12,5 +12,18 @@
   "ariaToggleMenu": "Abrir menú",
   "ariaSwitchTo": "Cambiar a {{language}}",
   "languageEn": "Inglés",
-  "languageEs": "Español"
+  "languageEs": "Español",
+  "quality": {
+    "ariaLabel": "Calidad del fondo",
+    "options": {
+      "quality": "Completo",
+      "static": "Estático",
+      "simple": "Ligero"
+    },
+    "tooltips": {
+      "quality": "Completo · escenas 3D con vuelo de cámara",
+      "static": "Estático · capturas, sin movimiento",
+      "simple": "Ligero · degradados simples, mínimo costo"
+    }
+  }
 }

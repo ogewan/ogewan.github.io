@@ -1,6 +1,10 @@
 import { useEffect } from 'react';
 import { Route, Routes } from 'react-router';
-import { CelestialBackdrop, CelestialFocusProvider } from '@portfolio/celestial';
+import {
+  CelestialBackdrop,
+  CelestialFocusProvider,
+  CelestialQualityProvider,
+} from '@portfolio/celestial';
 import { SiteLayout } from './layout/SiteLayout';
 import { Home } from './pages/Home';
 import { About } from './pages/About';
@@ -45,26 +49,28 @@ function useGitHubPagesRedirectReplay() {
 export function App() {
   useGitHubPagesRedirectReplay();
   return (
-    <CelestialFocusProvider>
-      <CelestialBackdrop />
-      <div className="relative z-10">
-        <SiteLayout>
-          <Routes>
-            <Route path="/" element={<RootRedirect />} />
-            <Route path="/:locale" element={<LocaleSync />}>
-              <Route index element={<Home />} />
-              <Route path="about" element={<About />} />
-              <Route path="projects" element={<Projects />} />
-              <Route path="projects/:slug" element={<ProjectDetail />} />
-              <Route path="projects/:slug/redirect" element={<ProjectRedirect />} />
-              <Route path="contact" element={<Contact />} />
-              <Route path="colophon" element={<Colophon />} />
-              {DEV_ROUTES}
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </SiteLayout>
-      </div>
-    </CelestialFocusProvider>
+    <CelestialQualityProvider>
+      <CelestialFocusProvider>
+        <CelestialBackdrop />
+        <div className="relative z-10">
+          <SiteLayout>
+            <Routes>
+              <Route path="/" element={<RootRedirect />} />
+              <Route path="/:locale" element={<LocaleSync />}>
+                <Route index element={<Home />} />
+                <Route path="about" element={<About />} />
+                <Route path="projects" element={<Projects />} />
+                <Route path="projects/:slug" element={<ProjectDetail />} />
+                <Route path="projects/:slug/redirect" element={<ProjectRedirect />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="colophon" element={<Colophon />} />
+                {DEV_ROUTES}
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </SiteLayout>
+        </div>
+      </CelestialFocusProvider>
+    </CelestialQualityProvider>
   );
 }
