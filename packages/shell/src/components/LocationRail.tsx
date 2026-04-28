@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCelestialFocus, type FocusTarget } from '@portfolio/celestial';
+import { CANONICAL_CITIES, useCelestialFocus, type FocusTarget } from '@portfolio/celestial';
 import { focusRingClassName } from '@portfolio/ui';
 import { useVisitorLocation } from './useVisitorLocation';
 
@@ -20,18 +20,6 @@ import { useVisitorLocation } from './useVisitorLocation';
 //
 // Keyboard: tab moves between nodes; Enter/Space activates; Up/Down arrow
 // rotates focus within the rail.
-
-const CANONICAL_CITIES: ReadonlyArray<{ key: string; label: string; lat: number; lng: number }> = [
-  { key: 'houston', label: 'Houston', lat: 29.76, lng: -95.37 },
-  { key: 'sf', label: 'San Francisco', lat: 37.77, lng: -122.42 },
-  { key: 'nyc', label: 'New York', lat: 40.71, lng: -74.01 },
-  { key: 'london', label: 'London', lat: 51.51, lng: -0.13 },
-  { key: 'paris', label: 'Paris', lat: 48.86, lng: 2.35 },
-  { key: 'frankfurt', label: 'Frankfurt', lat: 50.11, lng: 8.68 },
-  { key: 'beijing', label: 'Beijing', lat: 39.9, lng: 116.4 },
-  { key: 'tokyo', label: 'Tokyo', lat: 35.69, lng: 139.69 },
-  { key: 'sydney', label: 'Sydney', lat: -33.87, lng: 151.21 },
-];
 
 const SESSION_KEY = 'portfolio:rail-selection';
 

@@ -66,3 +66,22 @@ export function rotationForFocus(lat: number, lng: number): FocusRotation {
   const x = (lat * Math.PI) / 180;
   return { x, y };
 }
+
+// Local-space 3D position on a unit sphere for a (lat, lng) pair, matching
+// the convention used by `rotationForFocus`: (lng=0, lat=0) at +X; +Y is
+// north pole; lng increases east. This is the inverse of the rotation
+// `rotationForFocus` applies — i.e. a marker placed at this position ends up
+// facing the camera (+Z) after the focus rotation tween completes.
+//
+// Derived as the third row of the XYZ-Euler rotation matrix that
+// rotationForFocus produces; see commit history for the algebra.
+export function positionFromLatLng(lat: number, lng: number, radius = 1): THREE.Vector3 {
+  const latRad = (lat * Math.PI) / 180;
+  const lngRad = (lng * Math.PI) / 180;
+  const cLat = Math.cos(latRad);
+  return new THREE.Vector3(
+    radius * cLat * Math.cos(lngRad),
+    radius * Math.sin(latRad),
+    -radius * cLat * Math.sin(lngRad),
+  );
+}

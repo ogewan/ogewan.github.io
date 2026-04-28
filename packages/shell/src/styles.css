@@ -6,3 +6,13 @@
 @source "../../ui/src/**/*.{ts,tsx}";
 
 /* Page-level styles and shell-only rules belong below this line. */
+
+/* Dev-console visibility toggles. Driven by window.portfolio.ui.* / .bg.*
+   in dev-console.ts; the toggles add/remove these classes on <html>. Hidden
+   in prod regardless because the API that adds the classes is tree-shaken. */
+html.dev-hide-ui [data-ui-root] {
+  display: none;
+}
+html.dev-hide-bg [data-bg-root] {
+  display: none;
+}

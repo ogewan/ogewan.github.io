@@ -5,6 +5,7 @@ import {
   CelestialBackdrop,
   CelestialFocusProvider,
   CelestialQualityProvider,
+  EarthTestModeProvider,
 } from '@portfolio/celestial';
 import { SiteLayout } from './layout/SiteLayout';
 import { MainPage } from './pages/MainPage';
@@ -15,6 +16,7 @@ import { TokensShowcase } from './pages/dev/TokensShowcase';
 import { CelestialDebug } from './pages/dev/CelestialDebug';
 import { LocaleSync } from './components/LocaleSync';
 import { RootRedirect } from './components/RootRedirect';
+import { DevConsoleBridge } from './dev/DevConsoleBridge';
 
 // The /_dev branch is only mounted in non-production builds. Tree-shaken
 // completely out of the prod bundle by Vite via the import.meta.env.PROD
@@ -25,6 +27,9 @@ const DEV_ROUTES = import.meta.env.PROD ? null : (
     <Route path="celestial" element={<CelestialDebug />} />
   </Route>
 );
+
+// Same gate: bridge that registers React-context setters into window.portfolio.
+const DEV_BRIDGE = import.meta.env.PROD ? null : <DevConsoleBridge />;
 
 // GH Pages serves the same site for any unknown URL via 404.html. The 404 page
 // stashes the original pathname in sessionStorage and bounces to /; on mount
@@ -48,34 +53,39 @@ export function App() {
   return (
     <CelestialQualityProvider>
       <CelestialFocusProvider>
-        <ActiveSceneProvider>
-          <CelestialBackdrop />
-          <div className="relative z-10">
-            <SiteLayout>
-              <Routes>
-                <Route path="/" element={<RootRedirect />} />
-                <Route path="/:locale" element={<LocaleSync />}>
-                  {/* MainPage is a layout route — its element stays mounted
-                      across in-app navigation between section paths. The
-                      child routes only exist to match URLs (their elements
-                      render nothing); MainPage owns the section stack and
-                      scroll-to-section sync. */}
-                  <Route element={<MainPage />}>
-                    <Route index element={null} />
-                    <Route path="about" element={null} />
-                    <Route path="projects" element={null} />
-                    <Route path="contact" element={null} />
-                    <Route path="colophon" element={null} />
+        <EarthTestModeProvider>
+          <ActiveSceneProvider>
+            <div data-bg-root>
+              <CelestialBackdrop />
+            </div>
+            <div data-ui-root className="relative z-10">
+              <SiteLayout>
+                <Routes>
+                  <Route path="/" element={<RootRedirect />} />
+                  <Route path="/:locale" element={<LocaleSync />}>
+                    {/* MainPage is a layout route — its element stays mounted
+                        across in-app navigation between section paths. The
+                        child routes only exist to match URLs (their elements
+                        render nothing); MainPage owns the section stack and
+                        scroll-to-section sync. */}
+                    <Route element={<MainPage />}>
+                      <Route index element={null} />
+                      <Route path="about" element={null} />
+                      <Route path="projects" element={null} />
+                      <Route path="contact" element={null} />
+                      <Route path="colophon" element={null} />
+                    </Route>
+                    <Route path="projects/:slug" element={<ProjectDetail />} />
+                    <Route path="projects/:slug/redirect" element={<ProjectRedirect />} />
+                    {DEV_ROUTES}
                   </Route>
-                  <Route path="projects/:slug" element={<ProjectDetail />} />
-                  <Route path="projects/:slug/redirect" element={<ProjectRedirect />} />
-                  {DEV_ROUTES}
-                </Route>
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </SiteLayout>
-          </div>
-        </ActiveSceneProvider>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </SiteLayout>
+            </div>
+            {DEV_BRIDGE}
+          </ActiveSceneProvider>
+        </EarthTestModeProvider>
       </CelestialFocusProvider>
     </CelestialQualityProvider>
   );

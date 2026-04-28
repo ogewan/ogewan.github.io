@@ -3,10 +3,18 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { useCelestialFocus } from '../../CelestialContext.js';
+import { CANONICAL_CITIES } from '../../cities.js';
+import { getEarthRotationRate } from '../../earth-rotation-rate.js';
+import { useEarthTestMode } from '../../EarthTestModeContext.js';
 import { useMobileSettings } from '../MobileSettings.js';
 import { SCENE_ANCHORS } from '../scene-anchors.js';
-import { earthVertexShader, earthFragmentShader } from '../shaders/earth.glsl.js';
-import { getSunDirection, rotationForFocus } from '../sun-direction.js';
+import {
+  earthVertexShader,
+  earthFragmentShader,
+  earthTestVertexShader,
+  earthTestFragmentShader,
+} from '../shaders/earth.glsl.js';
+import { getSunDirection, positionFromLatLng, rotationForFocus } from '../sun-direction.js';
 import earthDayUrl from '../../textures/earth-day-4k.webp';
 import earthNightUrl from '../../textures/earth-night-4k.webp';
 import earthCloudsUrl from '../../textures/earth-clouds-2k.webp';
@@ -37,9 +45,16 @@ import earthCloudsUrl from '../../textures/earth-clouds-2k.webp';
 // fallbacks so the scene renders the moment it mounts. Real textures swap in
 // when they finish loading; if loading fails the procedural fallback stays.
 
-const AUTO_ROTATION_RATE = 0.025; // rad/sec ≈ 1.43°/sec at session timescale
+// Auto-rotation rate (rad/sec) is now sourced per-frame from
+// getEarthRotationRate() so window.portfolio.earth.rotationSpeed() can tweak
+// it live without re-rendering this component. Default is
+// DEFAULT_EARTH_ROTATION_RATE (0.025) ≈ 1.43°/sec at session timescale.
 const CLOUD_DRIFT_RATE = 0.015;
 const FOCUS_TWEEN_DURATION_SEC = 2;
+// Marker dot radius and orbit radius (slightly above the unit-radius earth so
+// dots don't z-fight with the surface).
+const CITY_DOT_RADIUS = 0.018;
+const CITY_DOT_ORBIT = 1.012;
 
 // Build a 1×1 RGBA DataTexture used as the procedural fallback while real
 // textures load (or if they fail). The shader samples the same color at every
@@ -63,6 +78,7 @@ export function EarthScene() {
   const [x, y, z] = SCENE_ANCHORS.earth.origin;
   const settings = useMobileSettings();
   const focus = useCelestialFocus();
+  const { testMode } = useEarthTestMode();
 
   const earthRef = useRef<THREE.Group>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
@@ -139,10 +155,12 @@ export function EarthScene() {
     [dayMap, nightMap, sunDir],
   );
 
-  // Auto-rotation. Skipped while a focus tween is in flight to avoid drift.
+  // Auto-rotation. Rate read per-frame from getEarthRotationRate() so the
+  // dev console can change it live (incl. negative for reverse, 0 to halt).
+  // Skipped while a focus tween is in flight to avoid drift.
   useFrame((_, delta) => {
     if (focus.mode === 'auto' && earthRef.current && !focusTweenRef.current?.isActive()) {
-      earthRef.current.rotation.y += AUTO_ROTATION_RATE * delta;
+      earthRef.current.rotation.y += getEarthRotationRate() * delta;
     }
     if (cloudsRef.current && !settings.degraded) {
       cloudsRef.current.rotation.y += CLOUD_DRIFT_RATE * delta;
@@ -176,18 +194,44 @@ export function EarthScene() {
 
   // Geometry density: lower on mobile to keep frame budget under control.
   const segments = settings.isMobile ? 32 : 64;
-  const showClouds = !settings.degraded;
+  // Clouds hidden in test mode regardless of device — the test material is
+  // unlit and cloud overlay would obscure the city markers.
+  const showClouds = !settings.degraded && !testMode;
+
+  // Precompute city marker positions once. Children of the rotating earth
+  // group, so they rotate with the planet (and a focus tween on the earth
+  // group brings the targeted dot under the camera automatically).
+  const cityPositions = useMemo(
+    () =>
+      CANONICAL_CITIES.map((c) => ({
+        key: c.key,
+        position: positionFromLatLng(c.lat, c.lng, CITY_DOT_ORBIT),
+      })),
+    [],
+  );
 
   return (
     <group position={[x, y, z]}>
       <group ref={earthRef}>
         <mesh>
           <sphereGeometry args={[1, segments, segments]} />
-          <shaderMaterial
-            vertexShader={earthVertexShader}
-            fragmentShader={earthFragmentShader}
-            uniforms={uniforms}
-          />
+          {testMode ? (
+            // Fresh key so the underlying THREE.ShaderMaterial is rebuilt
+            // (and its GL program recompiled) when toggling between shaders;
+            // otherwise the old compiled program persists.
+            <shaderMaterial
+              key="earth-test"
+              vertexShader={earthTestVertexShader}
+              fragmentShader={earthTestFragmentShader}
+            />
+          ) : (
+            <shaderMaterial
+              key="earth-day-night"
+              vertexShader={earthVertexShader}
+              fragmentShader={earthFragmentShader}
+              uniforms={uniforms}
+            />
+          )}
         </mesh>
         {showClouds ? (
           <mesh ref={cloudsRef}>
@@ -195,6 +239,14 @@ export function EarthScene() {
             <meshStandardMaterial map={cloudsMap} transparent opacity={0.45} depthWrite={false} />
           </mesh>
         ) : null}
+        {testMode
+          ? cityPositions.map(({ key, position }) => (
+              <mesh key={key} position={position}>
+                <sphereGeometry args={[CITY_DOT_RADIUS, 16, 16]} />
+                <meshBasicMaterial color="#ff2030" />
+              </mesh>
+            ))
+          : null}
       </group>
     </group>
   );

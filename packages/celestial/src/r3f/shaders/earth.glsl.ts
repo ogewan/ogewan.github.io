@@ -25,6 +25,46 @@ void main() {
 }
 `;
 
+// Earth test-mode shader: procedural UV checker grid + bold equator + bold
+// prime meridian. No textures, no lighting. Used by EarthScene when
+// useEarthTestMode().testMode is true to verify that city-marker meshes land
+// at the expected lat/lng positions and that the focus-rotation pipeline
+// brings the right city under the camera.
+//
+// Cell sizing: 24 columns × 12 rows ≈ 15° per cell.
+
+export const earthTestVertexShader = /* glsl */ `
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+export const earthTestFragmentShader = /* glsl */ `
+varying vec2 vUv;
+
+void main() {
+  // Checker pattern. Both cell colors are bright enough to read clearly
+  // against the dark page background — the earth silhouette must be obvious
+  // for the city dots to be positionally meaningful.
+  float cu = floor(vUv.x * 24.0);
+  float cv = floor(vUv.y * 12.0);
+  float chk = mod(cu + cv, 2.0);
+  vec3 base = mix(vec3(0.42, 0.46, 0.52), vec3(0.82, 0.85, 0.88), chk);
+
+  // Equator (v=0.5) and prime meridian (u=0.5). Lines anti-aliased via
+  // smoothstep so they look crisp at any zoom level. Cyan to match the
+  // site's accent color.
+  float equator = 1.0 - smoothstep(0.0, 0.004, abs(vUv.y - 0.5));
+  float prime = 1.0 - smoothstep(0.0, 0.004, abs(vUv.x - 0.5));
+  float seam = max(equator, prime);
+  vec3 color = mix(base, vec3(0.36, 0.84, 0.92), seam);
+
+  gl_FragColor = vec4(color, 1.0);
+}
+`;
+
 export const earthFragmentShader = /* glsl */ `
 uniform sampler2D dayMap;
 uniform sampler2D nightMap;
