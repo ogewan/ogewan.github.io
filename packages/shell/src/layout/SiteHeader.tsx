@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation, useNavigate, useParams } from 'react-router';
+import { useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Text, focusRingClassName } from '@portfolio/ui';
 import { QualitySwitcher } from '../components/QualitySwitcher';
+import { LocaleSwitcher } from '../components/LocaleSwitcher';
+import { SectionLink, type SectionKey } from '../components/SectionLink';
 
-// Five-route nav matching the design chat: 01 Home · 02 About · 03 Work ·
-// 04 Contact · 05 Colophon. URL slugs use 'projects' (so the manifest contract
-// stays clean) but the visible label for that route comes from i18n (`Work`/
-// `Proyectos`). All labels resolve from `nav.json`.
+// Five-section nav matching the design chat: 01 Home · 02 About · 03 Work ·
+// 04 Contact · 05 Colophon. URL slugs use 'projects' (so the manifest
+// contract stays clean) but the visible label comes from i18n (`Work`/
+// `Proyectos`). All labels resolve from `nav.json`. Items are SectionLinks
+// — clicking smooth-scrolls to the section AND replaces the URL via React
+// Router so the active state derived from pathname stays accurate.
 const NAV_ITEMS: Array<{
   slug: string;
-  key: 'home' | 'about' | 'projects' | 'contact' | 'colophon';
+  key: SectionKey;
   order: string;
 }> = [
   { slug: '', key: 'home', order: '01' },
@@ -26,36 +30,25 @@ function isActive(pathname: string, locale: string, slug: string): boolean {
   return pathname.startsWith(target);
 }
 
+// SiteHeader renders outside any matched route, so useParams returns {}
+// here. Derive locale from pathname directly so URL-driven state stays in
+// sync (otherwise locale falls back to 'en' permanently and the active-link
+// styling under /es paths breaks).
+function localeFromPathname(pathname: string): string {
+  const m = pathname.match(/^\/([a-z]{2})(?:\/|$)/);
+  return m?.[1] ?? 'en';
+}
+
 export function SiteHeader() {
-  const params = useParams<{ locale?: string }>();
-  const locale = params.locale ?? 'en';
-  const otherLocale = locale === 'es' ? 'en' : 'es';
   const location = useLocation();
-  const navigate = useNavigate();
-  const { t, i18n } = useTranslation(['nav']);
+  const locale = localeFromPathname(location.pathname);
+  const { t } = useTranslation(['nav']);
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Close mobile menu when the route changes.
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
-
-  // Locale switcher: tell i18next first (so the detector caches to localStorage),
-  // then rewrite the URL so the route layout's LocaleSync no-ops on its own
-  // changeLanguage check. Falls back to the home of the alternate locale if the
-  // current path doesn't start with the active locale prefix (defensive).
-  const switchLocale = () => {
-    const current = location.pathname;
-    const next = current.startsWith(`/${locale}`)
-      ? current.replace(`/${locale}`, `/${otherLocale}`)
-      : `/${otherLocale}/`;
-    void i18n.changeLanguage(otherLocale);
-    navigate(next);
-  };
-
-  const switcherAria = t('ariaSwitchTo', {
-    language: t(otherLocale === 'en' ? 'languageEn' : 'languageEs'),
-  });
 
   return (
     <header className="fixed top-4 left-0 right-0 z-50 pointer-events-none">
@@ -86,48 +79,37 @@ export function SiteHeader() {
                 : 'hidden md:flex')
             }
           >
-            {NAV_ITEMS.map((item) => (
-              <li key={item.slug || 'home'}>
-                <NavLink
-                  to={item.slug ? `/${locale}/${item.slug}` : `/${locale}/`}
-                  end={item.slug === ''}
-                  className={({ isActive: routerActive }) => {
-                    const active = routerActive || isActive(location.pathname, locale, item.slug);
-                    // min-h-11 forces the 44px tap target on mobile (where
-                    // items stack vertically and need to be thumb-sized);
-                    // desktop reverts to natural padding for the slim chrome.
-                    return (
-                      'inline-flex items-center gap-2 px-3 py-1.5 min-h-11 md:min-h-0 rounded-sm font-mono text-micro tracking-[0.14em] uppercase ' +
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(location.pathname, locale, item.slug);
+              return (
+                <li key={item.slug || 'home'}>
+                  <SectionLink
+                    to={item.key}
+                    aria-current={active ? 'page' : undefined}
+                    className={
+                      // min-h-11 forces the 44px tap target on mobile (where
+                      // items stack vertically and need to be thumb-sized);
+                      // desktop reverts to natural padding for the slim chrome.
+                      'inline-flex items-center gap-2 px-3 py-1.5 min-h-11 md:min-h-0 rounded-sm font-mono text-micro tracking-[0.14em] uppercase no-underline ' +
                       'transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)] ' +
                       (active
                         ? 'text-cyan border border-[color:oklch(0.84_0.12_210/0.3)] bg-[color:oklch(0.84_0.12_210/0.06)] '
                         : 'text-fg-muted border border-transparent hover:text-fg-primary ') +
                       focusRingClassName
-                    );
-                  }}
-                >
-                  <span aria-hidden="true">{item.order}</span>
-                  <span>{t(`items.${item.key}`)}</span>
-                </NavLink>
-              </li>
-            ))}
+                    }
+                  >
+                    <span aria-hidden="true">{item.order}</span>
+                    <span>{t(`items.${item.key}`)}</span>
+                  </SectionLink>
+                </li>
+              );
+            })}
           </ul>
 
-          {/* Backdrop quality (Full · Still · Lite) — desktop-only chrome.
-              Mobile menu users get the toggle inside the hamburger drawer. */}
+          {/* Backdrop quality (Full · Still · Lite) and locale (EN · ES) —
+              both single-button dropdowns. Always visible (mobile included). */}
           <QualitySwitcher />
-
-          {/* Locale switcher: EN · ES toggle */}
-          <button
-            type="button"
-            onClick={switchLocale}
-            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-sm font-mono text-micro tracking-[0.14em] uppercase border border-glass-hairline-inner hover:border-[color:oklch(0.84_0.12_210/0.4)] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)] transition-colors ${focusRingClassName}`}
-            aria-label={switcherAria}
-          >
-            <span className={locale === 'en' ? 'text-cyan' : 'text-fg-muted'}>EN</span>
-            <span className="text-fg-muted">·</span>
-            <span className={locale === 'es' ? 'text-cyan' : 'text-fg-muted'}>ES</span>
-          </button>
+          <LocaleSwitcher />
 
           {/* Mobile hamburger — only shown below md breakpoint. 44×44 minimum
               tap target per the brief. */}
@@ -151,13 +133,10 @@ export function SiteHeader() {
         variant="micro"
         className="fixed bottom-6 left-6 hidden lg:block pointer-events-none select-none"
       >
-        <Link
-          to={`/${locale}/`}
-          className={`pointer-events-auto ${focusRingClassName} no-underline`}
-        >
+        <SectionLink to="home" className={`pointer-events-auto ${focusRingClassName} no-underline`}>
           <span className="text-fg-muted">SYS</span>{' '}
           <span className="text-fg-primary">portfolio-0.7</span>
-        </Link>
+        </SectionLink>
       </Text>
     </header>
   );

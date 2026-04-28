@@ -1,21 +1,14 @@
-import { useParams } from 'react-router';
 import { Trans, useTranslation } from 'react-i18next';
 import { Button, Container, GlassPanel, Heading, Text } from '@portfolio/ui';
-import { TransitionLink } from '../components/TransitionLink';
-import { RoutePreloader } from '../components/RoutePreloader';
+import { SectionLink } from '../SectionLink';
 
-// Hero. Earth-scene backdrop is rendered behind by CelestialBackdrop. The
-// chat's A→C+D entry sequence (anamorphic flare → glass spec + bokeh) is
-// deferred to the real-scenes phase since the flare is part of the R3F
-// composition; the layout grammar is final.
-export function Home() {
-  const params = useParams<{ locale?: string }>();
-  const locale = params.locale ?? 'en';
+// Hero section. Earth-scene backdrop is rendered behind by CelestialBackdrop.
+// Was the old Home page; now the first section on the one-page MainPage.
+export function HeroSection() {
   const { t } = useTranslation(['home']);
 
   return (
     <Container className="min-h-[calc(100vh-12rem)] flex flex-col justify-between gap-16 pb-16">
-      <RoutePreloader />
       {/* Top — eyebrow + display headline */}
       <div className="pt-16">
         <Text variant="label" className="mb-6 inline-flex items-center gap-2">
@@ -35,16 +28,16 @@ export function Home() {
 
         {/* CTA pair */}
         <div className="mt-10 flex flex-wrap gap-3">
-          <TransitionLink to={`/${locale}/projects`} unstyled>
+          <SectionLink to="projects" className="no-underline">
             <Button variant="primary">
               {t('ctaWork')} <span aria-hidden="true">→</span>
             </Button>
-          </TransitionLink>
-          <TransitionLink to={`/${locale}/contact`} unstyled>
+          </SectionLink>
+          <SectionLink to="contact" className="no-underline">
             <Button>
               {t('ctaContact')} <span aria-hidden="true">→</span>
             </Button>
-          </TransitionLink>
+          </SectionLink>
         </div>
       </div>
 
@@ -63,7 +56,7 @@ export function Home() {
         </Text>
       </GlassPanel>
 
-      {/* Bottom strip — "currently / selected / scroll" mono labels, mockup grammar */}
+      {/* Bottom strip — "currently / selected / scroll" mono labels */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-10">
         <div>
           <Text variant="label" className="mb-1 block">
@@ -82,9 +75,9 @@ export function Home() {
             {t('selected.value')}
           </Text>
           <Text variant="small">
-            <TransitionLink to={`/${locale}/projects`} className="text-cyan no-underline">
+            <SectionLink to="projects" className="text-cyan no-underline">
               {t('selected.link')}
-            </TransitionLink>
+            </SectionLink>
           </Text>
         </div>
         <div>
@@ -92,9 +85,9 @@ export function Home() {
             {t('next.label')}
           </Text>
           <Text variant="small" className="text-fg-primary">
-            <TransitionLink to={`/${locale}/about`} className="no-underline">
+            <SectionLink to="about" className="no-underline">
               {t('next.value')}
-            </TransitionLink>
+            </SectionLink>
           </Text>
         </div>
       </div>

@@ -1,28 +1,26 @@
-import { useLocation, type Location } from 'react-router';
 import type { ReactNode } from 'react';
+import { useActiveScene } from '@portfolio/celestial';
 import { SiteHeader } from './SiteHeader';
 import { SiteFooter } from './SiteFooter';
 import { LocationRail } from '../components/LocationRail';
 import { useFocusOnRouteChange } from './useFocusOnRouteChange';
 import { useDocumentMeta } from './useDocumentMeta';
 
-// Pages where the right-side location rail is visible. Brief: Home and About
-// only. Detail/redirect pages don't show the rail because the camera focus
-// concept (rotating Earth to a city) only applies on Earth-scene routes.
-function shouldShowRail(location: Location): boolean {
-  const path = location.pathname.replace(/^\/[a-z-]+/, '') || '/';
-  return path === '/' || path === '/about';
-}
+// Scenes where the right-side location rail is visible. Brief: Earth and
+// About scenes only. Project / Contact / Colophon scenes hide the rail
+// because the camera-focus concept (rotating Earth toward a city) only
+// applies on Earth-scene anchors. Now that the layout is one-page,
+// visibility tracks the actively-scrolled-to scene rather than the route.
 
 interface SiteLayoutProps {
   children: ReactNode;
 }
 
 export function SiteLayout({ children }: SiteLayoutProps) {
-  const location = useLocation();
   useFocusOnRouteChange();
   useDocumentMeta();
-  const showRail = shouldShowRail(location);
+  const activeScene = useActiveScene();
+  const showRail = activeScene === 'earth' || activeScene === 'about';
 
   return (
     <>

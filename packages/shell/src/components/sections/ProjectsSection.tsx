@@ -2,16 +2,18 @@ import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Container, Heading, Text, focusRingClassName } from '@portfolio/ui';
-import { manifest, allCategories } from '../data/manifest';
-import { ProjectCard } from '../components/ProjectCard';
+import { manifest, allCategories } from '../../data/manifest';
+import { ProjectCard } from '../ProjectCard';
 
 type ViewMode = 'grid' | 'list';
 type CategoryFilter = 'all' | string;
 
-// Projects index. Toolbar (filter pills + grid/list toggle) above a 12-col
+// Projects section. Toolbar (filter pills + grid/list toggle) above a 12-col
 // card grid driven by manifest fixture. Featured entries span the full width
 // in grid mode; list mode collapses everything to single-column dense rows.
-export function Projects() {
+// Project cards link to /:locale/projects/:slug — the only cross-route nav
+// from the one-page MainPage.
+export function ProjectsSection() {
   const params = useParams<{ locale?: string }>();
   const locale = params.locale ?? 'en';
   const { t } = useTranslation(['projects']);

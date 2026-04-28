@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { useLocation } from 'react-router';
 import { sceneFromPathname, type SceneName } from './scenes.js';
+import { useActiveScene } from './useActiveScene.js';
 import { useCelestialQuality } from './CelestialQualityContext.js';
 import { SimpleBackdrop } from './r3f/SimpleBackdrop.js';
 import { StaticBackdrop } from './r3f/StaticBackdrop.js';
@@ -37,9 +38,19 @@ export interface CelestialBackdropProps {
   sceneOverride?: SceneName;
 }
 
+// Routes that override the IO-tracked active scene with the pathname-derived
+// one. Project detail / redirect pages have no <section data-scene> markers,
+// so we fall back to `sceneFromPathname` for them.
+function isPathnameDriven(pathname: string): boolean {
+  return /\/projects\/[^/]+/.test(pathname) || pathname.includes('/_dev/');
+}
+
 export function CelestialBackdrop({ sceneOverride }: CelestialBackdropProps = {}) {
   const location = useLocation();
-  const scene = sceneOverride ?? sceneFromPathname(location.pathname);
+  const pathnameScene = sceneFromPathname(location.pathname);
+  const activeScene = useActiveScene();
+  const scene =
+    sceneOverride ?? (isPathnameDriven(location.pathname) ? pathnameScene : activeScene);
   const { quality } = useCelestialQuality();
 
   return (
@@ -49,10 +60,17 @@ export function CelestialBackdrop({ sceneOverride }: CelestialBackdropProps = {}
       ) : quality === 'static' ? (
         <StaticBackdrop scene={scene} />
       ) : (
-        // Suspense fallback is the simple CSS scaffold so first paint is
-        // never blank during the Canvas3D chunk fetch. The body's design-
-        // token gradient is consistent across all three modes.
-        <Suspense fallback={<SimpleBackdrop scene={scene} />}>
+        // Suspense fallback is the STATIC backdrop (committed PNG) — not
+        // SimpleBackdrop. The Canvas3D chunk is ~270 KB gz and takes a
+        // perceptible moment on cold load; if we showed the CSS-only
+        // Simple gradient as the fallback, users in `quality` mode would
+        // see Lite for ~half a second before R3F took over (visually
+        // jarring — the Lite scene is a low-fidelity placeholder, while
+        // the Static PNG is a near-match for the eventual R3F output and
+        // the handoff to R3F is essentially invisible). The PNG is small
+        // (~75 KB for hero), HTTP-cached, and only the active scene's
+        // image fetches.
+        <Suspense fallback={<StaticBackdrop scene={scene} />}>
           <Canvas3D scene={scene} />
         </Suspense>
       )}

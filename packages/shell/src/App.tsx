@@ -1,18 +1,15 @@
 import { useEffect } from 'react';
 import { Route, Routes } from 'react-router';
 import {
+  ActiveSceneProvider,
   CelestialBackdrop,
   CelestialFocusProvider,
   CelestialQualityProvider,
 } from '@portfolio/celestial';
 import { SiteLayout } from './layout/SiteLayout';
-import { Home } from './pages/Home';
-import { About } from './pages/About';
-import { Projects } from './pages/Projects';
+import { MainPage } from './pages/MainPage';
 import { ProjectDetail } from './pages/ProjectDetail';
 import { ProjectRedirect } from './pages/ProjectRedirect';
-import { Contact } from './pages/Contact';
-import { Colophon } from './pages/Colophon';
 import { NotFound } from './pages/NotFound';
 import { TokensShowcase } from './pages/dev/TokensShowcase';
 import { CelestialDebug } from './pages/dev/CelestialDebug';
@@ -51,25 +48,34 @@ export function App() {
   return (
     <CelestialQualityProvider>
       <CelestialFocusProvider>
-        <CelestialBackdrop />
-        <div className="relative z-10">
-          <SiteLayout>
-            <Routes>
-              <Route path="/" element={<RootRedirect />} />
-              <Route path="/:locale" element={<LocaleSync />}>
-                <Route index element={<Home />} />
-                <Route path="about" element={<About />} />
-                <Route path="projects" element={<Projects />} />
-                <Route path="projects/:slug" element={<ProjectDetail />} />
-                <Route path="projects/:slug/redirect" element={<ProjectRedirect />} />
-                <Route path="contact" element={<Contact />} />
-                <Route path="colophon" element={<Colophon />} />
-                {DEV_ROUTES}
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </SiteLayout>
-        </div>
+        <ActiveSceneProvider>
+          <CelestialBackdrop />
+          <div className="relative z-10">
+            <SiteLayout>
+              <Routes>
+                <Route path="/" element={<RootRedirect />} />
+                <Route path="/:locale" element={<LocaleSync />}>
+                  {/* MainPage is a layout route — its element stays mounted
+                      across in-app navigation between section paths. The
+                      child routes only exist to match URLs (their elements
+                      render nothing); MainPage owns the section stack and
+                      scroll-to-section sync. */}
+                  <Route element={<MainPage />}>
+                    <Route index element={null} />
+                    <Route path="about" element={null} />
+                    <Route path="projects" element={null} />
+                    <Route path="contact" element={null} />
+                    <Route path="colophon" element={null} />
+                  </Route>
+                  <Route path="projects/:slug" element={<ProjectDetail />} />
+                  <Route path="projects/:slug/redirect" element={<ProjectRedirect />} />
+                  {DEV_ROUTES}
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </SiteLayout>
+          </div>
+        </ActiveSceneProvider>
       </CelestialFocusProvider>
     </CelestialQualityProvider>
   );

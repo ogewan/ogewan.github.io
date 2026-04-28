@@ -41,6 +41,29 @@
     <link rel="alternate" hreflang="en" href="/en/" />
     <link rel="alternate" hreflang="es" href="/es/" />
     <link rel="alternate" hreflang="x-default" href="/en/" />
+
+    <!-- Suppress font-swap FOUC. Self-hosted variable fonts load asynchronously
+         via @fontsource-variable; without this gate the page paints with system
+         fallbacks first and visibly re-flows when the webfont arrives a few
+         hundred ms later. We hide <html> until document.fonts.ready resolves;
+         a 2s failsafe reveals regardless so a stalled font fetch can never
+         leave the page blank forever.
+         NOTE: must set inline `visibility: visible` explicitly — clearing the
+         inline style would just expose the stylesheet's `hidden` rule. -->
+    <style>html:not([data-fonts-ready]) { visibility: hidden; }</style>
+    <script>
+      (function () {
+        var reveal = function () {
+          document.documentElement.setAttribute('data-fonts-ready', '');
+        };
+        if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+          document.fonts.ready.then(reveal);
+          setTimeout(reveal, 2000);
+        } else {
+          reveal();
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

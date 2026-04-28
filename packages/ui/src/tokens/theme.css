@@ -198,6 +198,28 @@
    not flashy" intent. Reduced motion already collapses --dur-route to 1ms via
    the @media block above, so no separate suppression is needed. */
 
+/* Static / Simple celestial backdrop scene swap. StaticBackdrop and
+   SimpleBackdrop tag their currently-rendered scene element with
+   view-transition-name: backdrop-scene; the active scene change runs inside
+   document.startViewTransition() (see useViewTransitionState), so the
+   browser snapshots before/after and crossfades them on this duration. R3F
+   (`quality`) mode does not use this — its scene transitions are continuous
+   gsap camera tweens, not discrete DOM swaps. */
+::view-transition-old(backdrop-scene),
+::view-transition-new(backdrop-scene) {
+  animation-duration: var(--dur-route);
+  animation-timing-function: var(--ease-smooth);
+}
+
+/* Section h1s are focused programmatically by useFocusOnRouteChange so screen
+   readers announce the new page on cross-family navigations. They carry
+   tabindex={-1}, which means keyboard users can never tab to them, but the
+   browser still paints its default focus outline on programmatic focus —
+   visible as a white border around the masthead. Suppress it. */
+h1[tabindex='-1']:focus {
+  outline: none;
+}
+
 /* Base body defaults — applied once by the shell's root stylesheet */
 html {
   background: var(--color-backdrop-base);

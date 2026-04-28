@@ -1,13 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import {
-  CELESTIAL_QUALITIES,
-  useCelestialQuality,
-  type CelestialQuality,
-} from '@portfolio/celestial';
+import { CELESTIAL_QUALITIES, useCelestialQuality } from '@portfolio/celestial';
 import { focusRingClassName } from '@portfolio/ui';
+import { Dropdown } from './Dropdown';
 
-// Three-state segmented control for the celestial backdrop's quality mode.
-// Lives in the SiteHeader between the nav and the locale switcher.
+// Single-button dropdown for the celestial backdrop's quality mode. Replaces
+// the previous segmented control. Lives in the SiteHeader between the nav
+// and the locale switcher.
 //
 //   Full   — full R3F canvas (quality mode)
 //   Still  — committed scene snapshots (static mode)
@@ -15,44 +13,31 @@ import { focusRingClassName } from '@portfolio/ui';
 //
 // Default is `quality`. Selection persists to localStorage via the
 // CelestialQualityContext provider; cross-tab sync is handled there too.
-//
-// Visual: same chrome family as the EN·ES locale switcher — 3 inline pills
-// inside a single border, the active one in cyan.
-
-const ORDER: CelestialQuality[] = [...CELESTIAL_QUALITIES];
 
 export function QualitySwitcher() {
   const { quality, setQuality } = useCelestialQuality();
   const { t } = useTranslation(['nav']);
 
+  const options = CELESTIAL_QUALITIES.map((q) => ({
+    value: q,
+    label: t(`quality.options.${q}`),
+    title: t(`quality.tooltips.${q}`),
+  }));
+
+  const triggerClassName =
+    'inline-flex items-center justify-center px-3 py-1.5 rounded-sm font-mono text-micro tracking-[0.14em] uppercase ' +
+    'text-cyan border border-glass-hairline-inner hover:border-[color:oklch(0.84_0.12_210/0.4)] ' +
+    '[transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)] transition-colors ' +
+    focusRingClassName;
+
   return (
-    <div
-      role="group"
-      aria-label={t('quality.ariaLabel')}
-      className="hidden md:inline-flex items-center gap-0.5 px-1 py-1 rounded-sm border border-glass-hairline-inner"
-    >
-      {ORDER.map((q) => {
-        const active = quality === q;
-        return (
-          <button
-            key={q}
-            type="button"
-            aria-pressed={active}
-            title={t(`quality.tooltips.${q}`)}
-            onClick={() => setQuality(q)}
-            className={
-              `px-2 py-1 rounded-sm font-mono text-micro tracking-[0.14em] uppercase ` +
-              `transition-colors [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)] ` +
-              (active
-                ? 'text-cyan bg-[color:oklch(0.84_0.12_210/0.10)] '
-                : 'text-fg-muted hover:text-fg-primary ') +
-              focusRingClassName
-            }
-          >
-            {t(`quality.options.${q}`)}
-          </button>
-        );
-      })}
-    </div>
+    <Dropdown
+      value={quality}
+      options={options}
+      onChange={setQuality}
+      triggerLabel={t(`quality.options.${quality}`)}
+      ariaLabel={t('quality.ariaLabel')}
+      triggerClassName={triggerClassName}
+    />
   );
 }

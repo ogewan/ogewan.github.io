@@ -13,8 +13,10 @@ import { useVisitorLocation } from './useVisitorLocation';
 // persists in sessionStorage across routes within the same session.
 //
 // Visual: small dots with hover-revealed labels (mono, cyan on hover/focus).
-// The visitor dot uses the amber accent + a sonar-style `pulseRing` keyframe
-// from theme.css; reduced motion freezes the ring at scale(1.6)/opacity(0.4).
+// Only the SELECTED node carries a sonar-style `pulseRing` keyframe ring.
+// Pulse color is amber when the visitor entry is selected (preserves the
+// "you-are-here" identity), cyan for any other selected node (cities, AUTO).
+// All unselected dots — including the visitor — render grey.
 //
 // Keyboard: tab moves between nodes; Enter/Space activates; Up/Down arrow
 // rotates focus within the rail.
@@ -130,14 +132,9 @@ export function LocationRail() {
           const isSelected = selectedKey === node.key;
           const isAuto = node.type === 'auto';
           const isVisitor = node.type === 'visitor';
-          const dotColor = isVisitor
-            ? 'bg-amber'
-            : isSelected && !isAuto
-              ? 'bg-cyan'
-              : 'bg-fg-muted';
-
-          // Auto uses a different visual: short horizontal dash, not a dot.
-          const dotShape = isAuto ? 'w-3 h-px bg-fg-muted' : `w-2 h-2 rounded-full ${dotColor}`;
+          const dotColor = isSelected ? (isVisitor ? 'bg-amber' : 'bg-cyan') : 'bg-fg-muted';
+          const pulseColor = isVisitor ? 'border-amber' : 'border-cyan';
+          const labelColor = isVisitor && isSelected ? 'text-amber' : 'text-fg-secondary';
 
           return (
             <li key={node.key} className="relative group">
@@ -154,8 +151,8 @@ export function LocationRail() {
                 onKeyDown={(e) => handleKey(e, i)}
                 className={`flex items-center justify-center w-11 h-11 rounded-full ${focusRingClassName} cursor-pointer`}
               >
-                <span aria-hidden="true" className={dotShape} />
-                {isVisitor ? (
+                <span aria-hidden="true" className={`w-2 h-2 rounded-full ${dotColor}`} />
+                {isSelected ? (
                   // Pulse runs in all quality modes. We deliberately do NOT
                   // gate on `motion-safe:` so OS prefers-reduced-motion can't
                   // silently disable the rail's primary visual cue. Users who
@@ -163,13 +160,13 @@ export function LocationRail() {
                   // quality toggle, which is a deliberate site-level choice.
                   <span
                     aria-hidden="true"
-                    className="absolute left-1/2 top-1/2 w-[10px] h-[10px] rounded-full border border-amber -translate-x-1/2 -translate-y-1/2 animate-[pulseRing_2.4s_var(--ease-smooth)_infinite]"
+                    className={`absolute left-1/2 top-1/2 w-[10px] h-[10px] rounded-full border ${pulseColor} -translate-x-1/2 -translate-y-1/2 animate-[pulseRing_2.4s_var(--ease-smooth)_infinite]`}
                   />
                 ) : null}
               </button>
               {/* Hover/focus label */}
               <span
-                className={`pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 px-2 py-1 rounded-sm bg-glass-elev backdrop-blur-md border border-glass-hairline-inner font-mono text-micro tracking-[0.14em] uppercase whitespace-nowrap ${isVisitor ? 'text-amber' : 'text-fg-secondary'} opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [transition-property:opacity] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)]`}
+                className={`pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 px-2 py-1 rounded-sm bg-glass-elev backdrop-blur-md border border-glass-hairline-inner font-mono text-micro tracking-[0.14em] uppercase whitespace-nowrap ${labelColor} opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [transition-property:opacity] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)]`}
               >
                 {isVisitor ? t('rail.youLabel', { city: node.label }) : node.label}
               </span>

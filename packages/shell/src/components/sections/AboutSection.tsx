@@ -1,33 +1,22 @@
 import { useParams } from 'react-router';
 import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
-import { TransitionLink } from '../components/TransitionLink';
-import { TimelineWrapper } from '../components/TimelineWrapper';
+import { TimelineWrapper } from '../TimelineWrapper';
+import { SectionLink } from '../SectionLink';
 
-// About page real layout. Phase 5 wired the Angular Elements timeline; Phase 6
-// migrated the rest of the strings to react-i18next.
+// About section. Was the old About page; now stacks on the one-page MainPage
+// after the Hero.
 //
 // Sections, mirroring the mockup grammar:
 //   01 Posture · 02 Trajectory (timeline) · 03 What I work on / how I work ·
 //   04 Currently · 05 Speaking & writing · 06 Shelf · CTA
-export function About() {
+export function AboutSection() {
   const params = useParams<{ locale?: string }>();
   const locale = params.locale ?? 'en';
   const { t } = useTranslation(['about']);
 
   return (
     <Container width="reading" className="pb-20">
-      {/* Crumb */}
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-        <TransitionLink
-          to={`/${locale}/`}
-          className="font-mono text-micro tracking-[0.14em] uppercase no-underline border-b-0"
-        >
-          <span aria-hidden="true">←</span> {t('crumbBack')}
-        </TransitionLink>
-        <Text variant="micro">{t('crumbBadge')}</Text>
-      </div>
-
       {/* Head */}
       <Text variant="label" className="mb-3 inline-flex items-center gap-2">
         <span aria-hidden="true" className="inline-block h-px w-[6px] bg-cyan" />
@@ -146,13 +135,12 @@ export function About() {
           <Heading level={3}>{t('cta.headline')}</Heading>
         </div>
         <div className="flex gap-3">
-          <TransitionLink
-            to={`/${locale}/contact`}
-            unstyled
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-sm border border-[color:oklch(0.84_0.12_210/0.4)] bg-glass-panel text-cyan font-mono text-small uppercase tracking-[0.14em]"
+          <SectionLink
+            to="contact"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-sm border border-[color:oklch(0.84_0.12_210/0.4)] bg-glass-panel text-cyan font-mono text-small uppercase tracking-[0.14em] no-underline"
           >
             {t('cta.button')} <span aria-hidden="true">→</span>
-          </TransitionLink>
+          </SectionLink>
         </div>
       </GlassPanel>
     </Container>

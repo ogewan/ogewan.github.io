@@ -2,35 +2,25 @@ import { lazy, Suspense } from 'react';
 import { useParams } from 'react-router';
 import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
-import { TransitionLink } from '../components/TransitionLink';
-import { SchedulePanel } from '../components/contact/SchedulePanel';
-import { useVisitorLocation } from '../components/useVisitorLocation';
+import { SchedulePanel } from '../contact/SchedulePanel';
+import { useVisitorLocation } from '../useVisitorLocation';
 
-// Phase 6 contact page. Calendly inline embed lives behind a Cloudflare
-// Turnstile challenge (SchedulePanel). MapLibre map below the fold shows the
-// visitor + Mountain View ground station — lazy-imported so its ~70 KB gz
-// doesn't ride on every other route's bundle.
+const ContactMap = lazy(() => import('../contact/ContactMap'));
 
-const ContactMap = lazy(() => import('../components/contact/ContactMap'));
-
-export function Contact() {
+// Contact section. Calendly inline embed lives behind a Cloudflare Turnstile
+// challenge (SchedulePanel). MapLibre map below the fold shows the visitor +
+// Mountain View ground station — lazy-imported so its ~70 KB gz doesn't ride
+// on every other section's bundle.
+export function ContactSection() {
   const params = useParams<{ locale?: string }>();
-  const locale = params.locale ?? 'en';
+  // locale is currently unused inside the section body but kept for parity
+  // with the original page module's signature.
+  void params.locale;
   const { t } = useTranslation(['contact']);
   const visitor = useVisitorLocation();
 
   return (
     <Container width="reading" className="pb-24">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-        <TransitionLink
-          to={`/${locale}/`}
-          className="font-mono text-micro tracking-[0.14em] uppercase no-underline border-b-0"
-        >
-          <span aria-hidden="true">←</span> {t('crumbBack')}
-        </TransitionLink>
-        <Text variant="micro">04 · /contact · NEB-0?</Text>
-      </div>
-
       <Text variant="label" className="mb-3 inline-flex items-center gap-2">
         <span aria-hidden="true" className="inline-block h-px w-[6px] bg-cyan" />
         {t('eyebrow')}

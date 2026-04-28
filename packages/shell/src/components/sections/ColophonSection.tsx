@@ -1,20 +1,13 @@
 import { useEffect } from 'react';
-import { useParams } from 'react-router';
 import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
-import { TransitionLink } from '../components/TransitionLink';
 
-// Colophon — six sections per the user's mockup (type section dropped):
-// 01 Stack · 02 Build notes · 03 Perf & access · 04 Changelog · 05 Credits ·
-// 06 License & source. The black-hole backdrop is wired by CelestialBackdrop.
-// Phase 6 migrated visible strings to react-i18next; the body content stays
-// inline JSX (no MDX) per the phase scope decision.
-//
-// The DevTools console easter egg below ports the mockup's stylised greeting.
-
-export function Colophon() {
-  const params = useParams<{ locale?: string }>();
-  const locale = params.locale ?? 'en';
+// Colophon section. Six sub-sections per the user's mockup (type section
+// dropped): 01 Stack · 02 Build notes · 03 Perf & access · 04 Changelog ·
+// 05 Credits · 06 License & source. The black-hole backdrop is wired by
+// CelestialBackdrop. The DevTools console easter egg below ports the
+// mockup's stylised greeting.
+export function ColophonSection() {
   const { t } = useTranslation(['colophon', 'common']);
 
   // Console easter egg — fires once per page load.
@@ -34,16 +27,6 @@ export function Colophon() {
 
   return (
     <Container width="reading" className="pb-24">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
-        <TransitionLink
-          to={`/${locale}/`}
-          className="font-mono text-micro tracking-[0.14em] uppercase no-underline border-b-0"
-        >
-          <span aria-hidden="true">←</span> {t('crumbBack')}
-        </TransitionLink>
-        <Text variant="micro">05 · /colophon · v0.7</Text>
-      </div>
-
       <Text variant="label" className="mb-3 inline-flex items-center gap-2">
         <span aria-hidden="true" className="inline-block h-px w-[6px] bg-cyan" />
         {t('eyebrow')}
