@@ -4,7 +4,6 @@ import { CameraDriver } from './CameraDriver.js';
 import { SharedStarField } from './SharedStarField.js';
 import { MobileSettingsProvider } from './MobileSettings.js';
 import { EarthScene } from './scenes/EarthScene.js';
-import { AboutScene } from './scenes/AboutScene.js';
 import { ProjectsScene } from './scenes/ProjectsScene.js';
 import { ContactScene } from './scenes/ContactScene.js';
 import { ColophonScene } from './scenes/ColophonScene.js';
@@ -46,8 +45,10 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
         <SharedStarField />
         <CameraDriver scene={scene} />
 
+        {/* About no longer mounts a separate scene — its camera anchor in
+            scene-anchors.ts shares the Earth lookAt, just pulled back. The
+            Earth + Moon system here is what About frames at wider focal. */}
         <EarthScene />
-        <AboutScene />
         <ProjectsScene />
         <ContactScene />
         <ColophonScene />

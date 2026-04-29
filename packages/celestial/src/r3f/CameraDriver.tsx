@@ -8,24 +8,20 @@ import { SCENE_ANCHORS } from './scene-anchors.js';
 // Camera fly-through driver. Reads the active scene name and tweens the
 // Three.js camera between scene anchors via a single gsap timeline.
 //
-// Duration is read from the design token --dur-route at the start of every
-// transition so reduced-motion users get a 1ms snap (the token collapses
-// under prefers-reduced-motion).
+// Duration is fixed at 1200ms (smooth zoom/fly) regardless of
+// prefers-reduced-motion. The scene transition is the hero of the backdrop
+// — collapsing it to a 1ms snap on OS reduced-motion was jarring (matches
+// the same philosophy CelestialBackdrop applies to quality mode: a visitor
+// shouldn't get a visually-crippled experience from an OS preference they
+// may not have set deliberately).
 //
 // On first paint, the camera jumps to the active scene's anchor without
 // animation — there's no "fly in from infinity" intro.
 
+const CAMERA_TWEEN_DURATION_SEC = 1.2;
+
 interface CameraDriverProps {
   scene: SceneName;
-}
-
-function readRouteDurationMs(): number {
-  if (typeof window === 'undefined') return 1200;
-  const raw = getComputedStyle(document.documentElement).getPropertyValue('--dur-route').trim();
-  // Tokens are written with explicit `ms` suffix (e.g. "1200ms" or "1ms").
-  const match = raw.match(/^(\d+(?:\.\d+)?)ms$/);
-  if (!match) return 1200;
-  return parseFloat(match[1] ?? '1200');
 }
 
 export function CameraDriver({ scene }: CameraDriverProps) {
@@ -54,7 +50,6 @@ export function CameraDriver({ scene }: CameraDriverProps) {
     // Kill any in-flight tween before starting the next one.
     tweenRef.current?.kill();
 
-    const duration = readRouteDurationMs() / 1000;
     const proxy = {
       px: camera.position.x,
       py: camera.position.y,
@@ -70,7 +65,7 @@ export function CameraDriver({ scene }: CameraDriverProps) {
       lx: targetLookAt.x,
       ly: targetLookAt.y,
       lz: targetLookAt.z,
-      duration,
+      duration: CAMERA_TWEEN_DURATION_SEC,
       ease: 'power2.inOut',
       onUpdate: () => {
         camera.position.set(proxy.px, proxy.py, proxy.pz);

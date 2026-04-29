@@ -17,6 +17,7 @@ import {
   cityDotVertexShader,
   cityDotFragmentShader,
 } from '../shaders/earth.glsl.js';
+import { moonVertexShader, moonFragmentShader } from '../shaders/moon.glsl.js';
 import { getSunDirection, positionFromLatLng, rotationForFocus } from '../sun-direction.js';
 import {
   isLikelyStubTexture,
@@ -62,6 +63,35 @@ const FOCUS_TWEEN_DURATION_SEC = 2;
 // dots don't z-fight with the surface).
 const CITY_DOT_RADIUS = 0.018;
 const CITY_DOT_ORBIT = 1.012;
+// Moon visualization. Cosmetic, not ephemeris: orbit radius is compressed
+// vs reality (~60 earth-radii in physics) but generous enough to read as
+// "background satellite" rather than a tight crescent. Equatorial orbit
+// plane keeps the umbra cone math simple — the real moon's 5° inclination
+// is a subtle effect we trade away for clearer eclipse alignment.
+//
+// Orbital position is locked to earth.rotation.y at runtime: the moon
+// orbits at the same angular rate the earth spins, with a fixed offset
+// derived from the current UTC's synodic-month phase (so the start state
+// roughly matches the moon's real-world position at session open).
+const MOON_ORBIT_RADIUS = 7.8;
+const MOON_RADIUS = 0.27;
+// Earth's umbra cone — the moon is fully shadowed when its lateral distance
+// from the sun-axis-through-earth is less than the earth radius (1.0).
+// Penumbra fades out by 1.4 to soften the eclipse boundary.
+const UMBRA_INNER = 0.95;
+const UMBRA_OUTER = 1.4;
+// Known new-moon epoch (Jan 6 2000, 18:14 UTC) and synodic month length.
+// Used once at mount to compute a real-time-anchored offset for the moon's
+// orbital angle. After mount the moon tracks earth.rotation.y, preserving
+// this offset.
+const LUNAR_NEW_MOON_EPOCH_MS = Date.UTC(2000, 0, 6, 18, 14, 0);
+const SYNODIC_MONTH_MS = 29.530588853 * 86_400_000;
+
+function moonOrbitOffsetFromUtc(date: Date): number {
+  const elapsed = date.getTime() - LUNAR_NEW_MOON_EPOCH_MS;
+  const wrapped = ((elapsed % SYNODIC_MONTH_MS) + SYNODIC_MONTH_MS) % SYNODIC_MONTH_MS;
+  return (wrapped / SYNODIC_MONTH_MS) * Math.PI * 2;
+}
 
 // Build a 1×1 RGBA DataTexture used as the procedural fallback while real
 // textures load (or if they fail). The shader samples the same color at every
@@ -90,6 +120,8 @@ export function EarthScene() {
 
   const earthRef = useRef<THREE.Group>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
+  const moonOrbitRef = useRef<THREE.Group>(null);
+  const moonRef = useRef<THREE.Mesh>(null);
   const focusTweenRef = useRef<gsap.core.Tween | null>(null);
 
   // Placeholder fallbacks: canvas-drawn equirectangular world map (green
@@ -193,6 +225,19 @@ export function EarthScene() {
     [effectiveDayMap, effectiveNightMap, sunDirectionUniform],
   );
 
+  // Moon uniforms. Shares the sunDirection uniform reference with the earth
+  // shader so the per-frame mutation in useFrame propagates here too.
+  // shadowFactor is updated each frame by the umbra-cone test below.
+  const moonUniforms = useMemo(
+    () => ({
+      sunDirection: sunDirectionUniform,
+      baseColor: { value: new THREE.Color('#cccdd0') },
+      ambient: { value: 0.05 },
+      shadowFactor: { value: 0 },
+    }),
+    [sunDirectionUniform],
+  );
+
   // Auto-rotation. Rate read per-frame from getEarthRotationRate() so the
   // dev console can change it live (incl. negative for reverse, 0 to halt).
   // Skipped while a focus tween is in flight to avoid drift.
@@ -204,6 +249,20 @@ export function EarthScene() {
   // — the time-correct illumination, invariant under rotation. So focusing
   // London at 20:00 UTC reads as night and Houston as day, regardless of
   // which rotation the earth group happens to be in.
+  // Working vectors for the moon-shadow umbra cone. Allocated outside
+  // useFrame to avoid per-frame GC churn.
+  const earthOriginVec = useMemo(() => new THREE.Vector3(...SCENE_ANCHORS.earth.origin), []);
+  const moonWorldVec = useMemo(() => new THREE.Vector3(), []);
+  const earthToMoonVec = useMemo(() => new THREE.Vector3(), []);
+  const antiSunVec = useMemo(() => new THREE.Vector3(), []);
+  const lateralVec = useMemo(() => new THREE.Vector3(), []);
+  // UTC-anchored offset for the moon's orbital angle. Computed once at mount;
+  // afterward the moon mirrors earth.rotation.y plus this offset, so the
+  // orbit advances at exactly the earth's spin rate (auto-rotation or focus
+  // tween) while preserving an initial position that roughly matches the
+  // real moon's synodic phase at session open.
+  const moonOrbitOffset = useMemo(() => moonOrbitOffsetFromUtc(new Date()), []);
+
   useFrame((_, delta) => {
     if (focus.mode === 'auto' && earthRef.current && !focusTweenRef.current?.isActive()) {
       earthRef.current.rotation.y += getEarthRotationRate() * delta;
@@ -214,6 +273,34 @@ export function EarthScene() {
     if (earthRef.current) {
       sunWorldRef.current.copy(sunLocal).applyQuaternion(earthRef.current.quaternion);
       uniforms.sunDirection.value.copy(sunWorldRef.current);
+    }
+
+    // Lock moon orbit to earth.rotation.y + UTC-derived offset, then compute
+    // earth-shadow darkening from the resulting moon world position.
+    if (moonOrbitRef.current && moonRef.current && earthRef.current) {
+      moonOrbitRef.current.rotation.y = earthRef.current.rotation.y + moonOrbitOffset;
+
+      // Earth umbra cone: project earth→moon onto -sunDirection, measure the
+      // perpendicular distance from the sun-axis-through-earth. If that
+      // lateral distance is less than the earth radius (1.0) and the moon is
+      // on the anti-sun side (along > 0), it's in shadow.
+      moonRef.current.getWorldPosition(moonWorldVec);
+      earthToMoonVec.copy(moonWorldVec).sub(earthOriginVec);
+      antiSunVec.copy(sunWorldRef.current).negate();
+      const along = earthToMoonVec.dot(antiSunVec);
+
+      let shadowFactor = 0;
+      if (along > 0) {
+        // lateral = earthToMoon - along * antiSun
+        lateralVec.copy(antiSunVec).multiplyScalar(along);
+        lateralVec.copy(earthToMoonVec).sub(lateralVec);
+        const lateralLen = lateralVec.length();
+        // Soft cone: 1 inside UMBRA_INNER, 0 outside UMBRA_OUTER, smooth
+        // penumbra in between. (THREE.MathUtils.smoothstep requires
+        // min<=max, so we ramp 0→1 across the penumbra and invert.)
+        shadowFactor = 1 - THREE.MathUtils.smoothstep(lateralLen, UMBRA_INNER, UMBRA_OUTER);
+      }
+      moonUniforms.shadowFactor.value = shadowFactor;
     }
   });
 
@@ -312,6 +399,23 @@ export function EarthScene() {
               </mesh>
             ))
           : null}
+      </group>
+      {/* Moon — sibling of earthRef so it orbits around the earth-group's
+          center rather than rotating with the planet. moonOrbitRef rotates
+          around Y in the equatorial plane; the mesh inside is positioned at
+          orbit radius along +X within that group, so the rotation carries it
+          around earth. The shader handles lambert against the shared
+          sunDirection uniform; useFrame computes the umbra-cone shadow each
+          frame. */}
+      <group ref={moonOrbitRef}>
+        <mesh ref={moonRef} position={[MOON_ORBIT_RADIUS, 0, 0]}>
+          <sphereGeometry args={[MOON_RADIUS, 32, 32]} />
+          <shaderMaterial
+            vertexShader={moonVertexShader}
+            fragmentShader={moonFragmentShader}
+            uniforms={moonUniforms}
+          />
+        </mesh>
       </group>
     </group>
   );

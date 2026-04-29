@@ -8,9 +8,11 @@ import type { SceneName } from '../scenes.js';
 //
 // The tour line runs along negative Z so the camera looks "into" the scene
 // (Three.js camera defaults to looking down -Z). Anchor spacing is unitless
-// and intentionally non-uniform: nearer scenes (Earth → About) are close so
-// the moon entrance reads as a pull-back; farther scenes (Projects → Contact)
-// are spaced out so the route change feels like a warp through stars.
+// and intentionally non-uniform: Earth and About share the same lookAt
+// target — About is just the Earth scene viewed from a wider framing — so
+// the route change is a pure pull-back/zoom-out rather than a tour stop.
+// Farther scenes (Projects → Contact) are spaced out so the route change
+// feels like a warp through stars.
 //
 // X and Y offsets give each scene a slight off-axis framing so the camera
 // look-at lerp paints geometry into different parts of the viewport — the
@@ -35,10 +37,13 @@ export const SCENE_ANCHORS: Record<SceneName, SceneAnchor> = {
     lookAt: [1.2, -0.8, 0],
     origin: [1.2, -0.8, 0],
   },
+  // About reuses the Home Earth+Moon — camera pulls back along +Z to widen
+  // the framing so the moon's full orbit (radius 4) is visible. Same lookAt
+  // and origin as Earth; no separate scene geometry mounts at this anchor.
   about: {
-    cameraPosition: [0, 1.2, -46],
-    lookAt: [-1.0, -0.6, -50],
-    origin: [-1.0, -0.6, -50],
+    cameraPosition: [0, 0, 12],
+    lookAt: [1.2, -0.8, 0],
+    origin: [1.2, -0.8, 0],
   },
   projects: {
     cameraPosition: [-1.5, 0.8, -116],
