@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { useCelestialQuality, useEarthTestMode, type CelestialQuality } from '@portfolio/celestial';
+import {
+  useCelestialQuality,
+  useEarthPlaceholderMode,
+  useEarthTestMode,
+  type CelestialQuality,
+} from '@portfolio/celestial';
 import { registerDevAPI } from './dev-console';
 
 // Bridges React-context state into the vanilla window.portfolio API installed
@@ -11,14 +16,16 @@ export function DevConsoleBridge() {
   const navigate = useNavigate();
   const { setQuality } = useCelestialQuality();
   const { setTestMode } = useEarthTestMode();
+  const { setPlaceholderMode } = useEarthPlaceholderMode();
 
   useEffect(() => {
     registerDevAPI({
       navigate: (path: string) => navigate(path),
       setQuality: (q: string) => setQuality(q as CelestialQuality),
       setEarthTestMode: (on: boolean) => setTestMode(on),
+      setEarthPlaceholderMode: (on: boolean) => setPlaceholderMode(on),
     });
-  }, [navigate, setQuality, setTestMode]);
+  }, [navigate, setQuality, setTestMode, setPlaceholderMode]);
 
   return null;
 }

@@ -31,3 +31,8 @@ export {
   useEarthTestMode,
   type EarthTestModeValue,
 } from './EarthTestModeContext.js';
+export {
+  EarthPlaceholderModeProvider,
+  useEarthPlaceholderMode,
+  type EarthPlaceholderModeValue,
+} from './EarthPlaceholderModeContext.js';

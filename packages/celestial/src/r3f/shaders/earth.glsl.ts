@@ -2,11 +2,12 @@
 // fragment blends between two sphere textures across the terminator using a
 // sun-direction uniform, then adds an atmospheric Fresnel rim.
 //
-// Sun direction is in world space (computed from UTC by the host component
-// once at mount). The sphere rotates inside its parent group; because the
-// vertex shader transforms `normal` through `modelMatrix`, the lambert dot
-// stays correct as the planet rotates beneath the fixed sun. That's exactly
-// the intent — continents rotate, terminator does not.
+// Sun direction is in world space and updated per frame by the host
+// component: sunLocal (computed once from UTC at mount) is rotated by the
+// earth group's current quaternion before being written into the uniform.
+// That keeps the lambert correct as the planet rotates — for any focused
+// city, lambert reduces to cityLocal · sunLocal, which is the time-correct
+// illumination regardless of focus rotation.
 
 export const earthVertexShader = /* glsl */ `
 varying vec2 vUv;
@@ -62,6 +63,43 @@ void main() {
   vec3 color = mix(base, vec3(0.36, 0.84, 0.92), seam);
 
   gl_FragColor = vec4(color, 1.0);
+}
+`;
+
+// City-dot shader. The dots are tiny sphere meshes parented to the rotating
+// earth group, but their own per-vertex normals point in every direction —
+// no useful "this dot is on the day side" signal there. We pass the city's
+// surface normal in earth-LOCAL frame as a uniform, transform it through
+// mat3(modelMatrix) (which collapses to the earth group's rotation since the
+// dot's own matrix is pure translation and the scene-anchor is pure
+// translation), then lambert against the world-space sunDirection uniform
+// shared with the earth shader. Dim red on day side; bright warm yellow on
+// night side — reads as city lights through the dark hemisphere.
+
+export const cityDotVertexShader = /* glsl */ `
+uniform vec3 cityNormalLocal;
+varying vec3 vCityNormalWorld;
+
+void main() {
+  vCityNormalWorld = normalize(mat3(modelMatrix) * cityNormalLocal);
+  gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+}
+`;
+
+export const cityDotFragmentShader = /* glsl */ `
+uniform vec3 sunDirection;
+uniform vec3 dayColor;
+uniform vec3 nightColor;
+
+varying vec3 vCityNormalWorld;
+
+void main() {
+  vec3 normal = normalize(vCityNormalWorld);
+  vec3 sunDir = normalize(sunDirection);
+  float lambert = dot(normal, sunDir);
+  // Same ±0.2 lambert window the earth shader uses for its day/night seam.
+  float nightFactor = smoothstep(0.2, -0.2, lambert);
+  gl_FragColor = vec4(mix(dayColor, nightColor, nightFactor), 1.0);
 }
 `;
 

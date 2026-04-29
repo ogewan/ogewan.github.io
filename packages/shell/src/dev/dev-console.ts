@@ -23,6 +23,7 @@ interface DevAPIRegistry {
   setQuality?: Setter<string>;
   navigate?: Setter<string>;
   setEarthTestMode?: Setter<boolean>;
+  setEarthPlaceholderMode?: Setter<boolean>;
 }
 
 const registry: DevAPIRegistry = {};
@@ -151,6 +152,18 @@ export function installDevConsole(): void {
         registry.setEarthTestMode(Boolean(on));
       },
 
+      // portfolio.earth.placeholder()       → on
+      // portfolio.earth.placeholder(true)   → on
+      // portfolio.earth.placeholder(false)  → off
+      // Forces the canvas-drawn placeholder day/night maps regardless of
+      // whether real Blue Marble webps have loaded. Also makes the city
+      // dots visible (lambert-aware: dim red on day side, bright yellow
+      // city-lights glow on night side).
+      placeholder(on: boolean = true): void {
+        if (!registry.setEarthPlaceholderMode) return notRegistered('earth.placeholder');
+        registry.setEarthPlaceholderMode(Boolean(on));
+      },
+
       // Get/set earth auto-rotation rate.
       //   portfolio.earth.rotationSpeed()        → number (rad/sec)
       //   portfolio.earth.rotationSpeed(0.025)   → set default speed
@@ -185,6 +198,7 @@ export function installDevConsole(): void {
           '',
           'Earth test mode:',
           '  portfolio.earth.test(on?)             // on=true by default; UV checker + red city dots',
+          '  portfolio.earth.placeholder(on?)      // on=true; force green/blue placeholder map + lambert-aware city dots',
           '  portfolio.earth.rotationSpeed()       // get current rate, in rad/sec (default 0.025)',
           '  portfolio.earth.rotationSpeed(rate)   // set; negative reverses, 0 halts. Persists in localStorage.',
         ].join('\n'),

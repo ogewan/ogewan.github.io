@@ -5,6 +5,7 @@ import { useActiveScene } from './useActiveScene.js';
 import { useCelestialQuality } from './CelestialQualityContext.js';
 import { SimpleBackdrop } from './r3f/SimpleBackdrop.js';
 import { StaticBackdrop } from './r3f/StaticBackdrop.js';
+import { useWebGLAvailable } from './useWebGLAvailable.js';
 
 // Lazy-loaded R3F slice. Only fetched when the user is in `quality` mode
 // AND we mount the canvas branch. Static + Simple modes never download it.
@@ -31,6 +32,11 @@ const Canvas3D = lazy(() => import('./r3f/Canvas3D.js'));
 // not have set deliberately. Users who want still or simple pick it from
 // the toggle. The LocationRail visitor pulse likewise runs in all modes.
 //
+// WebGL fallback: if context creation isn't available (sandboxed Electron,
+// blocklisted drivers, GPU-disabled flags), the `quality` branch silently
+// downgrades to StaticBackdrop. The user keeps their preference; we just
+// can't honor it on this device. `simple` and `static` are unaffected.
+//
 // Public API stays identical: <CelestialBackdrop sceneOverride? />. The
 // dev cycler at /_dev/celestial drives sceneOverride exactly as before.
 
@@ -52,14 +58,22 @@ export function CelestialBackdrop({ sceneOverride }: CelestialBackdropProps = {}
   const scene =
     sceneOverride ?? (isPathnameDriven(location.pathname) ? pathnameScene : activeScene);
   const { quality } = useCelestialQuality();
+  const webgl = useWebGLAvailable();
+
+  // While webgl probe is pending (`null`), and the user picked `quality`,
+  // show the StaticBackdrop — same behaviour as the Suspense fallback below.
+  // Once the probe resolves to false we keep StaticBackdrop permanently;
+  // resolving to true mounts Canvas3D.
+  const canRunCanvas = quality === 'quality' && webgl === true;
+  const shouldFallbackToStatic = quality === 'quality' && webgl === false;
 
   return (
     <div aria-hidden="true" className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
       {quality === 'simple' ? (
         <SimpleBackdrop scene={scene} />
-      ) : quality === 'static' ? (
+      ) : quality === 'static' || shouldFallbackToStatic ? (
         <StaticBackdrop scene={scene} />
-      ) : (
+      ) : canRunCanvas ? (
         // Suspense fallback is the STATIC backdrop (committed PNG) — not
         // SimpleBackdrop. The Canvas3D chunk is ~270 KB gz and takes a
         // perceptible moment on cold load; if we showed the CSS-only
@@ -73,6 +87,9 @@ export function CelestialBackdrop({ sceneOverride }: CelestialBackdropProps = {}
         <Suspense fallback={<StaticBackdrop scene={scene} />}>
           <Canvas3D scene={scene} />
         </Suspense>
+      ) : (
+        // webgl probe pending — show the static PNG until we know.
+        <StaticBackdrop scene={scene} />
       )}
     </div>
   );

@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { useCelestialFocus } from '../../CelestialContext.js';
 import { CANONICAL_CITIES } from '../../cities.js';
 import { getEarthRotationRate } from '../../earth-rotation-rate.js';
+import { useEarthPlaceholderMode } from '../../EarthPlaceholderModeContext.js';
 import { useEarthTestMode } from '../../EarthTestModeContext.js';
 import { useMobileSettings } from '../MobileSettings.js';
 import { SCENE_ANCHORS } from '../scene-anchors.js';
@@ -13,8 +14,14 @@ import {
   earthFragmentShader,
   earthTestVertexShader,
   earthTestFragmentShader,
+  cityDotVertexShader,
+  cityDotFragmentShader,
 } from '../shaders/earth.glsl.js';
 import { getSunDirection, positionFromLatLng, rotationForFocus } from '../sun-direction.js';
+import {
+  isLikelyStubTexture,
+  makePlaceholderEarthTextures,
+} from '../../placeholder-earth-texture.js';
 import earthDayUrl from '../../textures/earth-day-4k.webp';
 import earthNightUrl from '../../textures/earth-night-4k.webp';
 import earthCloudsUrl from '../../textures/earth-clouds-2k.webp';
@@ -79,20 +86,23 @@ export function EarthScene() {
   const settings = useMobileSettings();
   const focus = useCelestialFocus();
   const { testMode } = useEarthTestMode();
+  const { placeholderMode } = useEarthPlaceholderMode();
 
   const earthRef = useRef<THREE.Group>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
   const focusTweenRef = useRef<gsap.core.Tween | null>(null);
 
-  // Procedural fallbacks: Earth-blue day, deep-navy night, fully transparent
-  // cloud (so the cloud sphere reads as invisible until a real cloud texture
-  // arrives). These render immediately on mount.
-  const fallbackDay = useMemo(() => makeSolidTexture([58, 120, 163, 255]), []);
-  const fallbackNight = useMemo(() => makeSolidTexture([12, 24, 48, 255]), []);
+  // Placeholder fallbacks: canvas-drawn equirectangular world map (green
+  // continents on blue ocean for day, darker palette for night). Shown until
+  // real Blue Marble webps drop in to packages/celestial/src/textures/. The
+  // current committed webps are 34-byte placeholder stubs that decode to
+  // 1×1 black; the load callback below uses isLikelyStubTexture to skip
+  // overriding the placeholder when that's the case.
+  const placeholder = useMemo(() => makePlaceholderEarthTextures(), []);
   const fallbackClouds = useMemo(() => makeSolidTexture([255, 255, 255, 0]), []);
 
-  const [dayMap, setDayMap] = useState<THREE.Texture>(fallbackDay);
-  const [nightMap, setNightMap] = useState<THREE.Texture>(fallbackNight);
+  const [dayMap, setDayMap] = useState<THREE.Texture>(placeholder.day);
+  const [nightMap, setNightMap] = useState<THREE.Texture>(placeholder.night);
   const [cloudsMap, setCloudsMap] = useState<THREE.Texture>(fallbackClouds);
 
   // Imperative texture load with per-texture error tolerance. If a file fails
@@ -116,15 +126,23 @@ export function EarthScene() {
         },
       );
     };
+    // Stub-detection: the committed earth-day-4k.webp / earth-night-4k.webp are
+    // 34-byte placeholder files that decode "successfully" to 1×1 black. Reject
+    // anything <64×64 so the canvas-drawn placeholder stays visible until real
+    // Blue Marble imagery is dropped in. Real NASA Blue Marble at 4096×2048
+    // sails past this threshold.
     load(earthDayUrl, (tex) => {
+      if (isLikelyStubTexture(tex)) return;
       configureSurfaceTexture(tex);
       setDayMap(tex);
     });
     load(earthNightUrl, (tex) => {
+      if (isLikelyStubTexture(tex)) return;
       configureSurfaceTexture(tex);
       setNightMap(tex);
     });
     load(earthCloudsUrl, (tex) => {
+      if (isLikelyStubTexture(tex)) return;
       tex.wrapS = THREE.RepeatWrapping;
       tex.needsUpdate = true;
       setCloudsMap(tex);
@@ -134,17 +152,37 @@ export function EarthScene() {
     };
   }, []);
 
-  // Sun direction is computed once on mount. Updating per-frame would let the
-  // terminator track real time, but the sun moves only ~15°/hour (0.067°/sec)
-  // so a multi-hour visit is required to see motion — and we'd rather the
-  // terminator be a stable orientation cue per session.
-  const sunDir = useMemo(() => getSunDirection(new Date()), []);
+  // Sun direction is computed once at mount in Earth-LOCAL frame (where +X is
+  // lng=0). UTC drifts only ~15°/hr so freezing it per-session is fine; what
+  // changes per-frame is the local→world transform below. We need that
+  // transform because `vNormal` in the shader is in WORLD space (mat3(modelMatrix) * normal),
+  // so the lambert dot product is only meaningful when sunDirection is also
+  // in world space. Without the transform, any rotation of the earth group
+  // (auto-rotate or rotationForFocus) breaks the math and the camera-facing
+  // hemisphere reads as the wrong day/night side regardless of UTC.
+  const sunLocal = useMemo(() => getSunDirection(new Date()), []);
+  const sunWorldRef = useRef(new THREE.Vector3());
+
+  // Stable shared sun-direction uniform. The same `{ value: Vector3 }` object
+  // is referenced by both the earth shader and every city-dot shader so the
+  // per-frame mutation in useFrame propagates to all materials at once.
+  const sunDirectionUniform = useMemo(
+    () => ({ value: new THREE.Vector3().copy(sunLocal) }),
+    [sunLocal],
+  );
+
+  // When placeholderMode is on, force the canvas-drawn placeholder maps even
+  // if real webps have loaded. Otherwise use whatever's in dayMap/nightMap
+  // state (which starts at the placeholder and is replaced only when a
+  // non-stub webp finishes loading — see the load callbacks below).
+  const effectiveDayMap = placeholderMode ? placeholder.day : dayMap;
+  const effectiveNightMap = placeholderMode ? placeholder.night : nightMap;
 
   const uniforms = useMemo(
     () => ({
-      dayMap: { value: dayMap },
-      nightMap: { value: nightMap },
-      sunDirection: { value: sunDir },
+      dayMap: { value: effectiveDayMap },
+      nightMap: { value: effectiveNightMap },
+      sunDirection: sunDirectionUniform,
       rimColor: { value: new THREE.Color('#5dc1d6') },
       rimIntensity: { value: 1.0 },
       // Night side gets a small color boost so placeholder textures don't
@@ -152,18 +190,30 @@ export function EarthScene() {
       // not to need this, but the constant doesn't hurt the final image.
       nightBoost: { value: 1.4 },
     }),
-    [dayMap, nightMap, sunDir],
+    [effectiveDayMap, effectiveNightMap, sunDirectionUniform],
   );
 
   // Auto-rotation. Rate read per-frame from getEarthRotationRate() so the
   // dev console can change it live (incl. negative for reverse, 0 to halt).
   // Skipped while a focus tween is in flight to avoid drift.
+  //
+  // After rotation we transform sunLocal by Earth's current quaternion and
+  // write the resulting world-space vector to the shader uniform. Because the
+  // shader's `vNormal` is also in world space, lambert at a city becomes
+  //   (R · cityLocal) · (R · sunLocal) = cityLocal · sunLocal
+  // — the time-correct illumination, invariant under rotation. So focusing
+  // London at 20:00 UTC reads as night and Houston as day, regardless of
+  // which rotation the earth group happens to be in.
   useFrame((_, delta) => {
     if (focus.mode === 'auto' && earthRef.current && !focusTweenRef.current?.isActive()) {
       earthRef.current.rotation.y += getEarthRotationRate() * delta;
     }
     if (cloudsRef.current && !settings.degraded) {
       cloudsRef.current.rotation.y += CLOUD_DRIFT_RATE * delta;
+    }
+    if (earthRef.current) {
+      sunWorldRef.current.copy(sunLocal).applyQuaternion(earthRef.current.quaternion);
+      uniforms.sunDirection.value.copy(sunWorldRef.current);
     }
   });
 
@@ -198,16 +248,27 @@ export function EarthScene() {
   // unlit and cloud overlay would obscure the city markers.
   const showClouds = !settings.degraded && !testMode;
 
-  // Precompute city marker positions once. Children of the rotating earth
-  // group, so they rotate with the planet (and a focus tween on the earth
-  // group brings the targeted dot under the camera automatically).
+  // Precompute city marker positions + per-dot shader uniforms once. The dots
+  // are children of the rotating earth group, so they rotate with the planet
+  // (and a focus tween on the earth group brings the targeted dot under the
+  // camera automatically). Per-dot uniforms include the city's earth-LOCAL
+  // surface normal (unit vector at the same lat/lng) — used by the city-dot
+  // shader to compute lambert against the shared sunDirection. dayColor +
+  // nightColor are constants but live in uniforms so each dot's material
+  // shares the same shader compilation.
   const cityPositions = useMemo(
     () =>
       CANONICAL_CITIES.map((c) => ({
         key: c.key,
         position: positionFromLatLng(c.lat, c.lng, CITY_DOT_ORBIT),
+        uniforms: {
+          cityNormalLocal: { value: positionFromLatLng(c.lat, c.lng, 1) },
+          sunDirection: sunDirectionUniform,
+          dayColor: { value: new THREE.Color('#8c1818') },
+          nightColor: { value: new THREE.Color('#ffd966') },
+        },
       })),
-    [],
+    [sunDirectionUniform],
   );
 
   return (
@@ -239,11 +300,15 @@ export function EarthScene() {
             <meshStandardMaterial map={cloudsMap} transparent opacity={0.45} depthWrite={false} />
           </mesh>
         ) : null}
-        {testMode
-          ? cityPositions.map(({ key, position }) => (
+        {testMode || placeholderMode
+          ? cityPositions.map(({ key, position, uniforms: dotUniforms }) => (
               <mesh key={key} position={position}>
                 <sphereGeometry args={[CITY_DOT_RADIUS, 16, 16]} />
-                <meshBasicMaterial color="#ff2030" />
+                <shaderMaterial
+                  vertexShader={cityDotVertexShader}
+                  fragmentShader={cityDotFragmentShader}
+                  uniforms={dotUniforms}
+                />
               </mesh>
             ))
           : null}

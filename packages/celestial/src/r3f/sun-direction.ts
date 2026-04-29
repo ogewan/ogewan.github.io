@@ -7,8 +7,13 @@ import * as THREE from 'three';
 // Approximation chosen for visual fidelity, not navigation:
 //
 //   declination (latitude of subsolar point):
-//     δ ≈ -23.45° · sin(2π · (N - 80) / 365.25)
+//     δ ≈ 23.45° · sin(2π · (N - 80) / 365.25)
 //   where N is day-of-year (Jan 1 = 1) and 80 is the spring-equinox offset.
+//   At June solstice (N≈172) → δ ≈ +23.45° (Tropic of Cancer); at December
+//   solstice (N≈355) → δ ≈ -23.45° (Tropic of Capricorn). The positive
+//   coefficient is essential — flipping the sign 6-months out of phase
+//   tilts the lit hemisphere the wrong way along Y and dims Northern
+//   Hemisphere cities during boreal spring/summer.
 //
 //   hour angle (longitude of subsolar point):
 //     λ ≈ -15° · (UTC_hour - 12)
@@ -22,14 +27,17 @@ import * as THREE from 'three';
 //
 // Coordinate system: Three.js right-handed, +Y up. Latitude rotates around the
 // XZ plane (Y is the polar axis); longitude rotates around Y in the XZ plane.
-// (lng=0, lat=0) maps to +X. With the Earth oriented so its rotation Y-axis
-// points up (default sphereGeometry), lng=0 points along +X in local space.
+// (lng=0, lat=0) maps to +X. East longitude (positive lng) maps to -Z, west
+// longitude to +Z — this matches three.js's default SphereGeometry vertex
+// layout, where the texture's u=0.5 (Greenwich) lands at +X and u=0.75
+// (lng=+90, east) lands at (0, 0, -1). The Z negation below puts the sun
+// direction in the same frame as the surface normals the shader sees.
 
 export function getSunDirection(date: Date): THREE.Vector3 {
   const start = Date.UTC(date.getUTCFullYear(), 0, 1);
   const dayOfYear = Math.floor((date.getTime() - start) / (1000 * 60 * 60 * 24)) + 1;
 
-  const declDeg = -23.45 * Math.sin((2 * Math.PI * (dayOfYear - 80)) / 365.25);
+  const declDeg = 23.45 * Math.sin((2 * Math.PI * (dayOfYear - 80)) / 365.25);
   const declRad = (declDeg * Math.PI) / 180;
 
   const hourUtc = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
@@ -39,7 +47,7 @@ export function getSunDirection(date: Date): THREE.Vector3 {
   return new THREE.Vector3(
     Math.cos(declRad) * Math.cos(lngRad),
     Math.sin(declRad),
-    Math.cos(declRad) * Math.sin(lngRad),
+    -Math.cos(declRad) * Math.sin(lngRad),
   );
 }
 
