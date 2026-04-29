@@ -24,12 +24,18 @@ export interface EarthTestModeValue {
   readonly setTestMode: (on: boolean) => void;
 }
 
+import { SCENE_DEFAULTS } from './scene-defaults.js';
+
 function readStored(): boolean {
-  if (typeof window === 'undefined') return false;
+  const fallback = SCENE_DEFAULTS.earth.testMode;
+  if (typeof window === 'undefined') return fallback;
   try {
-    return window.localStorage.getItem(STORAGE_KEY) === '1';
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw === '1') return true;
+    if (raw === '0') return false;
+    return fallback;
   } catch {
-    return false;
+    return fallback;
   }
 }
 

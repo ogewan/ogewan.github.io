@@ -8,7 +8,9 @@
 // Persisted to localStorage so a "set it and reload" workflow holds. Only
 // affects auto-rotation; focus tweens are independent.
 
-export const DEFAULT_EARTH_ROTATION_RATE = 0.025;
+import { SCENE_DEFAULTS } from './scene-defaults.js';
+
+export const DEFAULT_EARTH_ROTATION_RATE = SCENE_DEFAULTS.earth.rotationRate;
 
 const STORAGE_KEY = 'portfolio:earth-rotation-rate';
 

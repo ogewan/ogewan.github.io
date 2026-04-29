@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
+import type { SceneName } from '../../scenes.js';
 import { useCelestialFocus } from '../../CelestialContext.js';
 import { CANONICAL_CITIES } from '../../cities.js';
 import { getEarthRotationRate } from '../../earth-rotation-rate.js';
@@ -111,7 +112,21 @@ function configureSurfaceTexture(tex: THREE.Texture) {
   tex.needsUpdate = true;
 }
 
-export function EarthScene() {
+interface EarthSceneProps {
+  // Active backdrop scene. Used to gate the root group's visibility so the
+  // Earth+Moon system stops rendering once the camera has flown out to the
+  // projects anchor (and beyond). Mount stays — geometry, textures, and
+  // useFrame all keep running — but Three.js skips the entire subtree
+  // when `visible` is false.
+  readonly scene: SceneName;
+  // Shared sun-direction uniform owned by Canvas3D. EarthScene's useFrame
+  // mutates this every frame (sunLocal · earth.quaternion → world space)
+  // so every consumer (earth shader, city dots, moon, gas giant) reads
+  // the same up-to-date world-space sun vector via the same reference.
+  readonly sunDirection: { value: THREE.Vector3 };
+}
+
+export function EarthScene({ scene, sunDirection }: EarthSceneProps) {
   const [x, y, z] = SCENE_ANCHORS.earth.origin;
   const settings = useMobileSettings();
   const focus = useCelestialFocus();
@@ -195,13 +210,11 @@ export function EarthScene() {
   const sunLocal = useMemo(() => getSunDirection(new Date()), []);
   const sunWorldRef = useRef(new THREE.Vector3());
 
-  // Stable shared sun-direction uniform. The same `{ value: Vector3 }` object
-  // is referenced by both the earth shader and every city-dot shader so the
-  // per-frame mutation in useFrame propagates to all materials at once.
-  const sunDirectionUniform = useMemo(
-    () => ({ value: new THREE.Vector3().copy(sunLocal) }),
-    [sunLocal],
-  );
+  // The shared sun-direction uniform is owned by Canvas3D (the same
+  // `{ value: Vector3 }` reference threads through earth + city dots +
+  // moon + gas giant). EarthScene's useFrame mutates `sunDirection.value`
+  // each frame — gotcha #28 stands: don't break the reference identity.
+  const sunDirectionUniform = sunDirection;
 
   // When placeholderMode is on, force the canvas-drawn placeholder maps even
   // if real webps have loaded. Otherwise use whatever's in dayMap/nightMap
@@ -358,8 +371,14 @@ export function EarthScene() {
     [sunDirectionUniform],
   );
 
+  // Hide the entire Earth+Moon system once the camera has flown out to a
+  // farther scene. Keeping the subtree mounted means useFrame continues
+  // (rotation animation progresses in the background, sunDirection
+  // uniform stays in sync with UTC); Three.js just skips the draw calls.
+  const earthSystemVisible = scene === 'earth' || scene === 'about';
+
   return (
-    <group position={[x, y, z]}>
+    <group position={[x, y, z]} visible={earthSystemVisible}>
       <group ref={earthRef}>
         <mesh>
           <sphereGeometry args={[1, segments, segments]} />

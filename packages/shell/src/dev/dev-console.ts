@@ -12,18 +12,54 @@
 // Methods that need a registry that hasn't filled in yet (e.g. called
 // before the bridge mounts) log a warning and no-op; they don't throw.
 
-import { getEarthRotationRate, setEarthRotationRate } from '@portfolio/celestial';
+import {
+  getEarthRotationRate,
+  setEarthRotationRate,
+  getProjectsRingsRotationRate,
+  setProjectsRingsRotationRate,
+  getProjectsSceneRotationRate,
+  setProjectsSceneRotationRate,
+  getProjectsBodyRotationRate,
+  setProjectsBodyRotationRate,
+} from '@portfolio/celestial';
 
 const HIDE_UI_CLASS = 'dev-hide-ui';
 const HIDE_BG_CLASS = 'dev-hide-bg';
 
 type Setter<T> = (v: T) => void;
 
+interface RingsConfig {
+  visible: boolean;
+  rotationSpeed: number;
+  sceneRotationSpeed: number;
+  bodyRotationSpeed: number;
+  sparkles: boolean;
+  clumps: boolean;
+  spokes: boolean;
+  flow: boolean;
+  scenePreserveTilt: boolean;
+  clock: boolean;
+}
+
 interface DevAPIRegistry {
   setQuality?: Setter<string>;
   navigate?: Setter<string>;
   setEarthTestMode?: Setter<boolean>;
   setEarthPlaceholderMode?: Setter<boolean>;
+  setRingsVisible?: Setter<boolean>;
+  getRingsVisible?: () => boolean;
+  setRingsClockVisible?: Setter<boolean>;
+  getRingsClockVisible?: () => boolean;
+  setRingsSparkles?: Setter<boolean>;
+  getRingsSparkles?: () => boolean;
+  setRingsClumps?: Setter<boolean>;
+  getRingsClumps?: () => boolean;
+  setRingsSpokes?: Setter<boolean>;
+  getRingsSpokes?: () => boolean;
+  setRingsBandFlow?: Setter<boolean>;
+  getRingsBandFlow?: () => boolean;
+  setRingsScenePreserveTilt?: Setter<boolean>;
+  getRingsScenePreserveTilt?: () => boolean;
 }
 
 const registry: DevAPIRegistry = {};
@@ -179,6 +215,230 @@ export function installDevConsole(): void {
       },
     },
 
+    // Projects-scene rings — show/hide and rotation control.
+    rings: {
+      // portfolio.rings.show()    → on
+      // portfolio.rings.hide()    → off
+      // portfolio.rings.toggle()  → flip
+      show(): void {
+        if (!registry.setRingsVisible) return notRegistered('rings.show');
+        registry.setRingsVisible(true);
+      },
+      hide(): void {
+        if (!registry.setRingsVisible) return notRegistered('rings.hide');
+        registry.setRingsVisible(false);
+      },
+      toggle(): void {
+        if (!registry.setRingsVisible || !registry.getRingsVisible) {
+          return notRegistered('rings.toggle');
+        }
+        registry.setRingsVisible(!registry.getRingsVisible());
+      },
+
+      // Get/set the projects-scene ring orbit rate (the K constant in the
+      // Keplerian formula ω = K / sqrt(r); inner ring orbits faster than
+      // outer regardless of value, this just scales the whole pattern).
+      //   portfolio.rings.rotationSpeed()       → number
+      //   portfolio.rings.rotationSpeed(0.02)   → set default speed
+      //   portfolio.rings.rotationSpeed(0.05)   → faster (still gentle)
+      //   portfolio.rings.rotationSpeed(-0.02)  → reverse (clockwise from north)
+      //   portfolio.rings.rotationSpeed(0)      → halt
+      rotationSpeed(rate?: number): number | void {
+        if (rate === undefined) return getProjectsRingsRotationRate();
+        if (typeof rate !== 'number' || !Number.isFinite(rate)) {
+          console.warn(`[portfolio] rings.rotationSpeed(rate): rate must be a finite number.`);
+          return;
+        }
+        setProjectsRingsRotationRate(rate);
+      },
+
+      // Whole-scene angular velocity (rad/s) around its local Y axis.
+      // Independent of the Keplerian K — this is a uniform spin of
+      // the entire projects group. Default 0.
+      //   portfolio.rings.sceneRotationSpeed()       → number
+      //   portfolio.rings.sceneRotationSpeed(0.2)    → set
+      sceneRotationSpeed(rate?: number): number | void {
+        if (rate === undefined) return getProjectsSceneRotationRate();
+        if (typeof rate !== 'number' || !Number.isFinite(rate)) {
+          console.warn(`[portfolio] rings.sceneRotationSpeed(rate): rate must be a finite number.`);
+          return;
+        }
+        setProjectsSceneRotationRate(rate);
+      },
+
+      // Gas-giant body angular velocity (rad/s) around its local Y axis.
+      // Independent of scene rotation. Set to -sceneRotationSpeed to
+      // keep the body visually static while the rings spin around it.
+      // Default 0.
+      //   portfolio.rings.bodyRotationSpeed()        → number
+      //   portfolio.rings.bodyRotationSpeed(-0.2)    → counter-rotate at 0.2 rad/s
+      bodyRotationSpeed(rate?: number): number | void {
+        if (rate === undefined) return getProjectsBodyRotationRate();
+        if (typeof rate !== 'number' || !Number.isFinite(rate)) {
+          console.warn(`[portfolio] rings.bodyRotationSpeed(rate): rate must be a finite number.`);
+          return;
+        }
+        setProjectsBodyRotationRate(rate);
+      },
+
+      // Unified get/set as JSON.
+      //   portfolio.rings.config()        → all current properties
+      //   portfolio.rings.config({ ... }) → apply each provided property
+      // Unknown keys are ignored; invalid values for a known key are
+      // skipped with a warning. Useful for snapshotting / restoring a
+      // visual configuration as a single object.
+      config(partial?: Record<string, unknown>): RingsConfig | void {
+        if (partial === undefined) {
+          return {
+            visible: registry.getRingsVisible?.() ?? true,
+            rotationSpeed: getProjectsRingsRotationRate(),
+            sceneRotationSpeed: getProjectsSceneRotationRate(),
+            bodyRotationSpeed: getProjectsBodyRotationRate(),
+            sparkles: registry.getRingsSparkles?.() ?? true,
+            clumps: registry.getRingsClumps?.() ?? true,
+            spokes: registry.getRingsSpokes?.() ?? false,
+            flow: registry.getRingsBandFlow?.() ?? true,
+            scenePreserveTilt: registry.getRingsScenePreserveTilt?.() ?? true,
+            clock: registry.getRingsClockVisible?.() ?? false,
+          };
+        }
+        if (typeof partial !== 'object' || partial === null) {
+          console.warn('[portfolio] rings.config(json): json must be an object.');
+          return;
+        }
+        const setBool = (key: string, setter?: Setter<boolean>): void => {
+          if (!(key in partial)) return;
+          if (!setter) return;
+          setter(Boolean(partial[key]));
+        };
+        const setNum = (key: string, setter: (n: number) => void): void => {
+          if (!(key in partial)) return;
+          const v = partial[key];
+          if (typeof v !== 'number' || !Number.isFinite(v)) {
+            console.warn(`[portfolio] rings.config: ${key} must be a finite number; skipping.`);
+            return;
+          }
+          setter(v);
+        };
+        setBool('visible', registry.setRingsVisible);
+        setNum('rotationSpeed', setProjectsRingsRotationRate);
+        setNum('sceneRotationSpeed', setProjectsSceneRotationRate);
+        setNum('bodyRotationSpeed', setProjectsBodyRotationRate);
+        setBool('sparkles', registry.setRingsSparkles);
+        setBool('clumps', registry.setRingsClumps);
+        setBool('spokes', registry.setRingsSpokes);
+        setBool('flow', registry.setRingsBandFlow);
+        setBool('scenePreserveTilt', registry.setRingsScenePreserveTilt);
+        setBool('clock', registry.setRingsClockVisible);
+      },
+
+      // Clock-marker overlay (12/3/6/9 numerals at cardinal positions
+      // on the ring; orbit at the mid-B-ring's Keplerian rate). Off by
+      // default — diagnostic for verifying ring rotation is happening.
+      //   portfolio.rings.clock.show() / hide() / toggle()
+      clock: {
+        show(): void {
+          if (!registry.setRingsClockVisible) return notRegistered('rings.clock.show');
+          registry.setRingsClockVisible(true);
+        },
+        hide(): void {
+          if (!registry.setRingsClockVisible) return notRegistered('rings.clock.hide');
+          registry.setRingsClockVisible(false);
+        },
+        toggle(): void {
+          if (!registry.setRingsClockVisible || !registry.getRingsClockVisible) {
+            return notRegistered('rings.clock.toggle');
+          }
+          registry.setRingsClockVisible(!registry.getRingsClockVisible());
+        },
+      },
+
+      // Effect A: sparkle particles. ~0.4% of total particles bumped
+      // to ~0.5-1.0 size — eye-trackable as individual ice chunks.
+      // Default ON. Toggling regenerates the buffer.
+      //   portfolio.rings.sparkles.show() / hide() / toggle()
+      sparkles: {
+        show(): void {
+          if (!registry.setRingsSparkles) return notRegistered('rings.sparkles.show');
+          registry.setRingsSparkles(true);
+        },
+        hide(): void {
+          if (!registry.setRingsSparkles) return notRegistered('rings.sparkles.hide');
+          registry.setRingsSparkles(false);
+        },
+        toggle(): void {
+          if (!registry.setRingsSparkles || !registry.getRingsSparkles) {
+            return notRegistered('rings.sparkles.toggle');
+          }
+          registry.setRingsSparkles(!registry.getRingsSparkles());
+        },
+      },
+
+      // Effect B: azimuthal density clumps. Particles are distributed
+      // non-uniformly around the ring via 1D harmonic noise — denser
+      // sectors visibly travel as the ring rotates.
+      // Default ON. Toggling regenerates the buffer.
+      //   portfolio.rings.clumps.show() / hide() / toggle()
+      clumps: {
+        show(): void {
+          if (!registry.setRingsClumps) return notRegistered('rings.clumps.show');
+          registry.setRingsClumps(true);
+        },
+        hide(): void {
+          if (!registry.setRingsClumps) return notRegistered('rings.clumps.hide');
+          registry.setRingsClumps(false);
+        },
+        toggle(): void {
+          if (!registry.setRingsClumps || !registry.getRingsClumps) {
+            return notRegistered('rings.clumps.toggle');
+          }
+          registry.setRingsClumps(!registry.getRingsClumps());
+        },
+      },
+
+      // Effect C: radial spokes. 4 dark sectors rotate at the mid-B
+      // Keplerian rate, dimming particles inside them. Saturn's
+      // B-ring spoke phenomenon analogue. Default OFF.
+      //   portfolio.rings.spokes.show() / hide() / toggle()
+      spokes: {
+        show(): void {
+          if (!registry.setRingsSpokes) return notRegistered('rings.spokes.show');
+          registry.setRingsSpokes(true);
+        },
+        hide(): void {
+          if (!registry.setRingsSpokes) return notRegistered('rings.spokes.hide');
+          registry.setRingsSpokes(false);
+        },
+        toggle(): void {
+          if (!registry.setRingsSpokes || !registry.getRingsSpokes) {
+            return notRegistered('rings.spokes.toggle');
+          }
+          registry.setRingsSpokes(!registry.getRingsSpokes());
+        },
+      },
+
+      // Effect D: animated band texture. Each colored ring band gets
+      // an FBM noise overlay scrolled at its own Keplerian rate, so
+      // the haze appears to flow around the ring. Default ON.
+      //   portfolio.rings.flow.show() / hide() / toggle()
+      flow: {
+        show(): void {
+          if (!registry.setRingsBandFlow) return notRegistered('rings.flow.show');
+          registry.setRingsBandFlow(true);
+        },
+        hide(): void {
+          if (!registry.setRingsBandFlow) return notRegistered('rings.flow.hide');
+          registry.setRingsBandFlow(false);
+        },
+        toggle(): void {
+          if (!registry.setRingsBandFlow || !registry.getRingsBandFlow) {
+            return notRegistered('rings.flow.toggle');
+          }
+          registry.setRingsBandFlow(!registry.getRingsBandFlow());
+        },
+      },
+    },
+
     // Print all commands.
     help(): void {
       console.log(
@@ -201,6 +461,21 @@ export function installDevConsole(): void {
           '  portfolio.earth.placeholder(on?)      // on=true; force green/blue placeholder map + lambert-aware city dots',
           '  portfolio.earth.rotationSpeed()       // get current rate, in rad/sec (default 0.025)',
           '  portfolio.earth.rotationSpeed(rate)   // set; negative reverses, 0 halts. Persists in localStorage.',
+          '',
+          'Projects-scene rings:',
+          '  portfolio.rings.show() / hide() / toggle()',
+          '  portfolio.rings.rotationSpeed()        // get K (default 0.02). ω_particle = K / sqrt(r) per Keplerian.',
+          '  portfolio.rings.rotationSpeed(rate)    // set; negative reverses, 0 halts. Persists in localStorage.',
+          '  portfolio.rings.sceneRotationSpeed(r?) // angular velocity (rad/s) of the whole projects group.',
+          '  portfolio.rings.bodyRotationSpeed(r?)  // angular velocity (rad/s) of the gas giant body alone.',
+          '                                            // Set body = -scene to spin rings while the body stays put.',
+          '  portfolio.rings.config()               // → JSON of all ring properties',
+          '  portfolio.rings.config({ ... })        // partial set from JSON',
+          '  portfolio.rings.clock.show() / hide() / toggle()     // 12/3/6/9 numerals; orbit with the ring.',
+          '  portfolio.rings.sparkles.show() / hide() / toggle()  // (default on) trackable bright pinpricks',
+          '  portfolio.rings.clumps.show() / hide() / toggle()    // (default on) non-uniform azimuthal density',
+          '  portfolio.rings.spokes.show() / hide() / toggle()    // (default off) rotating dark radial bars',
+          '  portfolio.rings.flow.show() / hide() / toggle()      // (default on) FBM noise flow on the colored bands',
         ].join('\n'),
         'font-weight: bold',
       );

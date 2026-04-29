@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
+import * as THREE from 'three';
 import type { SceneName } from '../scenes.js';
 import { CameraDriver } from './CameraDriver.js';
 import { SharedStarField } from './SharedStarField.js';
@@ -7,6 +9,7 @@ import { EarthScene } from './scenes/EarthScene.js';
 import { ProjectsScene } from './scenes/ProjectsScene.js';
 import { ContactScene } from './scenes/ContactScene.js';
 import { ColophonScene } from './scenes/ColophonScene.js';
+import { getSunDirection } from './sun-direction.js';
 
 // The R3F slice of the celestial backdrop, factored out so it can be
 // React.lazy-loaded by CelestialBackdrop. Three.js + R3F + drei + gsap
@@ -21,6 +24,19 @@ interface Canvas3DProps {
 }
 
 export default function Canvas3D({ scene }: Canvas3DProps) {
+  // Shared sun-direction uniform. Lifted out of EarthScene so ProjectsScene
+  // (and future scenes) can read the same world-space sun vector. EarthScene
+  // owns the per-frame mutation: each frame it transforms its earth-local
+  // sun vector by the earth group's quaternion and writes the world-space
+  // result here (gotcha #27 + #28). Other scenes read but never mutate.
+  // Initial value is the world-space sun direction at mount; identity
+  // quaternion on first frame means this is correct until EarthScene's
+  // first useFrame fires.
+  const sunDirection = useMemo(
+    () => ({ value: new THREE.Vector3().copy(getSunDirection(new Date())) }),
+    [],
+  );
+
   return (
     <MobileSettingsProvider>
       <Canvas
@@ -47,9 +63,14 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
 
         {/* About no longer mounts a separate scene — its camera anchor in
             scene-anchors.ts shares the Earth lookAt, just pulled back. The
-            Earth + Moon system here is what About frames at wider focal. */}
-        <EarthScene />
-        <ProjectsScene />
+            Earth + Moon system here is what About frames at wider focal.
+            EarthScene takes the active `scene` so its root group can hide
+            (visible={false}) once the camera leaves earth/about — keeps
+            Earth from rendering as a stray dot in the projects framing.
+            sunDirection is the shared world-space sun-direction uniform;
+            EarthScene mutates it per frame, every other scene reads it. */}
+        <EarthScene scene={scene} sunDirection={sunDirection} />
+        <ProjectsScene sunDirection={sunDirection} />
         <ContactScene />
         <ColophonScene />
       </Canvas>

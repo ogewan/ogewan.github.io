@@ -36,3 +36,35 @@ export {
   useEarthPlaceholderMode,
   type EarthPlaceholderModeValue,
 } from './EarthPlaceholderModeContext.js';
+export {
+  DEFAULT_GAS_GIANT_ROTATION_RATE,
+  getGasGiantRotationRate,
+  setGasGiantRotationRate,
+} from './gas-giant-rotation-rate.js';
+export {
+  DEFAULT_PROJECTS_RINGS_ROTATION_RATE,
+  DEFAULT_PROJECTS_SCENE_ROTATION_RATE,
+  DEFAULT_PROJECTS_BODY_ROTATION_RATE,
+  getProjectsRingsRotationRate,
+  setProjectsRingsRotationRate,
+  getProjectsSceneRotationRate,
+  setProjectsSceneRotationRate,
+  getProjectsBodyRotationRate,
+  setProjectsBodyRotationRate,
+} from './projects-rings-rotation-rate.js';
+export {
+  RingsVisibilityProvider,
+  useRingsVisibility,
+  type RingsVisibilityValue,
+} from './RingsVisibilityContext.js';
+export {
+  RingsClockMarkersProvider,
+  useRingsClockMarkers,
+  type RingsClockMarkersValue,
+} from './RingsClockMarkersContext.js';
+export {
+  RingsEffectsProvider,
+  useRingsEffects,
+  type RingsEffectsValue,
+} from './RingsEffectsContext.js';
+export { SCENE_DEFAULTS, type SceneDefaults } from './scene-defaults.js';
