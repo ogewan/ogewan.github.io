@@ -7,6 +7,7 @@ import {
   ringParticleFragmentShader,
 } from '../shaders/ring-particles.glsl.js';
 import { ringBandVertexShader, ringBandFragmentShader } from '../shaders/ring-band.glsl.js';
+import { gasGiantVertexShader, gasGiantFragmentShader } from '../shaders/gas-giant.glsl.js';
 import { useMobileSettings } from '../MobileSettings.js';
 import { useRingsVisibility } from '../../RingsVisibilityContext.js';
 import { useRingsClockMarkers } from '../../RingsClockMarkersContext.js';
@@ -16,6 +17,7 @@ import {
   getProjectsSceneRotationRate,
   getProjectsBodyRotationRate,
 } from '../../projects-rings-rotation-rate.js';
+import { getGasGiantRotationRate } from '../../gas-giant-rotation-rate.js';
 import {
   buildRingParticleBuffers,
   RING_BANDS,
@@ -23,13 +25,81 @@ import {
 } from './projects-rings.js';
 import { buildClockMarkerTexture } from '../clock-marker-texture.js';
 
-// Phase 9.3 (in progress). Body shader still pending step 5; for now the
-// body is the amber stub at the user-confirmed 6.3-radius scale. The
-// ring system is the real particle implementation — multi-zone Saturn
-// layout, per-particle Keplerian orbital rate (inner orbits faster
-// than outer), per-particle lambert against the shared sun direction.
+// Procedural gas-giant body — Jupiter-like banded surface with seven
+// latitude bands at differential rotation rates (zonal flow), fed by a
+// 2-octave domain-warped FBM noise pass for turbulence, plus a Great
+// Red Spot vortex anchored at the south tropical zone (band 2). The
+// body's rigid rotation is handled by bodyGroupRef.rotation.y at
+// getProjectsBodyRotationRate(); the band-differential scrolling
+// happens INSIDE the shader via the `time` uniform advanced at
+// getGasGiantRotationRate().
 
-const STUB_BODY_RADIUS = 6.3;
+const BODY_RADIUS = 6.3;
+
+// Jupiter macro structure — 11 primary zone/belt control points.
+// The GRS lives in macro 4 (south tropical zone, the cream band at
+// ~22°S). Each fine sub-band below picks its base color + rate from
+// this macro, then varies brightness/rate within the macro band.
+//
+// Palette tuned for low contrast between adjacent macro bands so the
+// surface reads as cream-to-tan variations rather than hard stripes.
+// Belts are dim-warm (sandy rust), zones are bright cream — only ~0.2
+// luminance difference, which the eye reads as "subtle bands" not
+// "barber pole."
+const GAS_GIANT_MACRO_BANDS: ReadonlyArray<{
+  color: readonly [number, number, number];
+  rate: number;
+}> = [
+  { color: [0.8, 0.68, 0.5], rate: 0.85 }, //  0 S polar — pale tan
+  { color: [0.7, 0.54, 0.37], rate: 1.2 }, //  1 SPB — warm tan-rust
+  { color: [0.88, 0.78, 0.6], rate: 0.92 }, // 2 STZ — light cream
+  { color: [0.74, 0.59, 0.41], rate: 1.15 }, // 3 STB — sandy rust
+  { color: [0.9, 0.81, 0.61], rate: 0.95 }, //  4 STrZ — cream zone (GRS host)
+  { color: [0.93, 0.86, 0.66], rate: 1.4 }, //  5 EZ — brightest cream
+  { color: [0.9, 0.81, 0.61], rate: 0.95 }, //  6 NTrZ — cream
+  { color: [0.74, 0.59, 0.41], rate: 1.15 }, // 7 NTB — sandy rust
+  { color: [0.88, 0.78, 0.6], rate: 0.92 }, // 8 NTZ — light cream
+  { color: [0.7, 0.54, 0.37], rate: 1.2 }, //  9 NPB — warm tan-rust
+  { color: [0.78, 0.66, 0.48], rate: 0.85 }, // 10 N polar — pale tan
+];
+
+// 6× finer striation than the macro layout. Each fine band picks its
+// macro by integer division of its index, then varies brightness
+// (sub-band oscillation) and rate (slight differential) so the
+// surface reads as fine zonal flow on top of Jupiter's canonical
+// zone/belt structure. Total = 66 fine bands (11 × 6, ≈83 × 4/5).
+const GAS_GIANT_TOTAL_BANDS = 66;
+
+const { GAS_GIANT_BAND_COLORS, GAS_GIANT_BAND_RATES } = (() => {
+  const colors: Array<[number, number, number]> = [];
+  const rates: number[] = [];
+  const subPerMacro = GAS_GIANT_TOTAL_BANDS / GAS_GIANT_MACRO_BANDS.length;
+  for (let i = 0; i < GAS_GIANT_TOTAL_BANDS; i++) {
+    const macroIdx = Math.min(GAS_GIANT_MACRO_BANDS.length - 1, Math.floor(i / subPerMacro));
+    const macro = GAS_GIANT_MACRO_BANDS[macroIdx];
+    if (!macro) continue;
+    const subT = i / subPerMacro - macroIdx; // 0..1 within macro
+    // Sub-band brightness oscillation: ~3 cycles per macro → ~6 fine
+    // bright/dim alternations across each Jupiter zone or belt.
+    const osc = 0.88 + 0.18 * Math.sin(subT * Math.PI * 6);
+    colors.push([macro.color[0] * osc, macro.color[1] * osc, macro.color[2] * osc]);
+    // Per-fine-band rate variation — small differential so adjacent
+    // sub-bands shear past each other (fine turbulence at the seams).
+    const rateVar = 1 + 0.08 * Math.sin(i * 0.83);
+    rates.push(macro.rate * rateVar);
+  }
+  return {
+    GAS_GIANT_BAND_COLORS: colors,
+    GAS_GIANT_BAND_RATES: rates,
+  };
+})();
+
+// Great Red Spot vortex parameters. 22°S (-0.38 rad) lands in macro
+// band 4 (south tropical zone, fine band ~31). Anchored to macro 4's
+// rate so the GRS drifts with the surrounding cream zone.
+const GRS_LAT = -0.38;
+const GRS_LON0 = -1.5;
+const GRS_HOST_RATE = GAS_GIANT_MACRO_BANDS[4]?.rate ?? 0.95;
 
 const DESKTOP_PARTICLE_COUNT = 120_000;
 const MOBILE_PARTICLE_COUNT = 25_000;
@@ -154,6 +224,30 @@ export function ProjectsScene({ sunDirection }: ProjectsSceneProps) {
     [sharedTimeUniform, bandFlowIntensityUniform],
   );
 
+  // Gas-giant body shader uniforms. The shader reads `time` for the
+  // band-differential longitude scroll, separate from the body group's
+  // rigid rotation (which runs at getProjectsBodyRotationRate()).
+  const gasGiantTimeUniform = useMemo(() => ({ value: 0 }), []);
+  const gasGiantUniforms = useMemo(
+    () => ({
+      time: gasGiantTimeUniform,
+      sunDirection,
+      bandColors: {
+        value: GAS_GIANT_BAND_COLORS.map(([r, g, b]) => new THREE.Color(r, g, b)),
+      },
+      bandRates: { value: [...GAS_GIANT_BAND_RATES] },
+      rimColor: { value: new THREE.Color('#5dc1d6') },
+      rimIntensity: { value: 0.85 },
+      vortexParams: { value: new THREE.Vector3(GRS_LAT, GRS_LON0, GRS_HOST_RATE) },
+      vortexColor: { value: new THREE.Color('#8a3320') },
+      vortexIntensity: { value: 0.9 },
+      ambient: { value: 0.05 },
+    }),
+    [gasGiantTimeUniform, sunDirection],
+  );
+
+  const gasGiantTimeRef = useRef(0);
+
   const ringUniforms = useMemo(
     () => ({
       time: sharedTimeUniform,
@@ -196,6 +290,13 @@ export function ProjectsScene({ sunDirection }: ProjectsSceneProps) {
     if (bodyGroupRef.current) {
       bodyGroupRef.current.rotation.y += delta * getProjectsBodyRotationRate();
     }
+    // Advance the gas-giant shader's time uniform at its own rate.
+    // The shader uses this to scroll each band's longitude offset
+    // by `time * bandRate[i]` — the band-differential rotation. This
+    // is INDEPENDENT of the rigid body rotation above; the body can
+    // be static while the bands still move (or vice versa).
+    gasGiantTimeRef.current += delta * getGasGiantRotationRate();
+    gasGiantTimeUniform.value = gasGiantTimeRef.current;
     // Clock markers orbit at the B-ring's Keplerian angular velocity so
     // they track the densest particle band. Same K as the rings — live
     // tuning via portfolio.rings.rotationSpeed() applies here too.
@@ -224,13 +325,20 @@ export function ProjectsScene({ sunDirection }: ProjectsSceneProps) {
       <group ref={worldYSpinRef}>
         <group rotation={[0.3, 0, -0.18]}>
           <group ref={tiltSpinRef}>
-            {/* Gas-giant body. Counter-rotation works here regardless
-                of preserveTilt: setting bodyRotationRate = -sceneRate
-                keeps the body visually static while rings spin. */}
+            {/* Gas-giant body — procedural Jupiter-like banded surface
+                with differential band rotation and a Great Red Spot
+                vortex. Counter-rotation works here regardless of
+                preserveTilt: setting bodyRotationRate = -sceneRate
+                keeps the body's silhouette visually static (though
+                its bands still scroll internally via the shader). */}
             <group ref={bodyGroupRef}>
               <mesh>
-                <sphereGeometry args={[STUB_BODY_RADIUS, 64, 64]} />
-                <meshStandardMaterial color="#b07a3e" roughness={0.85} metalness={0.05} />
+                <sphereGeometry args={[BODY_RADIUS, 128, 96]} />
+                <shaderMaterial
+                  vertexShader={gasGiantVertexShader}
+                  fragmentShader={gasGiantFragmentShader}
+                  uniforms={gasGiantUniforms}
+                />
               </mesh>
             </group>
 
