@@ -94,10 +94,6 @@ export function DevConsoleBridge() {
       getParticleGlow: () => nebulae.particleGlow,
       setParticleDrift: (on) => nebulae.setParticleDrift(on),
       getParticleDrift: () => nebulae.particleDrift,
-      setPullback: (on) => nebulae.setPullback(on),
-      getPullback: () => nebulae.pullback,
-      setPullbackDuration: (n) => nebulae.setPullbackDuration(n),
-      getPullbackDuration: () => nebulae.pullbackDuration,
     });
   }, [
     navigate,

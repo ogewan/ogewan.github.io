@@ -18,19 +18,19 @@ import { NebulaParticles } from './NebulaParticles.js';
 //   2. NebulaParticles  — 3D particle cloud sampled from photo luminance.
 // Both share the variant's photo texture (loaded once via useLoader).
 //
-// Mounted only when the contact scene is active (gated by `scene` prop).
 // The local Suspense boundary is mandatory: useLoader suspends, and
 // without a local catch the suspension bubbles up to the Canvas root,
 // forcing a remount that loses the WebGL context (gotcha #45).
 
 interface ContactSceneProps {
   readonly scene: SceneName;
+  readonly previousScene: SceneName | null;
 }
 
-export function ContactScene({ scene }: ContactSceneProps) {
+export function ContactScene({ scene, previousScene }: ContactSceneProps) {
   const config = useNebulaeConfig();
   const settings = useMobileSettings();
-  const sceneActive = scene === 'contact';
+  const sceneActive = scene === 'contact' || previousScene === 'contact';
 
   if (!config.visible) {
     return null;

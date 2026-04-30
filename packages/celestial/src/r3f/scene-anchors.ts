@@ -13,14 +13,18 @@ import type { SceneName } from '../scenes.js';
 //   - About pulls back to z=12 (same lookAt as earth — about is just
 //     wider framing of the Earth+Moon system)
 //   - Projects pulls back to z=268 (256-unit jump from about)
-//   - Contact pulls back to z=2048 (1780-unit jump from projects, by far
-//     the longest warp — sells the "you've left the solar system"
-//     transition that the contact-scene brief calls a warp moment)
+//   - Contact lands at z=4025 (3757-unit jump from projects). Camera
+//     ends 25 units PAST the nebula center at z=4000 (volume back face
+//     at z=4012) and looks BACK at the volume center — same camera-
+//     facing direction as projects (both -Z), so the route tween is a
+//     pure +Z zoom-out without a direction flip mid-warp. The tween is
+//     stretched to 2.0s with a power3.out ease so the gas giant
+//     visibly shrinks out of view in the first ~30% of the duration
+//     and the final approach to the photograph settles slowly.
 // Earth+Moon system is hidden by EarthScene's group `visible` flag once
 // the active scene is `projects` or beyond, so the gas giant at z=246 is
-// the only body in frame at the projects anchor; the photo-driven
-// volumetric raymarched nebula at z=2055 is the only thing in frame at
-// the contact anchor.
+// the only body in frame at the projects anchor; the photo + particle
+// nebula at z=2055 is the only thing in frame at the contact anchor.
 //
 // Colophon stays on the -Z side of the origin. The transition
 // contact → colophon is now a 2384-unit cross-origin tween (camera
@@ -42,6 +46,11 @@ export interface SceneAnchor {
   // World-space center of the scene's geometry. Scene components position
   // themselves at this origin in their local <group>.
   readonly origin: readonly [number, number, number];
+  // Optional per-destination route-tween overrides. CameraDriver reads
+  // these from the TARGET anchor (the scene the camera is heading to).
+  // Defaults: 1.2s with `power2.inOut`.
+  readonly tweenDuration?: number;
+  readonly tweenEase?: string;
 }
 
 export const SCENE_ANCHORS: Record<SceneName, SceneAnchor> = {
@@ -70,18 +79,21 @@ export const SCENE_ANCHORS: Record<SceneName, SceneAnchor> = {
     lookAt: [3, 1.2, 246],
     origin: [3, 1.2, 246],
   },
-  // Contact: 1780-unit +Z zoom-out from Projects (z=268 → z=2048). The
-  // photo-driven volumetric raymarched nebula sits at z=2055 inside a
-  // bounding sphere of radius ~12; the camera arrives at z=2048 (just
-  // outside the bounding sphere on the camera-facing side), then
-  // ContactScene's dive sub-animation pushes the camera ~14 units
-  // forward over ~4.5s after the route tween settles. Far plane was
-  // bumped from 2000 → 3000 in Canvas3D to keep the volume in front of
-  // the far clip with margin.
+  // Contact: 3757-unit +Z zoom-out from Projects (z=268 → z=4025). The
+  // camera arrives 25 units PAST the nebula's volume center at z=4000,
+  // looking BACK in -Z at the nebula. This matches projects' camera-
+  // facing direction (-Z, looking back at the gas giant) — both anchors
+  // look backwards along the tour line, so the route tween is a pure +Z
+  // dolly without rotating the camera. The 2.0s tween + power3.out ease
+  // gives a fast-then-slow profile: the camera rapidly leaves projects
+  // in the first ~30% of the duration so the gas giant visibly shrinks
+  // out of view, then crawls the last short stretch into the photo.
   contact: {
-    cameraPosition: [0, 0, 2048],
-    lookAt: [0, 0, 2052],
-    origin: [0, 0, 2055],
+    cameraPosition: [0, 0, 4025],
+    lookAt: [0, 0, 4000],
+    origin: [0, 0, 4000],
+    tweenDuration: 2.0,
+    tweenEase: 'power3.out',
   },
   colophon: {
     cameraPosition: [0, 0, -336],

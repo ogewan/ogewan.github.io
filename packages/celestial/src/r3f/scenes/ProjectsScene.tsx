@@ -140,11 +140,15 @@ interface ProjectsSceneProps {
   // useFrame still runs (state advances at the right phase) so a
   // return to /projects shows the rings where they "should be."
   readonly scene: SceneName;
+  // Outgoing scene name during a route tween. Lets the gate stay
+  // visible while the camera flies away from /projects so the rings
+  // recede smoothly rather than popping out at the start of the warp.
+  readonly previousScene: SceneName | null;
 }
 
-export function ProjectsScene({ sunDirection, scene }: ProjectsSceneProps) {
+export function ProjectsScene({ sunDirection, scene, previousScene }: ProjectsSceneProps) {
   const [x, y, z] = SCENE_ANCHORS.projects.origin;
-  const projectsSceneVisible = scene === 'projects';
+  const projectsSceneVisible = scene === 'projects' || previousScene === 'projects';
   const settings = useMobileSettings();
   const { visible: ringsVisible } = useRingsVisibility();
   const { clockVisible } = useRingsClockMarkers();

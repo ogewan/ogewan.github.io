@@ -11,11 +11,12 @@ import { SCENE_ANCHORS } from '../scene-anchors.js';
 
 interface ColophonSceneProps {
   readonly scene: SceneName;
+  readonly previousScene: SceneName | null;
 }
 
-export function ColophonScene({ scene }: ColophonSceneProps) {
+export function ColophonScene({ scene, previousScene }: ColophonSceneProps) {
   const [x, y, z] = SCENE_ANCHORS.colophon.origin;
-  const colophonSceneVisible = scene === 'colophon';
+  const colophonSceneVisible = scene === 'colophon' || previousScene === 'colophon';
   return (
     <group position={[x, y, z]} rotation={[0, 0, -0.3]} visible={colophonSceneVisible}>
       {/* Event horizon — pure black */}

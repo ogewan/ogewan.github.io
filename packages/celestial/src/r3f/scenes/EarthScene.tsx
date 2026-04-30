@@ -119,6 +119,10 @@ interface EarthSceneProps {
   // useFrame all keep running — but Three.js skips the entire subtree
   // when `visible` is false.
   readonly scene: SceneName;
+  // Outgoing scene during a route tween. Lets earthSystemVisible stay
+  // true while the camera flies away from /earth or /about so the
+  // Earth+Moon system recedes smoothly through the warp.
+  readonly previousScene: SceneName | null;
   // Shared sun-direction uniform owned by Canvas3D. EarthScene's useFrame
   // mutates this every frame (sunLocal · earth.quaternion → world space)
   // so every consumer (earth shader, city dots, moon, gas giant) reads
@@ -126,7 +130,7 @@ interface EarthSceneProps {
   readonly sunDirection: { value: THREE.Vector3 };
 }
 
-export function EarthScene({ scene, sunDirection }: EarthSceneProps) {
+export function EarthScene({ scene, previousScene, sunDirection }: EarthSceneProps) {
   const [x, y, z] = SCENE_ANCHORS.earth.origin;
   const settings = useMobileSettings();
   const focus = useCelestialFocus();
@@ -375,7 +379,11 @@ export function EarthScene({ scene, sunDirection }: EarthSceneProps) {
   // farther scene. Keeping the subtree mounted means useFrame continues
   // (rotation animation progresses in the background, sunDirection
   // uniform stays in sync with UTC); Three.js just skips the draw calls.
-  const earthSystemVisible = scene === 'earth' || scene === 'about';
+  const earthSystemVisible =
+    scene === 'earth' ||
+    scene === 'about' ||
+    previousScene === 'earth' ||
+    previousScene === 'about';
 
   return (
     <group position={[x, y, z]} visible={earthSystemVisible}>

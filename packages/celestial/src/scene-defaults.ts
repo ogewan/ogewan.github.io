@@ -35,10 +35,10 @@ export const SCENE_DEFAULTS = {
     // Effect A — layered billboards. Camera-facing photo planes stacked
     // along the volume's local Z axis. Default ON.
     billboardsVisible: true,
-    billboardLayerCount: 3,
+    billboardLayerCount: 1,
     billboardJitter: 4,
     billboardScale: 3.0,
-    billboardBrightness: 1.0,
+    billboardBrightness: 0.35,
     billboardSaturation: 1.0,
     billboardGlow: 1.0,
     billboardDrift: true,
@@ -53,13 +53,6 @@ export const SCENE_DEFAULTS = {
     particleSaturation: 1.0,
     particleGlow: 1.0,
     particleDrift: true,
-
-    // Camera pull-back sub-animation. After the 1.2s route tween lands
-    // the camera deep inside the volume, ContactScene takes over and
-    // pulls the camera backward through the front face to a viewing
-    // distance outside the volume. Disable to lock camera at arrival.
-    pullback: true,
-    pullbackDuration: 2.0,
   },
   projects: {
     // Whether the particle ring system + colored bands render at all.

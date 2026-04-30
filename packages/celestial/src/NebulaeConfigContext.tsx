@@ -37,9 +37,6 @@ const STORAGE_KEY = {
   particleSaturation: 'portfolio:contact-particle-saturation',
   particleGlow: 'portfolio:contact-particle-glow',
   particleDrift: 'portfolio:contact-particle-drift',
-  // Camera
-  pullback: 'portfolio:contact-pullback',
-  pullbackDuration: 'portfolio:contact-pullback-duration',
 } as const;
 
 const URL_QUERY_KEY = 'neb';
@@ -63,8 +60,6 @@ export interface NebulaeConfigValue {
   readonly particleSaturation: number;
   readonly particleGlow: number;
   readonly particleDrift: boolean;
-  readonly pullback: boolean;
-  readonly pullbackDuration: number;
   readonly setVariant: (v: NebulaVariant) => void;
   readonly setVisible: (on: boolean) => void;
   readonly setBillboardsVisible: (on: boolean) => void;
@@ -83,8 +78,6 @@ export interface NebulaeConfigValue {
   readonly setParticleSaturation: (n: number) => void;
   readonly setParticleGlow: (n: number) => void;
   readonly setParticleDrift: (on: boolean) => void;
-  readonly setPullback: (on: boolean) => void;
-  readonly setPullbackDuration: (n: number) => void;
 }
 
 function isVariant(v: unknown): v is NebulaVariant {
@@ -230,13 +223,6 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
     readBoolStored(STORAGE_KEY.particleDrift, D.particleDrift),
   );
 
-  const [pullback, setPullbackState] = useState(() =>
-    readBoolStored(STORAGE_KEY.pullback, D.pullback),
-  );
-  const [pullbackDuration, setPullbackDurationState] = useState(() =>
-    readNumStored(STORAGE_KEY.pullbackDuration, D.pullbackDuration),
-  );
-
   const setVariant = useCallback((v: NebulaVariant) => {
     setVariantState(v);
     writeVariantToUrl(v);
@@ -363,21 +349,6 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
     [D.particleDrift],
   );
 
-  const setPullback = useCallback(
-    (on: boolean) => {
-      setPullbackState(on);
-      writeBoolStored(STORAGE_KEY.pullback, on, D.pullback);
-    },
-    [D.pullback],
-  );
-  const setPullbackDuration = useCallback(
-    (n: number) => {
-      setPullbackDurationState(n);
-      writeNumStored(STORAGE_KEY.pullbackDuration, n, D.pullbackDuration);
-    },
-    [D.pullbackDuration],
-  );
-
   // popstate: pick up URL param changes from browser back/forward.
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -456,12 +427,6 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
         case STORAGE_KEY.particleDrift:
           setParticleDriftState(readBoolStored(STORAGE_KEY.particleDrift, D.particleDrift));
           break;
-        case STORAGE_KEY.pullback:
-          setPullbackState(readBoolStored(STORAGE_KEY.pullback, D.pullback));
-          break;
-        case STORAGE_KEY.pullbackDuration:
-          setPullbackDurationState(readNumStored(STORAGE_KEY.pullbackDuration, D.pullbackDuration));
-          break;
       }
     };
     window.addEventListener('storage', handler);
@@ -488,8 +453,6 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
       particleSaturation,
       particleGlow,
       particleDrift,
-      pullback,
-      pullbackDuration,
       setVariant,
       setVisible,
       setBillboardsVisible,
@@ -508,8 +471,6 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
       setParticleSaturation,
       setParticleGlow,
       setParticleDrift,
-      setPullback,
-      setPullbackDuration,
     }),
     [
       variant,
@@ -530,8 +491,6 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
       particleSaturation,
       particleGlow,
       particleDrift,
-      pullback,
-      pullbackDuration,
       setVariant,
       setVisible,
       setBillboardsVisible,
@@ -550,8 +509,6 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
       setParticleSaturation,
       setParticleGlow,
       setParticleDrift,
-      setPullback,
-      setPullbackDuration,
     ],
   );
 

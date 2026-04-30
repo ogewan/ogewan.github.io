@@ -64,8 +64,6 @@ interface NebulaeConfig {
   particleSaturation: number;
   particleGlow: number;
   particleDrift: boolean;
-  pullback: boolean;
-  pullbackDuration: number;
 }
 
 interface DevAPIRegistry {
@@ -123,10 +121,6 @@ interface DevAPIRegistry {
   getParticleGlow?: () => number;
   setParticleDrift?: Setter<boolean>;
   getParticleDrift?: () => boolean;
-  setPullback?: Setter<boolean>;
-  getPullback?: () => boolean;
-  setPullbackDuration?: Setter<number>;
-  getPullbackDuration?: () => number;
 }
 
 const NEBULA_VARIANT_VALUES: readonly NebulaVariantString[] = ['01', '02', '03', '04'];
@@ -183,8 +177,6 @@ function resetNebulaeDefaults(): void {
   registry.setParticleSaturation?.(D.particleSaturation);
   registry.setParticleGlow?.(D.particleGlow);
   registry.setParticleDrift?.(D.particleDrift);
-  registry.setPullback?.(D.pullback);
-  registry.setPullbackDuration?.(D.pullbackDuration);
   console.log('[portfolio] nebulae defaults reset');
 }
 
@@ -597,8 +589,7 @@ export function installDevConsole(): void {
       //     billboardScale, billboardBrightness, billboardSaturation,
       //     billboardGlow, billboardDrift,
       //     particlesVisible, particleCount, particleSize, particleJitter,
-      //     particleBrightness, particleSaturation, particleGlow, particleDrift,
-      //     pullback, pullbackDuration }
+      //     particleBrightness, particleSaturation, particleGlow, particleDrift }
       //   portfolio.nebulae.config()                            → snapshot
       //   portfolio.nebulae.config({ particleCount: 50000 })    → partial set
       //   portfolio.nebulae.config({ billboardsVisible: false })
@@ -626,8 +617,6 @@ export function installDevConsole(): void {
             particleSaturation: registry.getParticleSaturation?.() ?? D.particleSaturation,
             particleGlow: registry.getParticleGlow?.() ?? D.particleGlow,
             particleDrift: registry.getParticleDrift?.() ?? D.particleDrift,
-            pullback: registry.getPullback?.() ?? D.pullback,
-            pullbackDuration: registry.getPullbackDuration?.() ?? D.pullbackDuration,
           };
         }
         if (typeof partial !== 'object' || partial === null) {
@@ -684,8 +673,6 @@ export function installDevConsole(): void {
         setNum('particleSaturation', registry.setParticleSaturation, 0);
         setNum('particleGlow', registry.setParticleGlow, 0);
         setBool('particleDrift', registry.setParticleDrift);
-        setBool('pullback', registry.setPullback);
-        setNum('pullbackDuration', registry.setPullbackDuration, 0);
       },
 
       reset: resetNebulaeDefaults,
@@ -741,7 +728,7 @@ export function installDevConsole(): void {
           "  portfolio.nebulae.variant()              // → '01' | '02' | '03' | '04' (Carina | Lagoon | Pillars | Veil)",
           "  portfolio.nebulae.variant('03')          // set + sync URL ?neb=03",
           '  portfolio.nebulae.config()               // → JSON of all nebula properties',
-          '  portfolio.nebulae.config({ ... })        // partial set: billboard*/particle*/pullback*',
+          '  portfolio.nebulae.config({ ... })        // partial set: billboard*/particle*',
         ].join('\n'),
         'font-weight: bold',
       );

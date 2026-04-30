@@ -18,7 +18,19 @@ import { SCENE_ANCHORS } from './scene-anchors.js';
 // On first paint, the camera jumps to the active scene's anchor without
 // animation — there's no "fly in from infinity" intro.
 
-const CAMERA_TWEEN_DURATION_SEC = 1.2;
+// Default route-tween cadence. Per-anchor overrides on `tweenDuration` /
+// `tweenEase` (in scene-anchors.ts) win when set; otherwise the tween
+// duration scales with the Euclidean distance between source/destination
+// camera positions, so a long jump (projects ↔ contact, ~3757 units)
+// auto-stretches to a longer tween than a short hop (about → projects,
+// ~256 units). The floor is DEFAULT_TWEEN_DURATION_SEC; the cap is
+// distance / DEFAULT_TWEEN_SPEED_UNITS_PER_SEC. CAMERA_TWEEN_DURATION_SEC
+// is exported for Canvas3D's visibility-grace window — sized to the
+// longest tween any destination might run.
+export const CAMERA_TWEEN_DURATION_SEC = 2.0;
+const DEFAULT_TWEEN_DURATION_SEC = 1.2;
+const DEFAULT_TWEEN_EASE = 'power2.inOut';
+const DEFAULT_TWEEN_SPEED_UNITS_PER_SEC = 2000;
 
 interface CameraDriverProps {
   scene: SceneName;
@@ -58,6 +70,14 @@ export function CameraDriver({ scene }: CameraDriverProps) {
       ly: lookAtRef.current.y,
       lz: lookAtRef.current.z,
     };
+    const distance = camera.position.distanceTo(targetPos);
+    const computedDuration = Math.max(
+      DEFAULT_TWEEN_DURATION_SEC,
+      distance / DEFAULT_TWEEN_SPEED_UNITS_PER_SEC,
+    );
+    const duration = anchor.tweenDuration ?? computedDuration;
+    const ease = anchor.tweenEase ?? DEFAULT_TWEEN_EASE;
+
     tweenRef.current = gsap.to(proxy, {
       px: targetPos.x,
       py: targetPos.y,
@@ -65,8 +85,8 @@ export function CameraDriver({ scene }: CameraDriverProps) {
       lx: targetLookAt.x,
       ly: targetLookAt.y,
       lz: targetLookAt.z,
-      duration: CAMERA_TWEEN_DURATION_SEC,
-      ease: 'power2.inOut',
+      duration,
+      ease,
       onUpdate: () => {
         camera.position.set(proxy.px, proxy.py, proxy.pz);
         lookAtRef.current.set(proxy.lx, proxy.ly, proxy.lz);
