@@ -1,5 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { useLocation, useNavigate, useParams, type NavigateOptions, type To } from 'react-router';
 import { useActiveScene, useObserveActiveScene, type SceneName } from '@portfolio/celestial';
 import { HeroSection } from '../components/sections/HeroSection';
 import { AboutSection } from '../components/sections/AboutSection';
@@ -60,8 +60,19 @@ export function MainPage() {
   const params = useParams<{ locale?: string }>();
   const locale = params.locale ?? 'en';
   const location = useLocation();
-  const navigate = useNavigate();
+  const navigateRaw = useNavigate();
   const activeScene = useActiveScene();
+
+  // useNavigate() on a BrowserRouter (non-data-route) creates a new function
+  // reference on every location change because it captures locationPathname in
+  // its useCallback deps. Storing it in a ref keeps the scene→URL effect below
+  // from re-running on nav clicks (which would fire it with a stale activeScene
+  // and bounce the URL back to the old scene's path).
+  const navigateRef = useRef(navigateRaw);
+  navigateRef.current = navigateRaw;
+  const navigate = useRef((to: To, opts?: NavigateOptions) =>
+    navigateRef.current(to, opts),
+  ).current;
 
   // Set up the IntersectionObserver that publishes the most-visible section
   // to ActiveSceneContext. CelestialBackdrop reads from that context.
@@ -99,7 +110,8 @@ export function MainPage() {
   // sync will track from there.
   //
   // pathname is deliberately NOT in the dep list — we only react to scene
-  // changes, never to our own URL writes.
+  // changes, never to our own URL writes. `navigate` is stable (wrapped in
+  // useCallback above) so it's safe to omit from deps without a lint disable.
   const firstSyncSkipped = useRef(false);
   useEffect(() => {
     if (!firstSyncSkipped.current) {
