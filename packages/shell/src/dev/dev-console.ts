@@ -48,14 +48,24 @@ type NebulaVariantString = '01' | '02' | '03' | '04';
 interface NebulaeConfig {
   variant: NebulaVariantString;
   visible: boolean;
-  dive: boolean;
-  density: number;
-  drift: boolean;
-  stepCount: number;
-  brightness: number;
-  saturation: number;
-  glow: number;
-  diffuse: number;
+  billboardsVisible: boolean;
+  billboardLayerCount: number;
+  billboardJitter: number;
+  billboardScale: number;
+  billboardBrightness: number;
+  billboardSaturation: number;
+  billboardGlow: number;
+  billboardDrift: boolean;
+  particlesVisible: boolean;
+  particleCount: number;
+  particleSize: number;
+  particleJitter: number;
+  particleBrightness: number;
+  particleSaturation: number;
+  particleGlow: number;
+  particleDrift: boolean;
+  pullback: boolean;
+  pullbackDuration: number;
 }
 
 interface DevAPIRegistry {
@@ -81,22 +91,42 @@ interface DevAPIRegistry {
   getNebulaVariant?: () => NebulaVariantString;
   setNebulaVisible?: Setter<boolean>;
   getNebulaVisible?: () => boolean;
-  setNebulaDive?: Setter<boolean>;
-  getNebulaDive?: () => boolean;
-  setNebulaDrift?: Setter<boolean>;
-  getNebulaDrift?: () => boolean;
-  setNebulaDensity?: Setter<number>;
-  getNebulaDensity?: () => number;
-  setNebulaStepCount?: Setter<number>;
-  getNebulaStepCount?: () => number;
-  setNebulaBrightness?: Setter<number>;
-  getNebulaBrightness?: () => number;
-  setNebulaSaturation?: Setter<number>;
-  getNebulaSaturation?: () => number;
-  setNebulaGlow?: Setter<number>;
-  getNebulaGlow?: () => number;
-  setNebulaDiffuse?: Setter<number>;
-  getNebulaDiffuse?: () => number;
+  setBillboardsVisible?: Setter<boolean>;
+  getBillboardsVisible?: () => boolean;
+  setBillboardLayerCount?: Setter<number>;
+  getBillboardLayerCount?: () => number;
+  setBillboardJitter?: Setter<number>;
+  getBillboardJitter?: () => number;
+  setBillboardScale?: Setter<number>;
+  getBillboardScale?: () => number;
+  setBillboardBrightness?: Setter<number>;
+  getBillboardBrightness?: () => number;
+  setBillboardSaturation?: Setter<number>;
+  getBillboardSaturation?: () => number;
+  setBillboardGlow?: Setter<number>;
+  getBillboardGlow?: () => number;
+  setBillboardDrift?: Setter<boolean>;
+  getBillboardDrift?: () => boolean;
+  setParticlesVisible?: Setter<boolean>;
+  getParticlesVisible?: () => boolean;
+  setParticleCount?: Setter<number>;
+  getParticleCount?: () => number;
+  setParticleSize?: Setter<number>;
+  getParticleSize?: () => number;
+  setParticleJitter?: Setter<number>;
+  getParticleJitter?: () => number;
+  setParticleBrightness?: Setter<number>;
+  getParticleBrightness?: () => number;
+  setParticleSaturation?: Setter<number>;
+  getParticleSaturation?: () => number;
+  setParticleGlow?: Setter<number>;
+  getParticleGlow?: () => number;
+  setParticleDrift?: Setter<boolean>;
+  getParticleDrift?: () => boolean;
+  setPullback?: Setter<boolean>;
+  getPullback?: () => boolean;
+  setPullbackDuration?: Setter<number>;
+  getPullbackDuration?: () => number;
 }
 
 const NEBULA_VARIANT_VALUES: readonly NebulaVariantString[] = ['01', '02', '03', '04'];
@@ -134,16 +164,27 @@ function resetRingsDefaults(): void {
 }
 
 function resetNebulaeDefaults(): void {
-  registry.setNebulaVariant?.(SCENE_DEFAULTS.contact.variant);
-  registry.setNebulaVisible?.(SCENE_DEFAULTS.contact.visible);
-  registry.setNebulaDive?.(SCENE_DEFAULTS.contact.dive);
-  registry.setNebulaDensity?.(SCENE_DEFAULTS.contact.density);
-  registry.setNebulaDrift?.(SCENE_DEFAULTS.contact.drift);
-  registry.setNebulaStepCount?.(SCENE_DEFAULTS.contact.stepCount);
-  registry.setNebulaBrightness?.(SCENE_DEFAULTS.contact.brightnessMul);
-  registry.setNebulaSaturation?.(SCENE_DEFAULTS.contact.saturationMul);
-  registry.setNebulaGlow?.(SCENE_DEFAULTS.contact.glowMul);
-  registry.setNebulaDiffuse?.(SCENE_DEFAULTS.contact.diffuseMul);
+  const D = SCENE_DEFAULTS.contact;
+  registry.setNebulaVariant?.(D.variant);
+  registry.setNebulaVisible?.(D.visible);
+  registry.setBillboardsVisible?.(D.billboardsVisible);
+  registry.setBillboardLayerCount?.(D.billboardLayerCount);
+  registry.setBillboardJitter?.(D.billboardJitter);
+  registry.setBillboardScale?.(D.billboardScale);
+  registry.setBillboardBrightness?.(D.billboardBrightness);
+  registry.setBillboardSaturation?.(D.billboardSaturation);
+  registry.setBillboardGlow?.(D.billboardGlow);
+  registry.setBillboardDrift?.(D.billboardDrift);
+  registry.setParticlesVisible?.(D.particlesVisible);
+  registry.setParticleCount?.(D.particleCount);
+  registry.setParticleSize?.(D.particleSize);
+  registry.setParticleJitter?.(D.particleJitter);
+  registry.setParticleBrightness?.(D.particleBrightness);
+  registry.setParticleSaturation?.(D.particleSaturation);
+  registry.setParticleGlow?.(D.particleGlow);
+  registry.setParticleDrift?.(D.particleDrift);
+  registry.setPullback?.(D.pullback);
+  registry.setPullbackDuration?.(D.pullbackDuration);
   console.log('[portfolio] nebulae defaults reset');
 }
 
@@ -550,26 +591,43 @@ export function installDevConsole(): void {
         registry.setNebulaVariant(v);
       },
 
-      // Unified get/set as JSON. Schema:
-      //   { variant, visible, dive, density, drift, stepCount }
-      //   portfolio.nebulae.config()                   → snapshot
-      //   portfolio.nebulae.config({ density: 1.5 })   → partial set
-      //   portfolio.nebulae.config({ visible: false, dive: false })
+      // Unified get/set as JSON. Schema mirrors NebulaeConfigContext:
+      //   { variant, visible,
+      //     billboardsVisible, billboardLayerCount, billboardJitter,
+      //     billboardScale, billboardBrightness, billboardSaturation,
+      //     billboardGlow, billboardDrift,
+      //     particlesVisible, particleCount, particleSize, particleJitter,
+      //     particleBrightness, particleSaturation, particleGlow, particleDrift,
+      //     pullback, pullbackDuration }
+      //   portfolio.nebulae.config()                            → snapshot
+      //   portfolio.nebulae.config({ particleCount: 50000 })    → partial set
+      //   portfolio.nebulae.config({ billboardsVisible: false })
       // Unknown keys ignored; invalid values for known keys skipped
       // with a warning.
       config(partial?: Record<string, unknown>): NebulaeConfig | void {
         if (partial === undefined) {
+          const D = SCENE_DEFAULTS.contact;
           return {
-            variant: registry.getNebulaVariant?.() ?? '01',
-            visible: registry.getNebulaVisible?.() ?? true,
-            dive: registry.getNebulaDive?.() ?? true,
-            density: registry.getNebulaDensity?.() ?? 1,
-            drift: registry.getNebulaDrift?.() ?? true,
-            stepCount: registry.getNebulaStepCount?.() ?? 16,
-            brightness: registry.getNebulaBrightness?.() ?? 1,
-            saturation: registry.getNebulaSaturation?.() ?? 1,
-            glow: registry.getNebulaGlow?.() ?? 1,
-            diffuse: registry.getNebulaDiffuse?.() ?? 1,
+            variant: registry.getNebulaVariant?.() ?? D.variant,
+            visible: registry.getNebulaVisible?.() ?? D.visible,
+            billboardsVisible: registry.getBillboardsVisible?.() ?? D.billboardsVisible,
+            billboardLayerCount: registry.getBillboardLayerCount?.() ?? D.billboardLayerCount,
+            billboardJitter: registry.getBillboardJitter?.() ?? D.billboardJitter,
+            billboardScale: registry.getBillboardScale?.() ?? D.billboardScale,
+            billboardBrightness: registry.getBillboardBrightness?.() ?? D.billboardBrightness,
+            billboardSaturation: registry.getBillboardSaturation?.() ?? D.billboardSaturation,
+            billboardGlow: registry.getBillboardGlow?.() ?? D.billboardGlow,
+            billboardDrift: registry.getBillboardDrift?.() ?? D.billboardDrift,
+            particlesVisible: registry.getParticlesVisible?.() ?? D.particlesVisible,
+            particleCount: registry.getParticleCount?.() ?? D.particleCount,
+            particleSize: registry.getParticleSize?.() ?? D.particleSize,
+            particleJitter: registry.getParticleJitter?.() ?? D.particleJitter,
+            particleBrightness: registry.getParticleBrightness?.() ?? D.particleBrightness,
+            particleSaturation: registry.getParticleSaturation?.() ?? D.particleSaturation,
+            particleGlow: registry.getParticleGlow?.() ?? D.particleGlow,
+            particleDrift: registry.getParticleDrift?.() ?? D.particleDrift,
+            pullback: registry.getPullback?.() ?? D.pullback,
+            pullbackDuration: registry.getPullbackDuration?.() ?? D.pullbackDuration,
           };
         }
         if (typeof partial !== 'object' || partial === null) {
@@ -610,14 +668,24 @@ export function installDevConsole(): void {
           }
         }
         setBool('visible', registry.setNebulaVisible);
-        setBool('dive', registry.setNebulaDive);
-        setBool('drift', registry.setNebulaDrift);
-        setNum('density', registry.setNebulaDensity, 0);
-        setNum('stepCount', registry.setNebulaStepCount, 1, 64);
-        setNum('brightness', registry.setNebulaBrightness, 0);
-        setNum('saturation', registry.setNebulaSaturation, 0);
-        setNum('glow', registry.setNebulaGlow, 0);
-        setNum('diffuse', registry.setNebulaDiffuse, 0);
+        setBool('billboardsVisible', registry.setBillboardsVisible);
+        setNum('billboardLayerCount', registry.setBillboardLayerCount, 1, 5);
+        setNum('billboardJitter', registry.setBillboardJitter, 0);
+        setNum('billboardScale', registry.setBillboardScale, 0);
+        setNum('billboardBrightness', registry.setBillboardBrightness, 0);
+        setNum('billboardSaturation', registry.setBillboardSaturation, 0);
+        setNum('billboardGlow', registry.setBillboardGlow, 0);
+        setBool('billboardDrift', registry.setBillboardDrift);
+        setBool('particlesVisible', registry.setParticlesVisible);
+        setNum('particleCount', registry.setParticleCount, 0, 200000);
+        setNum('particleSize', registry.setParticleSize, 0);
+        setNum('particleJitter', registry.setParticleJitter, 0);
+        setNum('particleBrightness', registry.setParticleBrightness, 0);
+        setNum('particleSaturation', registry.setParticleSaturation, 0);
+        setNum('particleGlow', registry.setParticleGlow, 0);
+        setBool('particleDrift', registry.setParticleDrift);
+        setBool('pullback', registry.setPullback);
+        setNum('pullbackDuration', registry.setPullbackDuration, 0);
       },
 
       reset: resetNebulaeDefaults,
@@ -673,7 +741,7 @@ export function installDevConsole(): void {
           "  portfolio.nebulae.variant()              // → '01' | '02' | '03' | '04' (Carina | Lagoon | Pillars | Veil)",
           "  portfolio.nebulae.variant('03')          // set + sync URL ?neb=03",
           '  portfolio.nebulae.config()               // → JSON of all nebula properties',
-          '  portfolio.nebulae.config({ ... })        // partial set: variant/visible/dive/density/drift/stepCount',
+          '  portfolio.nebulae.config({ ... })        // partial set: billboard*/particle*/pullback*',
         ].join('\n'),
         'font-weight: bold',
       );

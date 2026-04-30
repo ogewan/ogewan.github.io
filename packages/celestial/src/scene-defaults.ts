@@ -29,42 +29,37 @@ export const SCENE_DEFAULTS = {
     // query param when present; this is the fresh-load fallback only.
     // Valid: '01' (Carina) | '02' (Lagoon) | '03' (Pillars) | '04' (Veil).
     variant: '01' as '01' | '02' | '03' | '04',
-    // Whether the nebula renders at all. Hide when iterating shader
-    // tweaks that need a clean comparison frame.
+    // Master scene visibility. Hide for clean comparison frames.
     visible: true,
-    // Whether the camera-dive sub-animation runs after the route tween
-    // settles. Disable to lock camera at the route-tween anchor for
-    // taking still screenshots.
-    dive: true,
-    // Per-frame opacity multiplier applied to accumulated raymarch
-    // alpha. 1.0 = full density per the per-variant params; lower
-    // fades the nebula toward transparent.
-    density: 1.0,
-    // Whether the volume drifts gently (sinusoidal rotation) once the
-    // camera settles inside it. Adds subtle motion without being
-    // distracting.
-    drift: true,
-    // Raymarching steps per fragment. The bounding sphere uses BackSide
-    // rendering with the camera INSIDE the volume, so back-face fragments
-    // cover the entire viewport — per-fragment cost stacks across the
-    // whole canvas. Default 16 = comfortable middle ground on a modern
-    // desktop GPU after the Suspense fix (gotcha #45) eliminated the
-    // earlier context-loss issue. Dial via dev console:
-    //   portfolio.nebulae.config({ stepCount: 8 })    → low / fallback
-    //   portfolio.nebulae.config({ stepCount: 32 })   → high quality
-    //   portfolio.nebulae.config({ stepCount: 64 })   → ceiling
-    // Shader hard-caps at MAX_STEPS=64 (compile-time loop bound).
-    // Mobile / degraded path clamps to 8 in ContactScene.
-    stepCount: 16,
-    // Visual-vibrancy multipliers. Each multiplies the per-variant base
-    // value (in nebula-variants.ts) before it reaches the shader. Default
-    // 1.0 means "use the variant's tuned baseline." Values >1 push for
-    // more vivid output; values <1 dial it back. All four are exposed
-    // via portfolio.nebulae.config() for live tuning.
-    brightnessMul: 1.0,
-    saturationMul: 1.0,
-    glowMul: 1.0,
-    diffuseMul: 1.0,
+
+    // Effect A — layered billboards. Camera-facing photo planes stacked
+    // along the volume's local Z axis. Default ON.
+    billboardsVisible: true,
+    billboardLayerCount: 3,
+    billboardJitter: 4,
+    billboardScale: 3.0,
+    billboardBrightness: 1.0,
+    billboardSaturation: 1.0,
+    billboardGlow: 1.0,
+    billboardDrift: true,
+
+    // Effect B — photo-sampled particle cloud. Particles distributed in
+    // 3D space with positions sampled from photo luminance. Default ON.
+    particlesVisible: true,
+    particleCount: 30000,
+    particleSize: 0.08,
+    particleJitter: 1.0,
+    particleBrightness: 1.0,
+    particleSaturation: 1.0,
+    particleGlow: 1.0,
+    particleDrift: true,
+
+    // Camera pull-back sub-animation. After the 1.2s route tween lands
+    // the camera deep inside the volume, ContactScene takes over and
+    // pulls the camera backward through the front face to a viewing
+    // distance outside the volume. Disable to lock camera at arrival.
+    pullback: true,
+    pullbackDuration: 2.0,
   },
   projects: {
     // Whether the particle ring system + colored bands render at all.
