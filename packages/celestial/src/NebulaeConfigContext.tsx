@@ -27,6 +27,10 @@ const STORAGE_KEY_DIVE = 'portfolio:contact-dive';
 const STORAGE_KEY_DRIFT = 'portfolio:contact-drift';
 const STORAGE_KEY_DENSITY = 'portfolio:contact-density';
 const STORAGE_KEY_STEP_COUNT = 'portfolio:contact-step-count';
+const STORAGE_KEY_BRIGHTNESS_MUL = 'portfolio:contact-brightness-mul';
+const STORAGE_KEY_SATURATION_MUL = 'portfolio:contact-saturation-mul';
+const STORAGE_KEY_GLOW_MUL = 'portfolio:contact-glow-mul';
+const STORAGE_KEY_DIFFUSE_MUL = 'portfolio:contact-diffuse-mul';
 
 const URL_QUERY_KEY = 'neb';
 
@@ -37,12 +41,20 @@ export interface NebulaeConfigValue {
   readonly density: number;
   readonly drift: boolean;
   readonly stepCount: number;
+  readonly brightnessMul: number;
+  readonly saturationMul: number;
+  readonly glowMul: number;
+  readonly diffuseMul: number;
   readonly setVariant: (v: NebulaVariant) => void;
   readonly setVisible: (on: boolean) => void;
   readonly setDive: (on: boolean) => void;
   readonly setDensity: (d: number) => void;
   readonly setDrift: (on: boolean) => void;
   readonly setStepCount: (n: number) => void;
+  readonly setBrightnessMul: (n: number) => void;
+  readonly setSaturationMul: (n: number) => void;
+  readonly setGlowMul: (n: number) => void;
+  readonly setDiffuseMul: (n: number) => void;
 }
 
 function isVariant(v: unknown): v is NebulaVariant {
@@ -149,6 +161,18 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
   const [stepCount, setStepCountState] = useState<number>(() =>
     readNumStored(STORAGE_KEY_STEP_COUNT, SCENE_DEFAULTS.contact.stepCount),
   );
+  const [brightnessMul, setBrightnessMulState] = useState<number>(() =>
+    readNumStored(STORAGE_KEY_BRIGHTNESS_MUL, SCENE_DEFAULTS.contact.brightnessMul),
+  );
+  const [saturationMul, setSaturationMulState] = useState<number>(() =>
+    readNumStored(STORAGE_KEY_SATURATION_MUL, SCENE_DEFAULTS.contact.saturationMul),
+  );
+  const [glowMul, setGlowMulState] = useState<number>(() =>
+    readNumStored(STORAGE_KEY_GLOW_MUL, SCENE_DEFAULTS.contact.glowMul),
+  );
+  const [diffuseMul, setDiffuseMulState] = useState<number>(() =>
+    readNumStored(STORAGE_KEY_DIFFUSE_MUL, SCENE_DEFAULTS.contact.diffuseMul),
+  );
 
   const setVariant = useCallback((v: NebulaVariant) => {
     setVariantState(v);
@@ -178,6 +202,23 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
   const setStepCount = useCallback((n: number) => {
     setStepCountState(n);
     writeNumStored(STORAGE_KEY_STEP_COUNT, n, SCENE_DEFAULTS.contact.stepCount);
+  }, []);
+
+  const setBrightnessMul = useCallback((n: number) => {
+    setBrightnessMulState(n);
+    writeNumStored(STORAGE_KEY_BRIGHTNESS_MUL, n, SCENE_DEFAULTS.contact.brightnessMul);
+  }, []);
+  const setSaturationMul = useCallback((n: number) => {
+    setSaturationMulState(n);
+    writeNumStored(STORAGE_KEY_SATURATION_MUL, n, SCENE_DEFAULTS.contact.saturationMul);
+  }, []);
+  const setGlowMul = useCallback((n: number) => {
+    setGlowMulState(n);
+    writeNumStored(STORAGE_KEY_GLOW_MUL, n, SCENE_DEFAULTS.contact.glowMul);
+  }, []);
+  const setDiffuseMul = useCallback((n: number) => {
+    setDiffuseMulState(n);
+    writeNumStored(STORAGE_KEY_DIFFUSE_MUL, n, SCENE_DEFAULTS.contact.diffuseMul);
   }, []);
 
   // popstate: pick up URL param changes from browser back/forward.
@@ -210,6 +251,24 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
             readNumStored(STORAGE_KEY_STEP_COUNT, SCENE_DEFAULTS.contact.stepCount),
           );
           break;
+        case STORAGE_KEY_BRIGHTNESS_MUL:
+          setBrightnessMulState(
+            readNumStored(STORAGE_KEY_BRIGHTNESS_MUL, SCENE_DEFAULTS.contact.brightnessMul),
+          );
+          break;
+        case STORAGE_KEY_SATURATION_MUL:
+          setSaturationMulState(
+            readNumStored(STORAGE_KEY_SATURATION_MUL, SCENE_DEFAULTS.contact.saturationMul),
+          );
+          break;
+        case STORAGE_KEY_GLOW_MUL:
+          setGlowMulState(readNumStored(STORAGE_KEY_GLOW_MUL, SCENE_DEFAULTS.contact.glowMul));
+          break;
+        case STORAGE_KEY_DIFFUSE_MUL:
+          setDiffuseMulState(
+            readNumStored(STORAGE_KEY_DIFFUSE_MUL, SCENE_DEFAULTS.contact.diffuseMul),
+          );
+          break;
       }
     };
     window.addEventListener('storage', handler);
@@ -224,12 +283,20 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
       density,
       drift,
       stepCount,
+      brightnessMul,
+      saturationMul,
+      glowMul,
+      diffuseMul,
       setVariant,
       setVisible,
       setDive,
       setDensity,
       setDrift,
       setStepCount,
+      setBrightnessMul,
+      setSaturationMul,
+      setGlowMul,
+      setDiffuseMul,
     }),
     [
       variant,
@@ -238,12 +305,20 @@ export function NebulaeConfigProvider({ children }: { children: ReactNode }) {
       density,
       drift,
       stepCount,
+      brightnessMul,
+      saturationMul,
+      glowMul,
+      diffuseMul,
       setVariant,
       setVisible,
       setDive,
       setDensity,
       setDrift,
       setStepCount,
+      setBrightnessMul,
+      setSaturationMul,
+      setGlowMul,
+      setDiffuseMul,
     ],
   );
 

@@ -70,6 +70,10 @@ export function ContactScene({ scene }: ContactSceneProps) {
             density={config.density}
             stepCount={settings.degraded ? Math.min(config.stepCount, 8) : config.stepCount}
             drift={config.drift}
+            brightnessMul={config.brightnessMul}
+            saturationMul={config.saturationMul}
+            glowMul={config.glowMul}
+            diffuseMul={config.diffuseMul}
             camera={camera}
             meshRef={meshRef}
           />
@@ -85,6 +89,10 @@ interface NebulaVolumeProps {
   readonly density: number;
   readonly stepCount: number;
   readonly drift: boolean;
+  readonly brightnessMul: number;
+  readonly saturationMul: number;
+  readonly glowMul: number;
+  readonly diffuseMul: number;
   readonly camera: THREE.Camera;
   readonly meshRef: React.RefObject<THREE.Mesh | null>;
 }
@@ -95,6 +103,10 @@ function NebulaVolume({
   density,
   stepCount,
   drift,
+  brightnessMul,
+  saturationMul,
+  glowMul,
+  diffuseMul,
   camera,
   meshRef,
 }: NebulaVolumeProps) {
@@ -119,6 +131,7 @@ function NebulaVolume({
     () => ({
       nebulaPhoto: { value: photo },
       cameraLocal: { value: new THREE.Vector3() },
+      time: { value: 0 },
       densityScale: { value: params.densityScale * density },
       noiseFreq: { value: params.noiseFreq },
       warpAmplitude: { value: params.warpAmplitude },
@@ -126,10 +139,12 @@ function NebulaVolume({
       variantSeed: { value: new THREE.Vector3(...params.variantSeed) },
       stepCount: { value: stepCount },
       edgeFeather: { value: params.edgeFeather },
+      brightness: { value: params.brightness },
       saturation: { value: params.saturation },
       glowAmount: { value: params.glowAmount },
       diffuseStrength: { value: params.diffuseStrength },
       diffuseLodBias: { value: params.diffuseLodBias },
+      shimmerSpeed: { value: params.shimmerSpeed },
     }),
     // photo is stable identity from useLoader cache for the same URL;
     // params is the constant variant entry.
@@ -151,8 +166,13 @@ function NebulaVolume({
     mesh.updateMatrixWorld();
     const inv = new THREE.Matrix4().copy(mesh.matrixWorld).invert();
     uniforms.cameraLocal.value.copy(camera.position).applyMatrix4(inv);
+    uniforms.time.value += delta;
     uniforms.densityScale.value = params.densityScale * density;
     uniforms.stepCount.value = stepCount;
+    uniforms.brightness.value = params.brightness * brightnessMul;
+    uniforms.saturation.value = params.saturation * saturationMul;
+    uniforms.glowAmount.value = params.glowAmount * glowMul;
+    uniforms.diffuseStrength.value = params.diffuseStrength * diffuseMul;
   });
 
   return (

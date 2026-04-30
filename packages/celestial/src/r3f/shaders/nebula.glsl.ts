@@ -51,6 +51,7 @@ precision highp float;
 
 uniform sampler2D nebulaPhoto;
 uniform vec3 cameraLocal;       // camera position in volume's local frame
+uniform float time;             // seconds since mount; drives shimmer
 uniform float densityScale;     // overall density multiplier
 uniform float noiseFreq;        // FBM frequency on the unit volume
 uniform float warpAmplitude;    // per-step UV warp strength
@@ -64,6 +65,7 @@ uniform float edgeFeather;      // radial UV mask threshold; <0.5 feathers
                                 // grazes the sphere boundary at oblique
                                 // angles, accumulating a lot of edge
                                 // photo content into one ring of pixels).
+uniform float brightness;       // post-accumulation rgb scalar (>1 brighter)
 uniform float saturation;       // 1.0 = neutral; >1 boosts color richness
                                 // by widening RGB distance from luma.
 uniform float glowAmount;       // 0 = off; >0 adds an HDR-style brighten
@@ -75,6 +77,9 @@ uniform float diffuseStrength;  // 0 = off; >0 adds a soft mipmap-blurred
 uniform float diffuseLodBias;   // texture LOD bias for the diffuse sample
                                 // (positive = blurrier; ~3-5 is a soft
                                 // glow, ~6+ is heavy bloom).
+uniform float shimmerSpeed;     // 0 = off; FBM sample point drifts at this
+                                // rate (radians-per-second-equivalent), so
+                                // the cloud's internal noise pattern flows.
 
 varying vec3 vLocal;
 
@@ -202,22 +207,42 @@ void main() {
     float radial = length(photoUV - vec2(0.5)) * 2.0;
     float edgeMask = 1.0 - smoothstep(edgeFeather, edgeFeather + 0.15, radial);
 
-    float fbm = fbmWarped3(p * noiseFreq + variantSeed);
+    // Time-shimmer: drift the FBM sample point along a small offset over
+    // time. The cloud's internal noise pattern slowly flows, so the
+    // nebula reads as alive rather than frozen. shimmerSpeed=0 disables.
+    vec3 shimmerOffset = vec3(time * shimmerSpeed, time * shimmerSpeed * 0.7, time * shimmerSpeed * 1.3);
+    float fbm = fbmWarped3(p * noiseFreq + variantSeed + shimmerOffset);
     float density = pow(photoLum, falloffPower) * fbm * densityScale * edgeMask;
 
-    float deltaA = density * stepSize * (1.0 - accum.a);
-    accum.rgb += emissive * deltaA;
-    accum.a += deltaA;
+    // Decoupled emission vs occlusion. Emission accumulates ADDITIVELY
+    // (no (1-accum.a) factor) because nebulae are physically emissive
+    // without significant self-absorption — the back of the cloud
+    // contributes equally to the front. Without this decoupling, more
+    // raymarch steps caused the result to dim (later samples occluded
+    // by accumulated alpha → average bias toward photo's mean color
+    // rather than peaks). With it, brightness is step-count-invariant.
+    // Alpha still uses front-to-back occlusion so the volume composites
+    // correctly against the starfield behind.
+    accum.rgb += emissive * density * stepSize;
+    accum.a += density * stepSize * (1.0 - accum.a);
 
     if (accum.a > 0.98) break;
   }
 
-  // Post-march color adjustments. Saturation widens RGB from luma;
-  // glow boosts the brightest accumulated pixels for an HDR pop.
+  // Post-march color adjustments.
+  // (1) Brightness: scalar multiply on rgb — the simplest knob.
+  accum.rgb *= brightness;
+  // (2) Saturation: widen RGB distance from luma.
   float finalLum = dot(accum.rgb, vec3(0.2126, 0.7152, 0.0722));
   accum.rgb = mix(vec3(finalLum), accum.rgb, saturation);
+  // (3) Glow: HDR boost on highlights so bright pixels feel luminous
+  // rather than just bright.
   float glowMask = smoothstep(0.35, 0.85, finalLum);
   accum.rgb += accum.rgb * glowAmount * glowMask;
+  // (4) Reinhard-ish soft tonemap — keeps the brightest pixels from
+  // clipping to pure white when brightness/glow drive them past 1.0.
+  // Preserves color saturation in highlights instead of bleaching out.
+  accum.rgb = accum.rgb / (1.0 + accum.rgb * 0.5);
 
   gl_FragColor = accum;
 }

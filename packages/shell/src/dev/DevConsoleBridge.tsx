@@ -43,12 +43,20 @@ export function DevConsoleBridge() {
     density: nebulaDensity,
     drift: nebulaDrift,
     stepCount: nebulaStepCount,
+    brightnessMul: nebulaBrightnessMul,
+    saturationMul: nebulaSaturationMul,
+    glowMul: nebulaGlowMul,
+    diffuseMul: nebulaDiffuseMul,
     setVariant: setNebulaVariant,
     setVisible: setNebulaVisible,
     setDive: setNebulaDive,
     setDensity: setNebulaDensity,
     setDrift: setNebulaDrift,
     setStepCount: setNebulaStepCount,
+    setBrightnessMul: setNebulaBrightnessMul,
+    setSaturationMul: setNebulaSaturationMul,
+    setGlowMul: setNebulaGlowMul,
+    setDiffuseMul: setNebulaDiffuseMul,
   } = useNebulaeConfig();
 
   useEffect(() => {
@@ -83,6 +91,14 @@ export function DevConsoleBridge() {
       getNebulaDensity: () => nebulaDensity,
       setNebulaStepCount: (n: number) => setNebulaStepCount(n),
       getNebulaStepCount: () => nebulaStepCount,
+      setNebulaBrightness: (n: number) => setNebulaBrightnessMul(n),
+      getNebulaBrightness: () => nebulaBrightnessMul,
+      setNebulaSaturation: (n: number) => setNebulaSaturationMul(n),
+      getNebulaSaturation: () => nebulaSaturationMul,
+      setNebulaGlow: (n: number) => setNebulaGlowMul(n),
+      getNebulaGlow: () => nebulaGlowMul,
+      setNebulaDiffuse: (n: number) => setNebulaDiffuseMul(n),
+      getNebulaDiffuse: () => nebulaDiffuseMul,
     });
   }, [
     navigate,
@@ -115,6 +131,14 @@ export function DevConsoleBridge() {
     nebulaDensity,
     setNebulaStepCount,
     nebulaStepCount,
+    setNebulaBrightnessMul,
+    nebulaBrightnessMul,
+    setNebulaSaturationMul,
+    nebulaSaturationMul,
+    setNebulaGlowMul,
+    nebulaGlowMul,
+    setNebulaDiffuseMul,
+    nebulaDiffuseMul,
   ]);
 
   return null;

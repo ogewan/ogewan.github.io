@@ -21,6 +21,8 @@ import {
   setProjectsSceneRotationRate,
   getProjectsBodyRotationRate,
   setProjectsBodyRotationRate,
+  setGasGiantRotationRate,
+  SCENE_DEFAULTS,
 } from '@portfolio/celestial';
 
 const HIDE_UI_CLASS = 'dev-hide-ui';
@@ -50,6 +52,10 @@ interface NebulaeConfig {
   density: number;
   drift: boolean;
   stepCount: number;
+  brightness: number;
+  saturation: number;
+  glow: number;
+  diffuse: number;
 }
 
 interface DevAPIRegistry {
@@ -83,6 +89,14 @@ interface DevAPIRegistry {
   getNebulaDensity?: () => number;
   setNebulaStepCount?: Setter<number>;
   getNebulaStepCount?: () => number;
+  setNebulaBrightness?: Setter<number>;
+  getNebulaBrightness?: () => number;
+  setNebulaSaturation?: Setter<number>;
+  getNebulaSaturation?: () => number;
+  setNebulaGlow?: Setter<number>;
+  getNebulaGlow?: () => number;
+  setNebulaDiffuse?: Setter<number>;
+  getNebulaDiffuse?: () => number;
 }
 
 const NEBULA_VARIANT_VALUES: readonly NebulaVariantString[] = ['01', '02', '03', '04'];
@@ -92,6 +106,46 @@ function isNebulaVariant(v: unknown): v is NebulaVariantString {
 }
 
 const registry: DevAPIRegistry = {};
+
+// Scene-defaults reset helpers. Each writes every per-scene setter
+// back to its SCENE_DEFAULTS value; the localStorage write-explicit-
+// remove-default convention also clears the persisted entry.
+
+function resetEarthDefaults(): void {
+  setEarthRotationRate(SCENE_DEFAULTS.earth.rotationRate);
+  registry.setEarthTestMode?.(SCENE_DEFAULTS.earth.testMode);
+  registry.setEarthPlaceholderMode?.(SCENE_DEFAULTS.earth.placeholderMode);
+  console.log('[portfolio] earth defaults reset');
+}
+
+function resetRingsDefaults(): void {
+  setProjectsRingsRotationRate(SCENE_DEFAULTS.projects.ringsRotationSpeed);
+  setProjectsSceneRotationRate(SCENE_DEFAULTS.projects.sceneRotationSpeed);
+  setProjectsBodyRotationRate(SCENE_DEFAULTS.projects.bodyRotationSpeed);
+  setGasGiantRotationRate(SCENE_DEFAULTS.projects.gasGiantRotationRate);
+  registry.setRingsVisible?.(SCENE_DEFAULTS.projects.ringsVisible);
+  registry.setRingsClockVisible?.(SCENE_DEFAULTS.projects.clock);
+  registry.setRingsSparkles?.(SCENE_DEFAULTS.projects.sparkles);
+  registry.setRingsClumps?.(SCENE_DEFAULTS.projects.clumps);
+  registry.setRingsSpokes?.(SCENE_DEFAULTS.projects.spokes);
+  registry.setRingsBandFlow?.(SCENE_DEFAULTS.projects.flow);
+  registry.setRingsScenePreserveTilt?.(SCENE_DEFAULTS.projects.scenePreserveTilt);
+  console.log('[portfolio] rings defaults reset');
+}
+
+function resetNebulaeDefaults(): void {
+  registry.setNebulaVariant?.(SCENE_DEFAULTS.contact.variant);
+  registry.setNebulaVisible?.(SCENE_DEFAULTS.contact.visible);
+  registry.setNebulaDive?.(SCENE_DEFAULTS.contact.dive);
+  registry.setNebulaDensity?.(SCENE_DEFAULTS.contact.density);
+  registry.setNebulaDrift?.(SCENE_DEFAULTS.contact.drift);
+  registry.setNebulaStepCount?.(SCENE_DEFAULTS.contact.stepCount);
+  registry.setNebulaBrightness?.(SCENE_DEFAULTS.contact.brightnessMul);
+  registry.setNebulaSaturation?.(SCENE_DEFAULTS.contact.saturationMul);
+  registry.setNebulaGlow?.(SCENE_DEFAULTS.contact.glowMul);
+  registry.setNebulaDiffuse?.(SCENE_DEFAULTS.contact.diffuseMul);
+  console.log('[portfolio] nebulae defaults reset');
+}
 
 export function registerDevAPI(partial: DevAPIRegistry): void {
   Object.assign(registry, partial);
@@ -242,6 +296,8 @@ export function installDevConsole(): void {
         }
         setEarthRotationRate(rate);
       },
+
+      reset: resetEarthDefaults,
     },
 
     // Projects-scene rings — show/hide and rotation control.
@@ -466,6 +522,8 @@ export function installDevConsole(): void {
           registry.setRingsBandFlow(!registry.getRingsBandFlow());
         },
       },
+
+      reset: resetRingsDefaults,
     },
 
     // Contact-scene nebulae. Lighter dev surface than rings — only
@@ -508,6 +566,10 @@ export function installDevConsole(): void {
             density: registry.getNebulaDensity?.() ?? 1,
             drift: registry.getNebulaDrift?.() ?? true,
             stepCount: registry.getNebulaStepCount?.() ?? 16,
+            brightness: registry.getNebulaBrightness?.() ?? 1,
+            saturation: registry.getNebulaSaturation?.() ?? 1,
+            glow: registry.getNebulaGlow?.() ?? 1,
+            diffuse: registry.getNebulaDiffuse?.() ?? 1,
           };
         }
         if (typeof partial !== 'object' || partial === null) {
@@ -552,7 +614,21 @@ export function installDevConsole(): void {
         setBool('drift', registry.setNebulaDrift);
         setNum('density', registry.setNebulaDensity, 0);
         setNum('stepCount', registry.setNebulaStepCount, 1, 64);
+        setNum('brightness', registry.setNebulaBrightness, 0);
+        setNum('saturation', registry.setNebulaSaturation, 0);
+        setNum('glow', registry.setNebulaGlow, 0);
+        setNum('diffuse', registry.setNebulaDiffuse, 0);
       },
+
+      reset: resetNebulaeDefaults,
+    },
+
+    // Reset all scene defaults at once.
+    reset(): void {
+      resetEarthDefaults();
+      resetRingsDefaults();
+      resetNebulaeDefaults();
+      console.log('[portfolio] all defaults reset');
     },
 
     // Print all commands.

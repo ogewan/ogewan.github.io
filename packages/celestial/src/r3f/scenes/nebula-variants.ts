@@ -46,10 +46,12 @@ export interface NebulaParams {
   // Visual-polish controls. Per-variant tuned values; bake the
   // calibrated defaults here as you iterate.
   readonly edgeFeather: number; // 0.3..0.5; lower = more feathered edges
-  readonly saturation: number; // 1.0 neutral; 1.3..1.8 makes colors pop
-  readonly glowAmount: number; // 0..1.5; HDR brighten on highlights
-  readonly diffuseStrength: number; // 0..1; soft mipmap-blurred haze overlay
+  readonly brightness: number; // 1.0 neutral; >1 brighter; final-pass scalar
+  readonly saturation: number; // 1.0 neutral; 1.5..2.5 makes colors pop
+  readonly glowAmount: number; // 0..2; HDR brighten on highlights
+  readonly diffuseStrength: number; // 0..1.5; soft mipmap-blurred haze overlay
   readonly diffuseLodBias: number; // 3..6; LOD offset for the diffuse layer
+  readonly shimmerSpeed: number; // 0..0.1; FBM sample-point drift rate
 }
 
 export const NEBULA_VARIANTS: Record<NebulaVariant, NebulaParams> = {
@@ -66,10 +68,12 @@ export const NEBULA_VARIANTS: Record<NebulaVariant, NebulaParams> = {
     falloffPower: 1.1,
     variantSeed: [3.7, 1.2, 9.4],
     edgeFeather: 0.42,
-    saturation: 1.45,
-    glowAmount: 0.6,
-    diffuseStrength: 0.55,
+    brightness: 1.8,
+    saturation: 2.0,
+    glowAmount: 1.1,
+    diffuseStrength: 0.6,
     diffuseLodBias: 4.0,
+    shimmerSpeed: 0.04,
   },
   '02': {
     slug: '02-lagoon',
@@ -85,10 +89,12 @@ export const NEBULA_VARIANTS: Record<NebulaVariant, NebulaParams> = {
     falloffPower: 1.0,
     variantSeed: [7.1, 4.4, 2.8],
     edgeFeather: 0.4,
-    saturation: 1.6,
-    glowAmount: 0.7,
-    diffuseStrength: 0.5,
+    brightness: 1.9,
+    saturation: 2.2,
+    glowAmount: 1.2,
+    diffuseStrength: 0.55,
     diffuseLodBias: 4.0,
+    shimmerSpeed: 0.05,
   },
   '03': {
     slug: '03-pillars',
@@ -104,10 +110,12 @@ export const NEBULA_VARIANTS: Record<NebulaVariant, NebulaParams> = {
     falloffPower: 1.4,
     variantSeed: [11.2, 8.6, 5.3],
     edgeFeather: 0.45,
-    saturation: 1.4,
-    glowAmount: 0.55,
-    diffuseStrength: 0.45,
+    brightness: 1.7,
+    saturation: 1.9,
+    glowAmount: 0.95,
+    diffuseStrength: 0.5,
     diffuseLodBias: 5.0,
+    shimmerSpeed: 0.03,
   },
   '04': {
     slug: '04-veil',
@@ -122,9 +130,11 @@ export const NEBULA_VARIANTS: Record<NebulaVariant, NebulaParams> = {
     falloffPower: 0.95,
     variantSeed: [2.6, 6.9, 12.1],
     edgeFeather: 0.4,
-    saturation: 1.7,
-    glowAmount: 0.85,
-    diffuseStrength: 0.65,
+    brightness: 2.1,
+    saturation: 2.3,
+    glowAmount: 1.4,
+    diffuseStrength: 0.7,
     diffuseLodBias: 4.0,
+    shimmerSpeed: 0.06,
   },
 };

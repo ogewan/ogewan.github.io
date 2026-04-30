@@ -56,6 +56,15 @@ export const SCENE_DEFAULTS = {
     // Shader hard-caps at MAX_STEPS=64 (compile-time loop bound).
     // Mobile / degraded path clamps to 8 in ContactScene.
     stepCount: 16,
+    // Visual-vibrancy multipliers. Each multiplies the per-variant base
+    // value (in nebula-variants.ts) before it reaches the shader. Default
+    // 1.0 means "use the variant's tuned baseline." Values >1 push for
+    // more vivid output; values <1 dial it back. All four are exposed
+    // via portfolio.nebulae.config() for live tuning.
+    brightnessMul: 1.0,
+    saturationMul: 1.0,
+    glowMul: 1.0,
+    diffuseMul: 1.0,
   },
   projects: {
     // Whether the particle ring system + colored bands render at all.
