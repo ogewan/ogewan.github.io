@@ -18,6 +18,10 @@ export default tseslint.config(
       // gitignored build artifacts dropped into the shell's public/ at build time
       'packages/shell/public/ng-elements/**',
       'packages/shell/public/sitemap.html',
+      // local source-master staging area (.scratch/ holds nebula source
+      // images + ad-hoc probe scripts that shouldn't be linted as part of
+      // the workspace); see .gitignore.
+      '.scratch/**',
     ],
   },
 

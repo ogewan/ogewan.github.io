@@ -41,6 +41,17 @@ interface RingsConfig {
   clock: boolean;
 }
 
+type NebulaVariantString = '01' | '02' | '03' | '04';
+
+interface NebulaeConfig {
+  variant: NebulaVariantString;
+  visible: boolean;
+  dive: boolean;
+  density: number;
+  drift: boolean;
+  stepCount: number;
+}
+
 interface DevAPIRegistry {
   setQuality?: Setter<string>;
   navigate?: Setter<string>;
@@ -60,6 +71,24 @@ interface DevAPIRegistry {
   getRingsBandFlow?: () => boolean;
   setRingsScenePreserveTilt?: Setter<boolean>;
   getRingsScenePreserveTilt?: () => boolean;
+  setNebulaVariant?: Setter<NebulaVariantString>;
+  getNebulaVariant?: () => NebulaVariantString;
+  setNebulaVisible?: Setter<boolean>;
+  getNebulaVisible?: () => boolean;
+  setNebulaDive?: Setter<boolean>;
+  getNebulaDive?: () => boolean;
+  setNebulaDrift?: Setter<boolean>;
+  getNebulaDrift?: () => boolean;
+  setNebulaDensity?: Setter<number>;
+  getNebulaDensity?: () => number;
+  setNebulaStepCount?: Setter<number>;
+  getNebulaStepCount?: () => number;
+}
+
+const NEBULA_VARIANT_VALUES: readonly NebulaVariantString[] = ['01', '02', '03', '04'];
+
+function isNebulaVariant(v: unknown): v is NebulaVariantString {
+  return typeof v === 'string' && (NEBULA_VARIANT_VALUES as readonly string[]).includes(v);
 }
 
 const registry: DevAPIRegistry = {};
@@ -439,6 +468,93 @@ export function installDevConsole(): void {
       },
     },
 
+    // Contact-scene nebulae. Lighter dev surface than rings — only
+    // config() get/set + variant() shortcut. Tune density / dive /
+    // drift / stepCount via config({...}) partial-set.
+    nebulae: {
+      // Get the active variant or set a new one. Variant changes are
+      // synced to the URL (?neb=01..04 via history.replaceState) so
+      // the deep link reflects current state.
+      //   portfolio.nebulae.variant()       → '01' | '02' | '03' | '04'
+      //   portfolio.nebulae.variant('03')   → set + URL sync
+      variant(v?: string): NebulaVariantString | void {
+        if (v === undefined) {
+          if (!registry.getNebulaVariant) return notRegistered('nebulae.variant');
+          return registry.getNebulaVariant();
+        }
+        if (!isNebulaVariant(v)) {
+          console.warn(
+            `[portfolio] nebulae.variant(v): v must be one of ${NEBULA_VARIANT_VALUES.join(' | ')}.`,
+          );
+          return;
+        }
+        if (!registry.setNebulaVariant) return notRegistered('nebulae.variant');
+        registry.setNebulaVariant(v);
+      },
+
+      // Unified get/set as JSON. Schema:
+      //   { variant, visible, dive, density, drift, stepCount }
+      //   portfolio.nebulae.config()                   → snapshot
+      //   portfolio.nebulae.config({ density: 1.5 })   → partial set
+      //   portfolio.nebulae.config({ visible: false, dive: false })
+      // Unknown keys ignored; invalid values for known keys skipped
+      // with a warning.
+      config(partial?: Record<string, unknown>): NebulaeConfig | void {
+        if (partial === undefined) {
+          return {
+            variant: registry.getNebulaVariant?.() ?? '01',
+            visible: registry.getNebulaVisible?.() ?? true,
+            dive: registry.getNebulaDive?.() ?? true,
+            density: registry.getNebulaDensity?.() ?? 1,
+            drift: registry.getNebulaDrift?.() ?? true,
+            stepCount: registry.getNebulaStepCount?.() ?? 16,
+          };
+        }
+        if (typeof partial !== 'object' || partial === null) {
+          console.warn('[portfolio] nebulae.config(json): json must be an object.');
+          return;
+        }
+        const setBool = (key: string, setter?: Setter<boolean>): void => {
+          if (!(key in partial)) return;
+          if (!setter) return;
+          setter(Boolean(partial[key]));
+        };
+        const setNum = (key: string, setter?: Setter<number>, min?: number, max?: number): void => {
+          if (!(key in partial)) return;
+          if (!setter) return;
+          const v = partial[key];
+          if (typeof v !== 'number' || !Number.isFinite(v)) {
+            console.warn(`[portfolio] nebulae.config: ${key} must be a finite number; skipping.`);
+            return;
+          }
+          if (min !== undefined && v < min) {
+            console.warn(`[portfolio] nebulae.config: ${key} must be >= ${min}; skipping.`);
+            return;
+          }
+          if (max !== undefined && v > max) {
+            console.warn(`[portfolio] nebulae.config: ${key} must be <= ${max}; skipping.`);
+            return;
+          }
+          setter(v);
+        };
+        if ('variant' in partial) {
+          const v = partial.variant;
+          if (!isNebulaVariant(v)) {
+            console.warn(
+              `[portfolio] nebulae.config: variant must be one of ${NEBULA_VARIANT_VALUES.join(' | ')}; skipping.`,
+            );
+          } else if (registry.setNebulaVariant) {
+            registry.setNebulaVariant(v);
+          }
+        }
+        setBool('visible', registry.setNebulaVisible);
+        setBool('dive', registry.setNebulaDive);
+        setBool('drift', registry.setNebulaDrift);
+        setNum('density', registry.setNebulaDensity, 0);
+        setNum('stepCount', registry.setNebulaStepCount, 1, 64);
+      },
+    },
+
     // Print all commands.
     help(): void {
       console.log(
@@ -476,6 +592,12 @@ export function installDevConsole(): void {
           '  portfolio.rings.clumps.show() / hide() / toggle()    // (default on) non-uniform azimuthal density',
           '  portfolio.rings.spokes.show() / hide() / toggle()    // (default off) rotating dark radial bars',
           '  portfolio.rings.flow.show() / hide() / toggle()      // (default on) FBM noise flow on the colored bands',
+          '',
+          'Contact-scene nebulae:',
+          "  portfolio.nebulae.variant()              // → '01' | '02' | '03' | '04' (Carina | Lagoon | Pillars | Veil)",
+          "  portfolio.nebulae.variant('03')          // set + sync URL ?neb=03",
+          '  portfolio.nebulae.config()               // → JSON of all nebula properties',
+          '  portfolio.nebulae.config({ ... })        // partial set: variant/visible/dive/density/drift/stepCount',
         ].join('\n'),
         'font-weight: bold',
       );

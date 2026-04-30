@@ -1,13 +1,23 @@
+import type { SceneName } from '../../scenes.js';
 import { SCENE_ANCHORS } from '../scene-anchors.js';
 
 // Phase 9.0 stub. A black disc with an offset amber halo stands in for the
 // future raymarched black hole + lensing pass. Phase 9.5 replaces this with a
 // fragment shader that distorts the starfield via geodesic approximation.
+//
+// Visibility gate: hidden when the active scene isn't 'colophon'. Same
+// pattern EarthScene + ProjectsScene use — useFrame (none here yet) would
+// keep firing if it existed, only GPU draws are skipped.
 
-export function ColophonScene() {
+interface ColophonSceneProps {
+  readonly scene: SceneName;
+}
+
+export function ColophonScene({ scene }: ColophonSceneProps) {
   const [x, y, z] = SCENE_ANCHORS.colophon.origin;
+  const colophonSceneVisible = scene === 'colophon';
   return (
-    <group position={[x, y, z]} rotation={[0, 0, -0.3]}>
+    <group position={[x, y, z]} rotation={[0, 0, -0.3]} visible={colophonSceneVisible}>
       {/* Event horizon — pure black */}
       <mesh>
         <sphereGeometry args={[1, 24, 24]} />

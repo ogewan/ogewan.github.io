@@ -4,10 +4,12 @@ import {
   useCelestialQuality,
   useEarthPlaceholderMode,
   useEarthTestMode,
+  useNebulaeConfig,
   useRingsClockMarkers,
   useRingsEffects,
   useRingsVisibility,
   type CelestialQuality,
+  type NebulaVariant,
 } from '@portfolio/celestial';
 import { registerDevAPI } from './dev-console';
 
@@ -34,6 +36,20 @@ export function DevConsoleBridge() {
     setBandFlow,
     setScenePreserveTilt,
   } = useRingsEffects();
+  const {
+    variant: nebulaVariant,
+    visible: nebulaVisible,
+    dive: nebulaDive,
+    density: nebulaDensity,
+    drift: nebulaDrift,
+    stepCount: nebulaStepCount,
+    setVariant: setNebulaVariant,
+    setVisible: setNebulaVisible,
+    setDive: setNebulaDive,
+    setDensity: setNebulaDensity,
+    setDrift: setNebulaDrift,
+    setStepCount: setNebulaStepCount,
+  } = useNebulaeConfig();
 
   useEffect(() => {
     registerDevAPI({
@@ -55,6 +71,18 @@ export function DevConsoleBridge() {
       getRingsBandFlow: () => bandFlow,
       setRingsScenePreserveTilt: (on: boolean) => setScenePreserveTilt(on),
       getRingsScenePreserveTilt: () => scenePreserveTilt,
+      setNebulaVariant: (v) => setNebulaVariant(v as NebulaVariant),
+      getNebulaVariant: () => nebulaVariant,
+      setNebulaVisible: (on: boolean) => setNebulaVisible(on),
+      getNebulaVisible: () => nebulaVisible,
+      setNebulaDive: (on: boolean) => setNebulaDive(on),
+      getNebulaDive: () => nebulaDive,
+      setNebulaDrift: (on: boolean) => setNebulaDrift(on),
+      getNebulaDrift: () => nebulaDrift,
+      setNebulaDensity: (d: number) => setNebulaDensity(d),
+      getNebulaDensity: () => nebulaDensity,
+      setNebulaStepCount: (n: number) => setNebulaStepCount(n),
+      getNebulaStepCount: () => nebulaStepCount,
     });
   }, [
     navigate,
@@ -75,6 +103,18 @@ export function DevConsoleBridge() {
     bandFlow,
     setScenePreserveTilt,
     scenePreserveTilt,
+    setNebulaVariant,
+    nebulaVariant,
+    setNebulaVisible,
+    nebulaVisible,
+    setNebulaDive,
+    nebulaDive,
+    setNebulaDrift,
+    nebulaDrift,
+    setNebulaDensity,
+    nebulaDensity,
+    setNebulaStepCount,
+    nebulaStepCount,
   ]);
 
   return null;

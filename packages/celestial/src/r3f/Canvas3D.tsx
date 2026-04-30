@@ -45,9 +45,13 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
         // (raymarched black hole).
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true, powerPreference: 'low-power' }}
-        // Far defaults to 1000 in R3F; tour line reaches z = -340 plus a
-        // 400-unit star sphere, so 2000 is the safe horizon.
-        camera={{ position: [0, 0, 4], fov: 45, near: 0.1, far: 2000 }}
+        // Far plane sized to the longest tour-line point (contact anchor
+        // at z=2048 plus ~14 units of dive depth = ~2062). 3000 leaves
+        // ~900 units of margin and keeps depth-buffer precision
+        // acceptable (no shadows, no z-fighting cases). The starfield
+        // is now camera-followed (see SharedStarField.tsx) so it doesn't
+        // factor into the far-plane budget.
+        camera={{ position: [0, 0, 4], fov: 45, near: 0.1, far: 3000 }}
         // Transparent so the body's design-token gradient shows through
         // behind the canvas.
         style={{ background: 'transparent' }}
@@ -70,9 +74,9 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
             sunDirection is the shared world-space sun-direction uniform;
             EarthScene mutates it per frame, every other scene reads it. */}
         <EarthScene scene={scene} sunDirection={sunDirection} />
-        <ProjectsScene sunDirection={sunDirection} />
-        <ContactScene />
-        <ColophonScene />
+        <ProjectsScene scene={scene} sunDirection={sunDirection} />
+        <ContactScene scene={scene} />
+        <ColophonScene scene={scene} />
       </Canvas>
     </MobileSettingsProvider>
   );

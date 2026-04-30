@@ -67,4 +67,15 @@ export {
   useRingsEffects,
   type RingsEffectsValue,
 } from './RingsEffectsContext.js';
+export {
+  NebulaeConfigProvider,
+  useNebulaeConfig,
+  type NebulaeConfigValue,
+} from './NebulaeConfigContext.js';
+export {
+  NEBULA_VARIANTS,
+  NEBULA_VARIANTS_ORDER,
+  type NebulaVariant,
+  type NebulaParams,
+} from './r3f/scenes/nebula-variants.js';
 export { SCENE_DEFAULTS, type SceneDefaults } from './scene-defaults.js';

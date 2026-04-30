@@ -60,3 +60,9 @@ CONTINUE.md
 # Local debugging screenshots from Playwright/Puppeteer runs. Useful for
 # verifying behavior without a real browser; never committed.
 .screenshots/
+
+# Local source-master staging area for asset-prep scripts (e.g. nebula
+# imagery before it's resized + WebP-encoded into committed textures).
+# Contents are inputs to scripts/build-*.mjs scripts; the emitted
+# outputs ARE committed under packages/celestial/src/textures/.
+.scratch/

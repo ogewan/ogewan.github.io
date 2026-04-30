@@ -1,12 +1,24 @@
 import { useMemo, useRef } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useMobileSettings } from './MobileSettings.js';
 
 // Persistent starfield rendered behind every scene on the tour line. Uses a
 // single Points geometry with instanced positions so the cost is one draw
-// call regardless of count. Stars sit on a sphere of radius STARFIELD_RADIUS
-// centered on the origin; the tour line runs through the inside of that
-// sphere so stars surround the camera throughout.
+// call regardless of count.
+//
+// Skybox semantics. Stars sit on a sphere of radius STARFIELD_RADIUS, but
+// the sphere itself is repositioned to follow the camera every frame —
+// the camera is always at the sphere's center, so stars appear at a
+// constant distance regardless of where the tour line is. This matters
+// for the post-9.4 anchor topology: contact sits at z=2048, far outside
+// any reasonable origin-centered sphere. Reparenting to the camera
+// avoids needing to either expand the sphere to ~2400 (which makes
+// stars 6× smaller under sizeAttenuation) or massively bump the count.
+//
+// Real starfields don't have motion parallax for a human-scale observer
+// anyway — stars are effectively at infinity — so the skybox is also
+// the physically-correct behavior.
 //
 // Color palette mirrors the Phase 3 CSS placeholder palette: cool whites
 // shading toward cyan and violet. Sizes vary slightly so the field has depth.
@@ -67,6 +79,14 @@ export function SharedStarField() {
   const count = settings.isMobile ? MOBILE_COUNT : DESKTOP_COUNT;
   const data = useMemo(() => buildStars(count), [count]);
   const ref = useRef<THREE.Points>(null);
+  const camera = useThree((s) => s.camera);
+
+  // Skybox: copy the camera's world position into the points group every
+  // frame so the star sphere is always centered on the viewer. Cost is
+  // one Vector3.copy per frame — negligible.
+  useFrame(() => {
+    if (ref.current) ref.current.position.copy(camera.position);
+  });
 
   return (
     <points ref={ref} frustumCulled={false}>

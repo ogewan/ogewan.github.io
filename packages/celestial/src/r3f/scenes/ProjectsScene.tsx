@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import type { SceneName } from '../../scenes.js';
 import { SCENE_ANCHORS } from '../scene-anchors.js';
 import {
   ringParticleVertexShader,
@@ -132,10 +133,18 @@ interface ProjectsSceneProps {
   // into the ring shader so each particle's lambert against the sun
   // tracks the per-frame mutation EarthScene performs.
   readonly sunDirection: { value: THREE.Vector3 };
+  // Active scene name. Drives the root-group `visible` gate so the
+  // 120k-particle ring system + gas giant stop drawing when the camera
+  // isn't framing them — frustum culling for `<points>` isn't always
+  // reliable, and an explicit gate is cheaper than relying on it.
+  // useFrame still runs (state advances at the right phase) so a
+  // return to /projects shows the rings where they "should be."
+  readonly scene: SceneName;
 }
 
-export function ProjectsScene({ sunDirection }: ProjectsSceneProps) {
+export function ProjectsScene({ sunDirection, scene }: ProjectsSceneProps) {
   const [x, y, z] = SCENE_ANCHORS.projects.origin;
+  const projectsSceneVisible = scene === 'projects';
   const settings = useMobileSettings();
   const { visible: ringsVisible } = useRingsVisibility();
   const { clockVisible } = useRingsClockMarkers();
@@ -321,7 +330,7 @@ export function ProjectsScene({ sunDirection }: ProjectsSceneProps) {
     //   4. tiltSpinRef — rotates this when scenePreserveTilt is ON
     //      (rotation follows the static tilt → rings spin around
     //      their own plane's normal, tilt-to-camera stays constant).
-    <group position={[x, y, z]}>
+    <group position={[x, y, z]} visible={projectsSceneVisible}>
       <group ref={worldYSpinRef}>
         <group rotation={[0.3, 0, -0.18]}>
           <group ref={tiltSpinRef}>

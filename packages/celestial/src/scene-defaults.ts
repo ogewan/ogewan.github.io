@@ -24,6 +24,39 @@ export const SCENE_DEFAULTS = {
     // real Blue Marble webps are available.
     placeholderMode: false,
   },
+  contact: {
+    // Active nebula variant. Source-of-truth lives in the URL `?neb`
+    // query param when present; this is the fresh-load fallback only.
+    // Valid: '01' (Carina) | '02' (Lagoon) | '03' (Pillars) | '04' (Veil).
+    variant: '01' as '01' | '02' | '03' | '04',
+    // Whether the nebula renders at all. Hide when iterating shader
+    // tweaks that need a clean comparison frame.
+    visible: true,
+    // Whether the camera-dive sub-animation runs after the route tween
+    // settles. Disable to lock camera at the route-tween anchor for
+    // taking still screenshots.
+    dive: true,
+    // Per-frame opacity multiplier applied to accumulated raymarch
+    // alpha. 1.0 = full density per the per-variant params; lower
+    // fades the nebula toward transparent.
+    density: 1.0,
+    // Whether the volume drifts gently (sinusoidal rotation) once the
+    // camera settles inside it. Adds subtle motion without being
+    // distracting.
+    drift: true,
+    // Raymarching steps per fragment. The bounding sphere uses BackSide
+    // rendering with the camera INSIDE the volume, so back-face fragments
+    // cover the entire viewport — per-fragment cost stacks across the
+    // whole canvas. Default 16 = comfortable middle ground on a modern
+    // desktop GPU after the Suspense fix (gotcha #45) eliminated the
+    // earlier context-loss issue. Dial via dev console:
+    //   portfolio.nebulae.config({ stepCount: 8 })    → low / fallback
+    //   portfolio.nebulae.config({ stepCount: 32 })   → high quality
+    //   portfolio.nebulae.config({ stepCount: 64 })   → ceiling
+    // Shader hard-caps at MAX_STEPS=64 (compile-time loop bound).
+    // Mobile / degraded path clamps to 8 in ContactScene.
+    stepCount: 16,
+  },
   projects: {
     // Whether the particle ring system + colored bands render at all.
     ringsVisible: true,

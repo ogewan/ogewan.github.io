@@ -6,21 +6,26 @@ import type { SceneName } from '../scenes.js';
 // from one scene to the next is real continuous motion rather than an
 // opacity swap.
 //
-// Three.js cameras look down -Z by default. The first three scenes
-// (earth → about → projects) sit on the +Z side of the origin and are a
-// progressive zoom-out: Earth at z=4, About pulls back to z=12, Projects
-// pulls back to z=268 — a 256-unit zoom-out journey (twice the original
-// forward warp's 128 units, in the opposite direction). The dramatic
-// distance is what sells the "stepping back to see the whole solar
-// system" narrative. Earth and About share the same lookAt target —
-// About is the Earth scene at wider framing. The Earth+Moon system is
-// hidden by EarthScene's group `visible` flag once the active scene is
-// `projects` or beyond, so the gas giant at z=246 is the only body in
-// frame at the projects anchor.
+// Three.js cameras look down -Z by default. The first FOUR scenes
+// (earth → about → projects → contact) sit on the +Z side of the origin
+// as a progressive zoom-out chain:
+//   - Earth at z=4
+//   - About pulls back to z=12 (same lookAt as earth — about is just
+//     wider framing of the Earth+Moon system)
+//   - Projects pulls back to z=268 (256-unit jump from about)
+//   - Contact pulls back to z=2048 (1780-unit jump from projects, by far
+//     the longest warp — sells the "you've left the solar system"
+//     transition that the contact-scene brief calls a warp moment)
+// Earth+Moon system is hidden by EarthScene's group `visible` flag once
+// the active scene is `projects` or beyond, so the gas giant at z=246 is
+// the only body in frame at the projects anchor; the photo-driven
+// volumetric raymarched nebula at z=2055 is the only thing in frame at
+// the contact anchor.
 //
-// Contact and Colophon stay on the -Z side of the origin (the original
-// tour topology). The transition projects → contact crosses the origin
-// (a long warp); contact → colophon is a forward warp deeper into space.
+// Colophon stays on the -Z side of the origin. The transition
+// contact → colophon is now a 2384-unit cross-origin tween (camera
+// passes through the origin region; nothing visible there). 9.5
+// (Colophon — black hole) gets to decide whether to reposition.
 //
 // X and Y offsets give each scene a slight off-axis framing so the camera
 // look-at lerp paints geometry into different parts of the viewport — the
@@ -65,10 +70,18 @@ export const SCENE_ANCHORS: Record<SceneName, SceneAnchor> = {
     lookAt: [3, 1.2, 246],
     origin: [3, 1.2, 246],
   },
+  // Contact: 1780-unit +Z zoom-out from Projects (z=268 → z=2048). The
+  // photo-driven volumetric raymarched nebula sits at z=2055 inside a
+  // bounding sphere of radius ~12; the camera arrives at z=2048 (just
+  // outside the bounding sphere on the camera-facing side), then
+  // ContactScene's dive sub-animation pushes the camera ~14 units
+  // forward over ~4.5s after the route tween settles. Far plane was
+  // bumped from 2000 → 3000 in Canvas3D to keep the volume in front of
+  // the far clip with margin.
   contact: {
-    cameraPosition: [0, 0, -216],
-    lookAt: [0, 0, -220],
-    origin: [0, 0, -220],
+    cameraPosition: [0, 0, 2048],
+    lookAt: [0, 0, 2052],
+    origin: [0, 0, 2055],
   },
   colophon: {
     cameraPosition: [0, 0, -336],
