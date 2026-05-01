@@ -21,6 +21,12 @@ import type { GravitationalLensingEffectImpl } from './GravitationalLensingEffec
 // in Canvas3D's <EffectComposer>. This component drives that effect's uniforms
 // per frame via the lensingEffectRef passed from Canvas3D.
 //
+// EffectComposer is conditionally mounted by Canvas3D (only when this scene
+// is active or transitioning). Because the ref is populated 1–2 R3F frames
+// after mount, tween startup is deferred to useFrame via tweenPendingRef so
+// it fires on the first frame the effect ref is non-null — the 16 ms delay
+// is invisible within the 2-second camera tween.
+//
 // Transition — contact → colophon:
 //   uVignette ramps 0→1 over 800ms (masking nebula billboard edges as the
 //   camera zooms out), then falls back 1→0 over 400ms as the BH fills frame.
@@ -31,6 +37,8 @@ interface ColophonSceneProps {
   readonly previousScene: SceneName | null;
   readonly lensingEffectRef: React.RefObject<GravitationalLensingEffectImpl | null>;
 }
+
+type TweenPending = { kind: 'enter'; prev: SceneName } | { kind: 'exit' } | null;
 
 // Reusable scratch objects — avoids per-frame allocation.
 const _bhWorld = new THREE.Vector3();
@@ -46,80 +54,88 @@ export function ColophonScene({ scene, previousScene, lensingEffectRef }: Coloph
   const distortionTweenRef = useRef<gsap.core.Tween | null>(null);
   const vignetteTweenRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
   const prevSceneRef = useRef<SceneName>(scene);
-  const uniformsProxy = useRef({ distortion: 0, vignette: 0 });
+  // vignette starts at 1 to match the Effect constructor's uVignette=1.0 —
+  // both agree on "full black" for the first mount frame.
+  const uniformsProxy = useRef({ distortion: 0, vignette: 1 });
 
-  // Drive uDistortion and uVignette via GSAP whenever scene changes.
+  // Deferred tween start: useEffect records intent; useFrame executes once
+  // lensingEffectRef.current is non-null (EffectComposer mounts 1–2 frames
+  // after Canvas3D's conditional renders it).
+  const tweenPendingRef = useRef<TweenPending>(null);
+
   useEffect(() => {
     const prev = prevSceneRef.current;
     prevSceneRef.current = scene;
-
-    const effect = lensingEffectRef.current;
-    if (!effect) return;
 
     distortionTweenRef.current?.kill();
     vignetteTweenRef.current?.kill();
 
     if (scene === 'colophon') {
-      // Arriving at colophon: fade distortion in over the tween duration.
-      distortionTweenRef.current = gsap.to(uniformsProxy.current, {
-        distortion: config.distortionStrength,
-        duration: CAMERA_TWEEN_DURATION_SEC,
-        ease: 'power2.in',
-        onUpdate: () => {
-          const u = effect.uniforms.get('uDistortion');
-          if (u) u.value = uniformsProxy.current.distortion;
-        },
-      });
-
-      // contact → colophon: vignette up then down to mask billboard edges.
-      if (prev === 'contact') {
-        vignetteTweenRef.current = gsap
-          .timeline()
-          .to(uniformsProxy.current, {
-            vignette: 1,
-            duration: 0.8,
-            ease: 'power2.in',
-            onUpdate: () => {
-              const u = effect.uniforms.get('uVignette');
-              if (u) u.value = uniformsProxy.current.vignette;
-            },
-          })
-          .to(uniformsProxy.current, {
-            vignette: 0,
-            duration: 0.4,
-            ease: 'power2.out',
-            onUpdate: () => {
-              const u = effect.uniforms.get('uVignette');
-              if (u) u.value = uniformsProxy.current.vignette;
-            },
-          });
-      }
+      tweenPendingRef.current = { kind: 'enter', prev };
     } else {
-      // Leaving colophon: fade distortion out quickly.
-      distortionTweenRef.current = gsap.to(uniformsProxy.current, {
-        distortion: 0,
-        duration: 0.4,
-        ease: 'power2.out',
-        onUpdate: () => {
-          const u = effect.uniforms.get('uDistortion');
-          if (u) u.value = uniformsProxy.current.distortion;
-        },
-      });
-
-      const uVig = effect.uniforms.get('uVignette');
-      if (uVig) uVig.value = 0;
-      uniformsProxy.current.vignette = 0;
+      tweenPendingRef.current = { kind: 'exit' };
     }
+  }, [scene]);
 
-    return () => {
-      distortionTweenRef.current?.kill();
-      vignetteTweenRef.current?.kill();
-    };
-  }, [scene, lensingEffectRef]);
-
-  // Per-frame: project BH world position to screen, update lensing uniforms.
+  // Per-frame: drain pending tween once effect ref is available, then update
+  // lensing uniforms from BH world position every frame.
   useFrame(() => {
     const effect = lensingEffectRef.current;
+
+    // --- Drain pending tween ---
+    if (tweenPendingRef.current && effect) {
+      const pending = tweenPendingRef.current;
+      tweenPendingRef.current = null;
+
+      if (pending.kind === 'enter') {
+        distortionTweenRef.current = gsap.to(uniformsProxy.current, {
+          distortion: config.distortionStrength,
+          duration: CAMERA_TWEEN_DURATION_SEC,
+          ease: 'power2.in',
+          onUpdate: () => {
+            const u = effect.uniforms.get('uDistortion');
+            if (u) u.value = uniformsProxy.current.distortion;
+          },
+        });
+
+        // Ensure uniform matches proxy before tween starts — defensive sync
+        // in case Effect re-used from a prior colophon visit (uVignette may
+        // have been left at 0 by the exit cleanup).
+        uniformsProxy.current.vignette = 1;
+        const uVigNow = effect.uniforms.get('uVignette');
+        if (uVigNow) uVigNow.value = 1;
+
+        // Reveal from black → 0 over 1.2 s. The 0→1 fade-in is replaced by
+        // the guaranteed uVignette=1.0 on first mount frame (Effect constructor
+        // + proxy init), so we only need the reveal half of the tween.
+        vignetteTweenRef.current = gsap.to(uniformsProxy.current, {
+          vignette: 0,
+          duration: 1.2,
+          ease: 'power2.out',
+          onUpdate: () => {
+            const u = effect.uniforms.get('uVignette');
+            if (u) u.value = uniformsProxy.current.vignette;
+          },
+        });
+      } else {
+        // Leaving colophon: fade distortion out quickly.
+        distortionTweenRef.current = gsap.to(uniformsProxy.current, {
+          distortion: 0,
+          duration: 0.4,
+          ease: 'power2.out',
+          onUpdate: () => {
+            const u = effect.uniforms.get('uDistortion');
+            if (u) u.value = uniformsProxy.current.distortion;
+          },
+        });
+
+        const uVig = effect.uniforms.get('uVignette');
+        if (uVig) uVig.value = 0;
+        uniformsProxy.current.vignette = 0;
+      }
+    }
+
+    // --- Per-frame uniform sync ---
     if (!effect) return;
 
     const origin = SCENE_ANCHORS.colophon.origin;

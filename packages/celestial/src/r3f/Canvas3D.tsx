@@ -55,6 +55,16 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
   const [previousScene, setPreviousScene] = useState<SceneName | null>(null);
   const lastSceneRef = useRef(scene);
 
+  // EffectComposer mounts only when colophon is active, and only AFTER the
+  // camera tween completes (CAMERA_TWEEN_DURATION_SEC delay on enter). This
+  // prevents EffectComposer's LinearSRGBColorSpace side-effect from brightening
+  // other scenes or flashing during the contact→colophon transition. On exit,
+  // it stays mounted for the same duration to cover the exit animation, then
+  // unmounts — restoring SRGBColorSpace for all subsequent scenes.
+  // Cold-load on colophon: activate immediately (no transition to hide).
+  // Navigation to colophon delays activation via setTimeout in useLayoutEffect.
+  const [lensingActive, setLensingActive] = useState(scene === 'colophon');
+
   // useLayoutEffect (not useEffect) so the previousScene state update commits
   // before the browser paints. useEffect fires after paint, leaving one frame
   // where scene has changed but previousScene is still null — the outgoing
@@ -63,12 +73,32 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
   // the re-render before yielding to the browser, so the blink never shows.
   useLayoutEffect(() => {
     if (lastSceneRef.current === scene) return undefined;
-    setPreviousScene(lastSceneRef.current);
+    const outgoing = lastSceneRef.current;
+    setPreviousScene(outgoing);
     lastSceneRef.current = scene;
+
+    const tweenMs = CAMERA_TWEEN_DURATION_SEC * 1000;
+    let lensingTimer: number | undefined;
+
+    if (scene === 'colophon') {
+      // Delay EffectComposer mount until the camera has fully arrived — mirrors
+      // the exit: just as the nebula is hidden behind EffectComposer on enter,
+      // EffectComposer is gone before the nebula reappears on exit.
+      lensingTimer = window.setTimeout(() => setLensingActive(true), tweenMs);
+    } else if (outgoing === 'colophon') {
+      // Unmount immediately so EffectComposer's LinearSRGBColorSpace effect is
+      // gone before the camera starts moving toward the contact nebula.
+      setLensingActive(false);
+    }
+
     const handle = window.setTimeout(() => {
       setPreviousScene(null);
-    }, CAMERA_TWEEN_DURATION_SEC * 1000);
-    return () => window.clearTimeout(handle);
+    }, tweenMs);
+
+    return () => {
+      window.clearTimeout(handle);
+      if (lensingTimer !== undefined) window.clearTimeout(lensingTimer);
+    };
   }, [scene]);
 
   return (
@@ -95,17 +125,16 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
         <ambientLight intensity={0.18} />
         <directionalLight position={[5, 3, 5]} intensity={0.9} />
 
-        {/* Lensing post-process. Always mounted; uDistortion=0 is a passthrough
-            blit on non-colophon scenes (~0.1ms overhead). ColophonScene drives
-            the uniforms (uBhCenter, uBhRadius, uDistortion, uVignette) per frame
-            via lensingEffectRef. */}
-        {/* multisampling={0}: canvas already has antialias, no extra MSAA needed.
-            frameBufferType=UnsignedByteType: matches the original 8-bit render path,
-            preventing EffectComposer's default HalfFloat framebuffer from brightening
-            the nebula via HDR accumulation of additive blending. */}
-        <EffectComposer multisampling={0} frameBufferType={THREE.UnsignedByteType}>
-          <GravitationalLensing ref={lensingEffectRef} />
-        </EffectComposer>
+        {/* Lensing post-process — mounted only after the colophon camera tween
+            completes (lensingActive), so EffectComposer's LinearSRGBColorSpace
+            side-effect never touches other scenes or flashes during the
+            contact→colophon transition. Stays mounted for the full exit-tween
+            window so the distortion fade-out completes before unmount. */}
+        {lensingActive && (
+          <EffectComposer multisampling={0} frameBufferType={THREE.UnsignedByteType}>
+            <GravitationalLensing ref={lensingEffectRef} />
+          </EffectComposer>
+        )}
 
         <SharedStarField />
         <CameraDriver scene={scene} />

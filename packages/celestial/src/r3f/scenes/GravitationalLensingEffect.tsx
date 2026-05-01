@@ -74,11 +74,14 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   vec4 result = mix(lensed, lensed + ringColor * 1.5, ringBlend * shadowMask);
   result *= shadowMask;
 
-  // Edge vignette: darkens screen periphery during contact→colophon transition,
-  // masking nebula billboard edges as camera zooms out.
+  // Vignette: masks nebula billboard edges during contact→colophon transition.
+  // Formula scales from edge-only (low uVignette) to full-screen black (uVignette=1)
+  // so the initial mount frame (uVignette=1.0) is fully opaque — hiding the
+  // one-frame outputColorSpace flash that occurs when EffectComposer mounts.
   vec2 centred = uv - 0.5;
   float vigR = length(vec2(centred.x * uAspect, centred.y));
-  float vignette = uVignette * smoothstep(0.25, 0.65, vigR);
+  float edgeVig = smoothstep(0.25, 0.65, vigR);
+  float vignette = uVignette * max(edgeVig, uVignette);
   result = mix(result, vec4(0.0, 0.0, 0.0, 1.0), vignette);
 
   outputColor = result;
@@ -93,7 +96,7 @@ export class GravitationalLensingEffectImpl extends Effect {
         ['uBhCenter', new Uniform(new Vector2(0.5, 0.5))],
         ['uBhRadius', new Uniform(0.0)],
         ['uDistortion', new Uniform(0.0)],
-        ['uVignette', new Uniform(0.0)],
+        ['uVignette', new Uniform(1.0)], // starts at 1 — full black on first mount frame
         ['uAspect', new Uniform(1.0)],
         ['uPhotonRing', new Uniform(1.0)],
       ]),
