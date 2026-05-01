@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
+import { EffectComposer } from '@react-three/postprocessing';
 import type { SceneName } from '../scenes.js';
 import { CAMERA_TWEEN_DURATION_SEC, CameraDriver } from './CameraDriver.js';
 import { SharedStarField } from './SharedStarField.js';
@@ -9,6 +10,10 @@ import { EarthScene } from './scenes/EarthScene.js';
 import { ProjectsScene } from './scenes/ProjectsScene.js';
 import { ContactScene } from './scenes/ContactScene.js';
 import { ColophonScene } from './scenes/ColophonScene.js';
+import {
+  GravitationalLensing,
+  type GravitationalLensingEffectImpl,
+} from './scenes/GravitationalLensingEffect.js';
 import { getSunDirection } from './sun-direction.js';
 
 // The R3F slice of the celestial backdrop, factored out so it can be
@@ -45,6 +50,8 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
   // tween. When `scene` changes, we capture the outgoing name and schedule
   // a clear after CAMERA_TWEEN_DURATION_SEC. Each scene component checks
   // both `scene` and `previousScene` to decide whether to render itself.
+  const lensingEffectRef = useRef<GravitationalLensingEffectImpl | null>(null);
+
   const [previousScene, setPreviousScene] = useState<SceneName | null>(null);
   const lastSceneRef = useRef(scene);
 
@@ -88,6 +95,18 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
         <ambientLight intensity={0.18} />
         <directionalLight position={[5, 3, 5]} intensity={0.9} />
 
+        {/* Lensing post-process. Always mounted; uDistortion=0 is a passthrough
+            blit on non-colophon scenes (~0.1ms overhead). ColophonScene drives
+            the uniforms (uBhCenter, uBhRadius, uDistortion, uVignette) per frame
+            via lensingEffectRef. */}
+        {/* multisampling={0}: canvas already has antialias, no extra MSAA needed.
+            frameBufferType=UnsignedByteType: matches the original 8-bit render path,
+            preventing EffectComposer's default HalfFloat framebuffer from brightening
+            the nebula via HDR accumulation of additive blending. */}
+        <EffectComposer multisampling={0} frameBufferType={THREE.UnsignedByteType}>
+          <GravitationalLensing ref={lensingEffectRef} />
+        </EffectComposer>
+
         <SharedStarField />
         <CameraDriver scene={scene} />
 
@@ -102,7 +121,11 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
         <EarthScene scene={scene} previousScene={previousScene} sunDirection={sunDirection} />
         <ProjectsScene scene={scene} previousScene={previousScene} sunDirection={sunDirection} />
         <ContactScene scene={scene} previousScene={previousScene} />
-        <ColophonScene scene={scene} previousScene={previousScene} />
+        <ColophonScene
+          scene={scene}
+          previousScene={previousScene}
+          lensingEffectRef={lensingEffectRef}
+        />
       </Canvas>
     </MobileSettingsProvider>
   );

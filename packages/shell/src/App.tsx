@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Route, Routes } from 'react-router';
 import {
   ActiveSceneProvider,
+  BlackHoleConfigProvider,
   CelestialBackdrop,
   CelestialFocusProvider,
   CelestialQualityProvider,
@@ -64,37 +65,42 @@ export function App() {
               <RingsEffectsProvider>
                 <RingsClockMarkersProvider>
                   <NebulaeConfigProvider>
-                    <ActiveSceneProvider>
-                      <div data-bg-root>
-                        <CelestialBackdrop />
-                      </div>
-                      <div data-ui-root className="relative z-10">
-                        <SiteLayout>
-                          <Routes>
-                            <Route path="/" element={<RootRedirect />} />
-                            <Route path="/:locale" element={<LocaleSync />}>
-                              {/* MainPage is a layout route — its element stays mounted
+                    <BlackHoleConfigProvider>
+                      <ActiveSceneProvider>
+                        <div data-bg-root>
+                          <CelestialBackdrop />
+                        </div>
+                        <div data-ui-root className="relative z-10">
+                          <SiteLayout>
+                            <Routes>
+                              <Route path="/" element={<RootRedirect />} />
+                              <Route path="/:locale" element={<LocaleSync />}>
+                                {/* MainPage is a layout route — its element stays mounted
                           across in-app navigation between section paths. The
                           child routes only exist to match URLs (their elements
                           render nothing); MainPage owns the section stack and
                           scroll-to-section sync. */}
-                              <Route element={<MainPage />}>
-                                <Route index element={null} />
-                                <Route path="about" element={null} />
-                                <Route path="projects" element={null} />
-                                <Route path="contact" element={null} />
-                                <Route path="colophon" element={null} />
+                                <Route element={<MainPage />}>
+                                  <Route index element={null} />
+                                  <Route path="about" element={null} />
+                                  <Route path="projects" element={null} />
+                                  <Route path="contact" element={null} />
+                                  <Route path="colophon" element={null} />
+                                </Route>
+                                <Route path="projects/:slug" element={<ProjectDetail />} />
+                                <Route
+                                  path="projects/:slug/redirect"
+                                  element={<ProjectRedirect />}
+                                />
+                                {DEV_ROUTES}
                               </Route>
-                              <Route path="projects/:slug" element={<ProjectDetail />} />
-                              <Route path="projects/:slug/redirect" element={<ProjectRedirect />} />
-                              {DEV_ROUTES}
-                            </Route>
-                            <Route path="*" element={<NotFound />} />
-                          </Routes>
-                        </SiteLayout>
-                      </div>
-                      {DEV_BRIDGE}
-                    </ActiveSceneProvider>
+                              <Route path="*" element={<NotFound />} />
+                            </Routes>
+                          </SiteLayout>
+                        </div>
+                        {DEV_BRIDGE}
+                      </ActiveSceneProvider>
+                    </BlackHoleConfigProvider>
                   </NebulaeConfigProvider>
                 </RingsClockMarkersProvider>
               </RingsEffectsProvider>

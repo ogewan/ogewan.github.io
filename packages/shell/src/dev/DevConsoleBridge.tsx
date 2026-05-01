@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import {
+  useBlackHoleConfig,
   useCelestialQuality,
   useEarthPlaceholderMode,
   useEarthTestMode,
@@ -37,6 +38,7 @@ export function DevConsoleBridge() {
     setScenePreserveTilt,
   } = useRingsEffects();
   const nebulae = useNebulaeConfig();
+  const bh = useBlackHoleConfig();
 
   useEffect(() => {
     registerDevAPI({
@@ -94,6 +96,31 @@ export function DevConsoleBridge() {
       getParticleGlow: () => nebulae.particleGlow,
       setParticleDrift: (on) => nebulae.setParticleDrift(on),
       getParticleDrift: () => nebulae.particleDrift,
+      // Black hole
+      setBhVisible: (on) => bh.setVisible(on),
+      getBhVisible: () => bh.visible,
+      setBhSchwarschildRadius: (n) => bh.setSchwarschildRadius(n),
+      getBhSchwarschildRadius: () => bh.schwarzschildRadius,
+      setBhDiskTilt: (n) => bh.setDiskTilt(n),
+      getBhDiskTilt: () => bh.diskTilt,
+      setBhDiskInnerFactor: (n) => bh.setDiskInnerFactor(n),
+      getBhDiskInnerFactor: () => bh.diskInnerFactor,
+      setBhDiskOuterFactor: (n) => bh.setDiskOuterFactor(n),
+      getBhDiskOuterFactor: () => bh.diskOuterFactor,
+      setBhDiskBrightness: (n) => bh.setDiskBrightness(n),
+      getBhDiskBrightness: () => bh.diskBrightness,
+      setBhDiskSaturation: (n) => bh.setDiskSaturation(n),
+      getBhDiskSaturation: () => bh.diskSaturation,
+      setBhDiskTurbulence: (n) => bh.setDiskTurbulence(n),
+      getBhDiskTurbulence: () => bh.diskTurbulence,
+      setBhDiskDrift: (on) => bh.setDiskDrift(on),
+      getBhDiskDrift: () => bh.diskDrift,
+      setBhDopplerStrength: (n) => bh.setDopplerStrength(n),
+      getBhDopplerStrength: () => bh.dopplerStrength,
+      setBhDistortionStrength: (n) => bh.setDistortionStrength(n),
+      getBhDistortionStrength: () => bh.distortionStrength,
+      setBhPhotonRing: (on) => bh.setPhotonRing(on),
+      getBhPhotonRing: () => bh.photonRing,
     });
   }, [
     navigate,
@@ -115,6 +142,7 @@ export function DevConsoleBridge() {
     setScenePreserveTilt,
     scenePreserveTilt,
     nebulae,
+    bh,
   ]);
 
   return null;

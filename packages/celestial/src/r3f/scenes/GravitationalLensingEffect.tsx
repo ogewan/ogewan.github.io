@@ -1,6 +1,6 @@
+import { useMemo, forwardRef } from 'react';
 import { Effect, BlendFunction } from 'postprocessing';
 import { Uniform, Vector2 } from 'three';
-import { wrapEffect } from '@react-three/postprocessing';
 
 // Screen-space gravitational lensing effect for Phase 9.5.
 //
@@ -85,7 +85,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
 }
 `;
 
-class GravitationalLensingEffectImpl extends Effect {
+export class GravitationalLensingEffectImpl extends Effect {
   constructor() {
     super('GravitationalLensingEffect', FRAGMENT_SHADER, {
       blendFunction: BlendFunction.NORMAL,
@@ -101,7 +101,12 @@ class GravitationalLensingEffectImpl extends Effect {
   }
 }
 
-// wrapEffect converts the class into a React component that integrates
-// with @react-three/postprocessing's EffectComposer pipeline.
-export const GravitationalLensing = wrapEffect(GravitationalLensingEffectImpl);
-export type { GravitationalLensingEffectImpl };
+// forwardRef + <primitive> avoids wrapEffect's JSON.stringify(props) dep,
+// which crashes in React 19 when a ref prop containing a Three.js object
+// (with circular __r3f parent/children links) is serialized on every render.
+export const GravitationalLensing = forwardRef<GravitationalLensingEffectImpl>(
+  function GravitationalLensing(_, ref) {
+    const effect = useMemo(() => new GravitationalLensingEffectImpl(), []);
+    return <primitive ref={ref} object={effect} dispose={null} />;
+  },
+);

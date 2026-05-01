@@ -43,6 +43,21 @@ interface RingsConfig {
   clock: boolean;
 }
 
+interface BlackHoleConfig {
+  visible: boolean;
+  schwarzschildRadius: number;
+  diskTilt: number;
+  diskInnerFactor: number;
+  diskOuterFactor: number;
+  diskBrightness: number;
+  diskSaturation: number;
+  diskTurbulence: number;
+  diskDrift: boolean;
+  dopplerStrength: number;
+  distortionStrength: number;
+  photonRing: boolean;
+}
+
 type NebulaVariantString = '01' | '02' | '03' | '04';
 
 interface NebulaeConfig {
@@ -121,6 +136,31 @@ interface DevAPIRegistry {
   getParticleGlow?: () => number;
   setParticleDrift?: Setter<boolean>;
   getParticleDrift?: () => boolean;
+  // Black hole (colophon scene)
+  setBhVisible?: Setter<boolean>;
+  getBhVisible?: () => boolean;
+  setBhSchwarschildRadius?: Setter<number>;
+  getBhSchwarschildRadius?: () => number;
+  setBhDiskTilt?: Setter<number>;
+  getBhDiskTilt?: () => number;
+  setBhDiskInnerFactor?: Setter<number>;
+  getBhDiskInnerFactor?: () => number;
+  setBhDiskOuterFactor?: Setter<number>;
+  getBhDiskOuterFactor?: () => number;
+  setBhDiskBrightness?: Setter<number>;
+  getBhDiskBrightness?: () => number;
+  setBhDiskSaturation?: Setter<number>;
+  getBhDiskSaturation?: () => number;
+  setBhDiskTurbulence?: Setter<number>;
+  getBhDiskTurbulence?: () => number;
+  setBhDiskDrift?: Setter<boolean>;
+  getBhDiskDrift?: () => boolean;
+  setBhDopplerStrength?: Setter<number>;
+  getBhDopplerStrength?: () => number;
+  setBhDistortionStrength?: Setter<number>;
+  getBhDistortionStrength?: () => number;
+  setBhPhotonRing?: Setter<boolean>;
+  getBhPhotonRing?: () => boolean;
 }
 
 const NEBULA_VARIANT_VALUES: readonly NebulaVariantString[] = ['01', '02', '03', '04'];
@@ -178,6 +218,23 @@ function resetNebulaeDefaults(): void {
   registry.setParticleGlow?.(D.particleGlow);
   registry.setParticleDrift?.(D.particleDrift);
   console.log('[portfolio] nebulae defaults reset');
+}
+
+function resetBlackHoleDefaults(): void {
+  const D = SCENE_DEFAULTS.blackhole;
+  registry.setBhVisible?.(D.visible);
+  registry.setBhSchwarschildRadius?.(D.schwarzschildRadius);
+  registry.setBhDiskTilt?.(D.diskTilt);
+  registry.setBhDiskInnerFactor?.(D.diskInnerFactor);
+  registry.setBhDiskOuterFactor?.(D.diskOuterFactor);
+  registry.setBhDiskBrightness?.(D.diskBrightness);
+  registry.setBhDiskSaturation?.(D.diskSaturation);
+  registry.setBhDiskTurbulence?.(D.diskTurbulence);
+  registry.setBhDiskDrift?.(D.diskDrift);
+  registry.setBhDopplerStrength?.(D.dopplerStrength);
+  registry.setBhDistortionStrength?.(D.distortionStrength);
+  registry.setBhPhotonRing?.(D.photonRing);
+  console.log('[portfolio] blackhole defaults reset');
 }
 
 export function registerDevAPI(partial: DevAPIRegistry): void {
@@ -678,11 +735,78 @@ export function installDevConsole(): void {
       reset: resetNebulaeDefaults,
     },
 
+    // Colophon-scene black hole.
+    blackhole: {
+      // Unified get/set as JSON. Schema mirrors BlackHoleConfigContext.
+      //   portfolio.blackhole.config()                              → snapshot
+      //   portfolio.blackhole.config({ diskTilt: 30 })             → partial set
+      //   portfolio.blackhole.config({ distortionStrength: 0 })    → disable lensing
+      config(partial?: Record<string, unknown>): BlackHoleConfig | void {
+        if (partial === undefined) {
+          const D = SCENE_DEFAULTS.blackhole;
+          return {
+            visible: registry.getBhVisible?.() ?? D.visible,
+            schwarzschildRadius: registry.getBhSchwarschildRadius?.() ?? D.schwarzschildRadius,
+            diskTilt: registry.getBhDiskTilt?.() ?? D.diskTilt,
+            diskInnerFactor: registry.getBhDiskInnerFactor?.() ?? D.diskInnerFactor,
+            diskOuterFactor: registry.getBhDiskOuterFactor?.() ?? D.diskOuterFactor,
+            diskBrightness: registry.getBhDiskBrightness?.() ?? D.diskBrightness,
+            diskSaturation: registry.getBhDiskSaturation?.() ?? D.diskSaturation,
+            diskTurbulence: registry.getBhDiskTurbulence?.() ?? D.diskTurbulence,
+            diskDrift: registry.getBhDiskDrift?.() ?? D.diskDrift,
+            dopplerStrength: registry.getBhDopplerStrength?.() ?? D.dopplerStrength,
+            distortionStrength: registry.getBhDistortionStrength?.() ?? D.distortionStrength,
+            photonRing: registry.getBhPhotonRing?.() ?? D.photonRing,
+          };
+        }
+        if (typeof partial !== 'object' || partial === null) {
+          console.warn('[portfolio] blackhole.config(json): json must be an object.');
+          return;
+        }
+        const setBool = (key: string, setter?: Setter<boolean>): void => {
+          if (!(key in partial) || !setter) return;
+          setter(Boolean(partial[key]));
+        };
+        const setNum = (key: string, setter?: Setter<number>, min?: number, max?: number): void => {
+          if (!(key in partial) || !setter) return;
+          const v = partial[key];
+          if (typeof v !== 'number' || !Number.isFinite(v)) {
+            console.warn(`[portfolio] blackhole.config: ${key} must be a finite number; skipping.`);
+            return;
+          }
+          if (min !== undefined && v < min) {
+            console.warn(`[portfolio] blackhole.config: ${key} must be >= ${min}; skipping.`);
+            return;
+          }
+          if (max !== undefined && v > max) {
+            console.warn(`[portfolio] blackhole.config: ${key} must be <= ${max}; skipping.`);
+            return;
+          }
+          setter(v);
+        };
+        setBool('visible', registry.setBhVisible);
+        setNum('schwarzschildRadius', registry.setBhSchwarschildRadius, 0.1);
+        setNum('diskTilt', registry.setBhDiskTilt, 0, 90);
+        setNum('diskInnerFactor', registry.setBhDiskInnerFactor, 1);
+        setNum('diskOuterFactor', registry.setBhDiskOuterFactor, 1);
+        setNum('diskBrightness', registry.setBhDiskBrightness, 0);
+        setNum('diskSaturation', registry.setBhDiskSaturation, 0);
+        setNum('diskTurbulence', registry.setBhDiskTurbulence, 0, 1);
+        setBool('diskDrift', registry.setBhDiskDrift);
+        setNum('dopplerStrength', registry.setBhDopplerStrength, 0, 1);
+        setNum('distortionStrength', registry.setBhDistortionStrength, 0);
+        setBool('photonRing', registry.setBhPhotonRing);
+      },
+
+      reset: resetBlackHoleDefaults,
+    },
+
     // Reset all scene defaults at once.
     reset(): void {
       resetEarthDefaults();
       resetRingsDefaults();
       resetNebulaeDefaults();
+      resetBlackHoleDefaults();
       console.log('[portfolio] all defaults reset');
     },
 
@@ -729,6 +853,12 @@ export function installDevConsole(): void {
           "  portfolio.nebulae.variant('03')          // set + sync URL ?neb=03",
           '  portfolio.nebulae.config()               // → JSON of all nebula properties',
           '  portfolio.nebulae.config({ ... })        // partial set: billboard*/particle*',
+          '',
+          'Colophon-scene black hole:',
+          '  portfolio.blackhole.config()             // → JSON of all black hole properties',
+          '  portfolio.blackhole.config({ distortionStrength: 0 })  // disable lensing',
+          '  portfolio.blackhole.config({ diskTilt: 30, dopplerStrength: 0.8 })',
+          '  portfolio.blackhole.reset()              // restore defaults',
         ].join('\n'),
         'font-weight: bold',
       );
