@@ -72,12 +72,12 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
         // (raymarched black hole).
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true, powerPreference: 'low-power' }}
-        // Far plane sized to comfortably cover the contact anchor at
-        // z=4025. 5000 leaves ~975 units of margin and keeps depth-buffer
+        // Far plane sized to comfortably cover the colophon anchor at
+        // z=7800. 9000 leaves ~1200 units of margin and keeps depth-buffer
         // precision acceptable (no shadows, no z-fighting cases). The
-        // starfield is now camera-followed (see SharedStarField.tsx) so
-        // it doesn't factor into the far-plane budget.
-        camera={{ position: [0, 0, 4], fov: 45, near: 0.1, far: 5000 }}
+        // starfield is camera-followed (see SharedStarField.tsx) so it
+        // doesn't factor into the far-plane budget.
+        camera={{ position: [0, 0, 4], fov: 45, near: 0.1, far: 9000 }}
         // Transparent so the body's design-token gradient shows through
         // behind the canvas.
         style={{ background: 'transparent' }}

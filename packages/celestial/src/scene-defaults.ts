@@ -54,6 +54,39 @@ export const SCENE_DEFAULTS = {
     particleGlow: 1.0,
     particleDrift: true,
   },
+  blackhole: {
+    // Master scene visibility. Hide for clean comparison frames.
+    visible: true,
+    // Schwarzschild radius in world units. The rendered shadow sphere
+    // has radius 2.6 × Rs (the photon capture cross-section). At the
+    // colophon camera distance of 20 units, Rs=1.5 gives a shadow
+    // diameter of ~39% of the vertical viewport — between Earth and
+    // the gas giant in apparent size.
+    schwarzschildRadius: 1.5,
+    // Accretion disk tilt from face-on in degrees. 20° shows the disk
+    // face AND lets the lensing warp the far half into view below the
+    // shadow (the Gargantua / M87 signature).
+    diskTilt: 20,
+    // Inner disk edge = diskInnerFactor × Rs (ISCO for Schwarzschild BH).
+    diskInnerFactor: 2.2,
+    // Outer disk edge = diskOuterFactor × Rs.
+    diskOuterFactor: 6.0,
+    // Brightness multiplier on the disk emission.
+    diskBrightness: 1.0,
+    // Saturation of the temperature-gradient colors.
+    diskSaturation: 1.0,
+    // FBm noise amplitude — controls turbulence density variation.
+    diskTurbulence: 0.6,
+    // Animate the turbulence over time (uTime advance per frame).
+    diskDrift: true,
+    // Doppler asymmetry: 0 = symmetric disk, 1 = max brightness ratio
+    // between approaching (left) and receding (right) sides.
+    dopplerStrength: 0.5,
+    // Lensing multiplier. 0 disables distortion (passthrough blit).
+    distortionStrength: 1.0,
+    // Render the photon-ring glow at the shadow edge.
+    photonRing: true,
+  },
   projects: {
     // Whether the particle ring system + colored bands render at all.
     ringsVisible: true,

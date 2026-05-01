@@ -26,10 +26,11 @@ import type { SceneName } from '../scenes.js';
 // the only body in frame at the projects anchor; the photo + particle
 // nebula at z=2055 is the only thing in frame at the contact anchor.
 //
-// Colophon stays on the -Z side of the origin. The transition
-// contact → colophon is now a 2384-unit cross-origin tween (camera
-// passes through the origin region; nothing visible there). 9.5
-// (Colophon — black hole) gets to decide whether to reposition.
+// Colophon continues the +Z tour line past Contact. The transition
+// contact → colophon is a 3775-unit +Z zoom-out (camera at z=4025 →
+// z=7800), matching the projects → contact leg length. Camera arrives
+// 20 units ahead of the black hole's origin and looks back at it,
+// maintaining the same −Z facing direction as all prior anchors.
 //
 // X and Y offsets give each scene a slight off-axis framing so the camera
 // look-at lerp paints geometry into different parts of the viewport — the
@@ -104,8 +105,9 @@ export const SCENE_ANCHORS: Record<SceneName, SceneAnchor> = {
     tweenDuration: 2.0,
   },
   colophon: {
-    cameraPosition: [0, 0, -336],
-    lookAt: [0, 0, -340],
-    origin: [0, 0, -340],
+    cameraPosition: [0, 0, 7800],
+    lookAt: [0, 0, 7780],
+    origin: [0, 0, 7780],
+    tweenDuration: 2.0,
   },
 };

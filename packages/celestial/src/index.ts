@@ -73,6 +73,11 @@ export {
   type NebulaeConfigValue,
 } from './NebulaeConfigContext.js';
 export {
+  BlackHoleConfigProvider,
+  useBlackHoleConfig,
+  type BlackHoleConfigValue,
+} from './BlackHoleConfigContext.js';
+export {
   NEBULA_VARIANTS,
   NEBULA_VARIANTS_ORDER,
   type NebulaVariant,
