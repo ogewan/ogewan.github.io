@@ -1,15 +1,21 @@
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { buildClockMarkerTexture } from '../clock-marker-texture.js';
 
 // Accretion disk for the black hole (Phase 9.5). A flat RingGeometry
 // rendered with a custom ShaderMaterial:
 //   - Radial temperature gradient: inner edge blue-white, outer edge orange-red.
 //   - FBm (4-octave) turbulence advected by uTime for animated density variation.
+//   - Keplerian rotation via uRotation: disk material orbits with inner
+//     parts faster than outer (phase ∝ 1/√r), producing visible shear.
 //   - Doppler asymmetry: clockwise spin (left side approaching) makes the left
 //     side brighter by up to dopplerStrength × base brightness.
 //   - diskTilt degrees from face-on (20° default) so the disk face is visible
 //     and the lensed far half curves into view below the shadow.
+//   - Clock overlay (diskClock): 12 sprite labels at clock positions in the
+//     disk plane. Due to gravitational lensing, all 12 positions are visible
+//     simultaneously even though 6 are geometrically behind the shadow sphere.
 
 const DISK_VERT = /* glsl */ `
 varying vec2 vUv;
@@ -23,6 +29,7 @@ void main() {
 
 const DISK_FRAG = /* glsl */ `
 uniform float uTime;
+uniform float uRotation;
 uniform float uInnerR;
 uniform float uOuterR;
 uniform float uBrightness;
@@ -76,7 +83,10 @@ vec3 diskColor(float t) {
 void main() {
   // Polar coords in local disk plane.
   float r     = length(vPosition.xz);
-  float theta = atan(vPosition.z, vPosition.x); // -PI .. PI
+
+  // Keplerian rotation: phase ∝ 1/sqrt(r), so inner orbits rotate faster.
+  float keplerPhase = uRotation / sqrt(max(r / uInnerR, 0.001));
+  float theta = atan(vPosition.z, vPosition.x) - keplerPhase; // -PI .. PI
 
   // Normalized radial position [0, 1].
   float tR = clamp((r - uInnerR) / max(uOuterR - uInnerR, 0.001), 0.0, 1.0);
@@ -113,6 +123,8 @@ void main() {
 }
 `;
 
+const CLOCK_HOURS = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
+
 interface AccretionDiskProps {
   readonly schwarzschildRadius: number;
   readonly diskInnerFactor: number;
@@ -122,7 +134,9 @@ interface AccretionDiskProps {
   readonly diskSaturation: number;
   readonly diskTurbulence: number;
   readonly diskDrift: boolean;
+  readonly diskRotationSpeed: number;
   readonly dopplerStrength: number;
+  readonly diskClock: boolean;
 }
 
 export function AccretionDisk({
@@ -134,7 +148,9 @@ export function AccretionDisk({
   diskSaturation,
   diskTurbulence,
   diskDrift,
+  diskRotationSpeed,
   dopplerStrength,
+  diskClock,
 }: AccretionDiskProps) {
   const matRef = useRef<THREE.ShaderMaterial>(null);
 
@@ -143,6 +159,7 @@ export function AccretionDisk({
 
   const uniforms = useRef({
     uTime: { value: 0 },
+    uRotation: { value: 0 },
     uInnerR: { value: innerR },
     uOuterR: { value: outerR },
     uBrightness: { value: diskBrightness },
@@ -151,10 +168,17 @@ export function AccretionDisk({
     uDopplerStrength: { value: dopplerStrength },
   });
 
+  // Clock marker textures — memoized, one canvas texture per hour label.
+  const clockTextures = useMemo(
+    () => CLOCK_HOURS.map((h) => buildClockMarkerTexture(String(h))),
+    [],
+  );
+
   // Keep uniforms in sync with props each frame (avoids recreating the material).
   useFrame((_, delta) => {
     const u = uniforms.current;
     if (diskDrift) u.uTime.value += delta;
+    u.uRotation.value += delta * diskRotationSpeed;
     u.uInnerR.value = schwarzschildRadius * diskInnerFactor;
     u.uOuterR.value = schwarzschildRadius * diskOuterFactor;
     u.uBrightness.value = diskBrightness;
@@ -167,6 +191,8 @@ export function AccretionDisk({
   // diskTilt: 0 = face-on, 90 = edge-on. Applied as X-rotation after
   // the base 90° lay-flat rotation. Both rotations on the same group.
   const tiltRad = (diskTilt * Math.PI) / 180;
+  const clockRadius = (innerR + outerR) * 0.5;
+  const clockScale = schwarzschildRadius * 0.55;
 
   return (
     <group rotation={[Math.PI / 2 + tiltRad, 0, 0]}>
@@ -183,6 +209,28 @@ export function AccretionDisk({
           side={THREE.DoubleSide}
         />
       </mesh>
+
+      {/* 12-hour clock labels in the disk plane — dev diagnostic.
+          Sprites always face the camera. Positions are in the group's
+          local XY plane (before the group rotation): 12 at (0,r,0) maps
+          to the far side of the disk in world space; 6 at (0,-r,0) maps
+          to the near side. Lensing bends the far-side labels into view. */}
+      {diskClock &&
+        CLOCK_HOURS.map((h, i) => {
+          const theta = (i / 12) * Math.PI * 2;
+          const x = Math.sin(theta) * clockRadius;
+          const y = Math.cos(theta) * clockRadius;
+          return (
+            <sprite key={h} position={[x, y, 0]} scale={[clockScale, clockScale, clockScale]}>
+              <spriteMaterial
+                map={clockTextures[i] ?? null}
+                transparent
+                alphaTest={0.01}
+                depthWrite={false}
+              />
+            </sprite>
+          );
+        })}
     </group>
   );
 }

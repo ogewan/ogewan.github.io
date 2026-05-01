@@ -115,12 +115,16 @@ export function DevConsoleBridge() {
       getBhDiskTurbulence: () => bh.diskTurbulence,
       setBhDiskDrift: (on) => bh.setDiskDrift(on),
       getBhDiskDrift: () => bh.diskDrift,
+      setBhDiskRotationSpeed: (n) => bh.setDiskRotationSpeed(n),
+      getBhDiskRotationSpeed: () => bh.diskRotationSpeed,
       setBhDopplerStrength: (n) => bh.setDopplerStrength(n),
       getBhDopplerStrength: () => bh.dopplerStrength,
       setBhDistortionStrength: (n) => bh.setDistortionStrength(n),
       getBhDistortionStrength: () => bh.distortionStrength,
       setBhPhotonRing: (on) => bh.setPhotonRing(on),
       getBhPhotonRing: () => bh.photonRing,
+      setBhDiskClock: (on) => bh.setDiskClock(on),
+      getBhDiskClock: () => bh.diskClock,
     });
   }, [
     navigate,

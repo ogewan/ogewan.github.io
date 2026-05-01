@@ -22,7 +22,10 @@ import {
   getProjectsBodyRotationRate,
   setProjectsBodyRotationRate,
   setGasGiantRotationRate,
+  getLensingActive,
+  setLensingActive,
   SCENE_DEFAULTS,
+  BLACKHOLE_PRESETS,
 } from '@portfolio/celestial';
 
 const HIDE_UI_CLASS = 'dev-hide-ui';
@@ -53,9 +56,11 @@ interface BlackHoleConfig {
   diskSaturation: number;
   diskTurbulence: number;
   diskDrift: boolean;
+  diskRotationSpeed: number;
   dopplerStrength: number;
   distortionStrength: number;
   photonRing: boolean;
+  diskClock: boolean;
 }
 
 type NebulaVariantString = '01' | '02' | '03' | '04';
@@ -155,12 +160,16 @@ interface DevAPIRegistry {
   getBhDiskTurbulence?: () => number;
   setBhDiskDrift?: Setter<boolean>;
   getBhDiskDrift?: () => boolean;
+  setBhDiskRotationSpeed?: Setter<number>;
+  getBhDiskRotationSpeed?: () => number;
   setBhDopplerStrength?: Setter<number>;
   getBhDopplerStrength?: () => number;
   setBhDistortionStrength?: Setter<number>;
   getBhDistortionStrength?: () => number;
   setBhPhotonRing?: Setter<boolean>;
   getBhPhotonRing?: () => boolean;
+  setBhDiskClock?: Setter<boolean>;
+  getBhDiskClock?: () => boolean;
 }
 
 const NEBULA_VARIANT_VALUES: readonly NebulaVariantString[] = ['01', '02', '03', '04'];
@@ -231,9 +240,11 @@ function resetBlackHoleDefaults(): void {
   registry.setBhDiskSaturation?.(D.diskSaturation);
   registry.setBhDiskTurbulence?.(D.diskTurbulence);
   registry.setBhDiskDrift?.(D.diskDrift);
+  registry.setBhDiskRotationSpeed?.(D.diskRotationSpeed);
   registry.setBhDopplerStrength?.(D.dopplerStrength);
   registry.setBhDistortionStrength?.(D.distortionStrength);
   registry.setBhPhotonRing?.(D.photonRing);
+  registry.setBhDiskClock?.(D.diskClock);
   console.log('[portfolio] blackhole defaults reset');
 }
 
@@ -754,9 +765,11 @@ export function installDevConsole(): void {
             diskSaturation: registry.getBhDiskSaturation?.() ?? D.diskSaturation,
             diskTurbulence: registry.getBhDiskTurbulence?.() ?? D.diskTurbulence,
             diskDrift: registry.getBhDiskDrift?.() ?? D.diskDrift,
+            diskRotationSpeed: registry.getBhDiskRotationSpeed?.() ?? D.diskRotationSpeed,
             dopplerStrength: registry.getBhDopplerStrength?.() ?? D.dopplerStrength,
             distortionStrength: registry.getBhDistortionStrength?.() ?? D.distortionStrength,
             photonRing: registry.getBhPhotonRing?.() ?? D.photonRing,
+            diskClock: registry.getBhDiskClock?.() ?? D.diskClock,
           };
         }
         if (typeof partial !== 'object' || partial === null) {
@@ -793,9 +806,55 @@ export function installDevConsole(): void {
         setNum('diskSaturation', registry.setBhDiskSaturation, 0);
         setNum('diskTurbulence', registry.setBhDiskTurbulence, 0, 1);
         setBool('diskDrift', registry.setBhDiskDrift);
+        setNum('diskRotationSpeed', registry.setBhDiskRotationSpeed, 0);
         setNum('dopplerStrength', registry.setBhDopplerStrength, 0, 1);
         setNum('distortionStrength', registry.setBhDistortionStrength, 0);
         setBool('photonRing', registry.setBhPhotonRing);
+        setBool('diskClock', registry.setBhDiskClock);
+      },
+
+      // Named presets. Apply via:
+      //   portfolio.blackhole.config(portfolio.blackhole.presets.m87)
+      //   portfolio.blackhole.config(portfolio.blackhole.presets.gargantua)
+      presets: BLACKHOLE_PRESETS,
+
+      // Clock-marker overlay (12-hour labels in the disk plane).
+      // Due to gravitational lensing all 12 positions are simultaneously
+      // visible even though half are geometrically behind the shadow sphere.
+      //   portfolio.blackhole.clock.show() / hide() / toggle()
+      clock: {
+        show(): void {
+          if (!registry.setBhDiskClock) return notRegistered('blackhole.clock.show');
+          registry.setBhDiskClock(true);
+        },
+        hide(): void {
+          if (!registry.setBhDiskClock) return notRegistered('blackhole.clock.hide');
+          registry.setBhDiskClock(false);
+        },
+        toggle(): void {
+          if (!registry.setBhDiskClock || !registry.getBhDiskClock) {
+            return notRegistered('blackhole.clock.toggle');
+          }
+          registry.setBhDiskClock(!registry.getBhDiskClock());
+        },
+      },
+
+      // EffectComposer mount gate. Canvas3D auto-mounts the post-process
+      // pass on colophon entry (after the camera tween) and unmounts on
+      // exit; this lets you override that for debugging. Manual writes
+      // win until the next scene transition, after which the auto-logic
+      // takes over again.
+      //   portfolio.blackhole.effectComposer.show() / hide() / toggle()
+      effectComposer: {
+        show(): void {
+          setLensingActive(true);
+        },
+        hide(): void {
+          setLensingActive(false);
+        },
+        toggle(): void {
+          setLensingActive(!getLensingActive());
+        },
       },
 
       reset: resetBlackHoleDefaults,
@@ -858,6 +917,11 @@ export function installDevConsole(): void {
           '  portfolio.blackhole.config()             // → JSON of all black hole properties',
           '  portfolio.blackhole.config({ distortionStrength: 0 })  // disable lensing',
           '  portfolio.blackhole.config({ diskTilt: 30, dopplerStrength: 0.8 })',
+          '  portfolio.blackhole.config({ diskRotationSpeed: 0.2 })  // disk animation speed',
+          '  portfolio.blackhole.presets              // { m87, gargantua } — reference configs',
+          '  portfolio.blackhole.config(portfolio.blackhole.presets.gargantua)  // apply preset',
+          '  portfolio.blackhole.clock.show() / hide() / toggle()  // 12-hour labels in disk plane',
+          '  portfolio.blackhole.effectComposer.show() / hide() / toggle()  // mount/unmount lensing pass',
           '  portfolio.blackhole.reset()              // restore defaults',
         ].join('\n'),
         'font-weight: bold',

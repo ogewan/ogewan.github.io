@@ -79,6 +79,9 @@ export const SCENE_DEFAULTS = {
     diskTurbulence: 0.6,
     // Animate the turbulence over time (uTime advance per frame).
     diskDrift: true,
+    // Keplerian rotation speed (rad/sec at the inner edge).
+    // Inner orbits rotate at diskRotationSpeed; outer at diskRotationSpeed/sqrt(r/Rs).
+    diskRotationSpeed: 0.12,
     // Doppler asymmetry: 0 = symmetric disk, 1 = max brightness ratio
     // between approaching (left) and receding (right) sides.
     dopplerStrength: 0.5,
@@ -86,6 +89,9 @@ export const SCENE_DEFAULTS = {
     distortionStrength: 1.0,
     // Render the photon-ring glow at the shadow edge.
     photonRing: true,
+    // Dev diagnostic: 12-hour clock face labels in the disk plane.
+    // All 12 positions are visible simultaneously due to gravitational lensing.
+    diskClock: false,
   },
   projects: {
     // Whether the particle ring system + colored bands render at all.
@@ -124,3 +130,40 @@ export const SCENE_DEFAULTS = {
 } as const;
 
 export type SceneDefaults = typeof SCENE_DEFAULTS;
+
+// Named presets for the colophon black hole — apply via:
+//   portfolio.blackhole.config(portfolio.blackhole.presets.m87)
+//   portfolio.blackhole.config(portfolio.blackhole.presets.gargantua)
+export const BLACKHOLE_PRESETS = {
+  // M87* — the first photographed black hole (Event Horizon Telescope, 2019).
+  // Nearly face-on orientation shows the full photon ring; orange-red palette.
+  // Image credit: Event Horizon Telescope Collaboration, CC BY 4.0.
+  m87: {
+    diskTilt: 20,
+    diskInnerFactor: 2.2,
+    diskOuterFactor: 6.0,
+    diskBrightness: 1.0,
+    diskSaturation: 1.0,
+    diskTurbulence: 0.6,
+    diskRotationSpeed: 0.08,
+    dopplerStrength: 0.5,
+    distortionStrength: 1.0,
+    photonRing: true,
+  },
+  // Gargantua — DNEG/Kip Thorne simulation from Interstellar (2014).
+  // Nearly edge-on: disk sweeps horizontal, near-side below shadow, lensed
+  // arc above. Cream-white → peach → dusty-rose palette.
+  // Reference: Warner Bros. / Paramount, for educational comparison only.
+  gargantua: {
+    diskTilt: 5,
+    diskInnerFactor: 2.6,
+    diskOuterFactor: 6.5,
+    diskBrightness: 1.8,
+    diskSaturation: 0.85,
+    diskTurbulence: 0.5,
+    diskRotationSpeed: 0.12,
+    dopplerStrength: 0.4,
+    distortionStrength: 0.3,
+    photonRing: true,
+  },
+} as const;

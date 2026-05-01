@@ -195,7 +195,9 @@ export function ColophonScene({ scene, previousScene, lensingEffectRef }: Coloph
         diskSaturation={config.diskSaturation}
         diskTurbulence={config.diskTurbulence}
         diskDrift={config.diskDrift}
+        diskRotationSpeed={config.diskRotationSpeed}
         dopplerStrength={config.dopplerStrength}
+        diskClock={config.diskClock}
       />
     </group>
   );

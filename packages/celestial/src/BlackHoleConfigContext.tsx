@@ -24,9 +24,11 @@ const STORAGE_KEY = {
   diskSaturation: 'portfolio:blackhole-disk-saturation',
   diskTurbulence: 'portfolio:blackhole-disk-turbulence',
   diskDrift: 'portfolio:blackhole-disk-drift',
+  diskRotationSpeed: 'portfolio:blackhole-disk-rotation-speed',
   dopplerStrength: 'portfolio:blackhole-doppler-strength',
   distortionStrength: 'portfolio:blackhole-distortion-strength',
   photonRing: 'portfolio:blackhole-photon-ring',
+  diskClock: 'portfolio:blackhole-disk-clock',
 } as const;
 
 export interface BlackHoleConfigValue {
@@ -39,9 +41,11 @@ export interface BlackHoleConfigValue {
   readonly diskSaturation: number;
   readonly diskTurbulence: number;
   readonly diskDrift: boolean;
+  readonly diskRotationSpeed: number;
   readonly dopplerStrength: number;
   readonly distortionStrength: number;
   readonly photonRing: boolean;
+  readonly diskClock: boolean;
   readonly setVisible: (on: boolean) => void;
   readonly setSchwarschildRadius: (n: number) => void;
   readonly setDiskTilt: (n: number) => void;
@@ -51,9 +55,11 @@ export interface BlackHoleConfigValue {
   readonly setDiskSaturation: (n: number) => void;
   readonly setDiskTurbulence: (n: number) => void;
   readonly setDiskDrift: (on: boolean) => void;
+  readonly setDiskRotationSpeed: (n: number) => void;
   readonly setDopplerStrength: (n: number) => void;
   readonly setDistortionStrength: (n: number) => void;
   readonly setPhotonRing: (on: boolean) => void;
+  readonly setDiskClock: (on: boolean) => void;
 }
 
 function readBoolStored(key: string, fallback: boolean): boolean {
@@ -137,6 +143,9 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
   const [diskDrift, setDiskDriftState] = useState(() =>
     readBoolStored(STORAGE_KEY.diskDrift, D.diskDrift),
   );
+  const [diskRotationSpeed, setDiskRotationSpeedState] = useState(() =>
+    readNumStored(STORAGE_KEY.diskRotationSpeed, D.diskRotationSpeed),
+  );
   const [dopplerStrength, setDopplerStrengthState] = useState(() =>
     readNumStored(STORAGE_KEY.dopplerStrength, D.dopplerStrength),
   );
@@ -145,6 +154,9 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
   );
   const [photonRing, setPhotonRingState] = useState(() =>
     readBoolStored(STORAGE_KEY.photonRing, D.photonRing),
+  );
+  const [diskClock, setDiskClockState] = useState(() =>
+    readBoolStored(STORAGE_KEY.diskClock, D.diskClock),
   );
 
   const setVisible = useCallback(
@@ -210,6 +222,13 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
     },
     [D.diskDrift],
   );
+  const setDiskRotationSpeed = useCallback(
+    (n: number) => {
+      setDiskRotationSpeedState(n);
+      writeNumStored(STORAGE_KEY.diskRotationSpeed, n, D.diskRotationSpeed);
+    },
+    [D.diskRotationSpeed],
+  );
   const setDopplerStrength = useCallback(
     (n: number) => {
       setDopplerStrengthState(n);
@@ -230,6 +249,13 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
       writeBoolStored(STORAGE_KEY.photonRing, on, D.photonRing);
     },
     [D.photonRing],
+  );
+  const setDiskClock = useCallback(
+    (on: boolean) => {
+      setDiskClockState(on);
+      writeBoolStored(STORAGE_KEY.diskClock, on, D.diskClock);
+    },
+    [D.diskClock],
   );
 
   // Cross-tab sync.
@@ -266,6 +292,11 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
         case STORAGE_KEY.diskDrift:
           setDiskDriftState(readBoolStored(STORAGE_KEY.diskDrift, D.diskDrift));
           break;
+        case STORAGE_KEY.diskRotationSpeed:
+          setDiskRotationSpeedState(
+            readNumStored(STORAGE_KEY.diskRotationSpeed, D.diskRotationSpeed),
+          );
+          break;
         case STORAGE_KEY.dopplerStrength:
           setDopplerStrengthState(readNumStored(STORAGE_KEY.dopplerStrength, D.dopplerStrength));
           break;
@@ -276,6 +307,9 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
           break;
         case STORAGE_KEY.photonRing:
           setPhotonRingState(readBoolStored(STORAGE_KEY.photonRing, D.photonRing));
+          break;
+        case STORAGE_KEY.diskClock:
+          setDiskClockState(readBoolStored(STORAGE_KEY.diskClock, D.diskClock));
           break;
       }
     };
@@ -294,9 +328,11 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
       diskSaturation,
       diskTurbulence,
       diskDrift,
+      diskRotationSpeed,
       dopplerStrength,
       distortionStrength,
       photonRing,
+      diskClock,
       setVisible,
       setSchwarschildRadius,
       setDiskTilt,
@@ -306,9 +342,11 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
       setDiskSaturation,
       setDiskTurbulence,
       setDiskDrift,
+      setDiskRotationSpeed,
       setDopplerStrength,
       setDistortionStrength,
       setPhotonRing,
+      setDiskClock,
     }),
     [
       visible,
@@ -320,9 +358,11 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
       diskSaturation,
       diskTurbulence,
       diskDrift,
+      diskRotationSpeed,
       dopplerStrength,
       distortionStrength,
       photonRing,
+      diskClock,
       setVisible,
       setSchwarschildRadius,
       setDiskTilt,
@@ -332,9 +372,11 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
       setDiskSaturation,
       setDiskTurbulence,
       setDiskDrift,
+      setDiskRotationSpeed,
       setDopplerStrength,
       setDistortionStrength,
       setPhotonRing,
+      setDiskClock,
     ],
   );
 

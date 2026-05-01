@@ -27,6 +27,11 @@ export {
   setEarthRotationRate,
 } from './earth-rotation-rate.js';
 export {
+  getLensingActive,
+  setLensingActive,
+  subscribeLensingActive,
+} from './r3f/lensing-active-store.js';
+export {
   EarthTestModeProvider,
   useEarthTestMode,
   type EarthTestModeValue,
@@ -83,4 +88,4 @@ export {
   type NebulaVariant,
   type NebulaParams,
 } from './r3f/scenes/nebula-variants.js';
-export { SCENE_DEFAULTS, type SceneDefaults } from './scene-defaults.js';
+export { SCENE_DEFAULTS, BLACKHOLE_PRESETS, type SceneDefaults } from './scene-defaults.js';

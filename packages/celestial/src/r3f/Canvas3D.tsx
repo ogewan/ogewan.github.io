@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import { EffectComposer } from '@react-three/postprocessing';
@@ -14,6 +14,11 @@ import {
   GravitationalLensing,
   type GravitationalLensingEffectImpl,
 } from './scenes/GravitationalLensingEffect.js';
+import {
+  getLensingActive,
+  setLensingActive,
+  subscribeLensingActive,
+} from './lensing-active-store.js';
 import { getSunDirection } from './sun-direction.js';
 
 // The R3F slice of the celestial backdrop, factored out so it can be
@@ -59,11 +64,19 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
   // camera tween completes (CAMERA_TWEEN_DURATION_SEC delay on enter). This
   // prevents EffectComposer's LinearSRGBColorSpace side-effect from brightening
   // other scenes or flashing during the contact→colophon transition. On exit,
-  // it stays mounted for the same duration to cover the exit animation, then
-  // unmounts — restoring SRGBColorSpace for all subsequent scenes.
-  // Cold-load on colophon: activate immediately (no transition to hide).
-  // Navigation to colophon delays activation via setTimeout in useLayoutEffect.
-  const [lensingActive, setLensingActive] = useState(scene === 'colophon');
+  // it unmounts immediately so SRGBColorSpace is restored before the camera
+  // starts moving toward the next scene.
+  //
+  // The active flag lives in a module-scoped pub/sub store so the dev console
+  // (`portfolio.blackhole.effectComposer.show/hide/toggle`) can override it.
+  // Cold-load on colophon: initialize the store to `true` synchronously before
+  // first paint via useState's lazy initializer — no transition is hiding the
+  // brightness flash on cold-load, so the composer must mount immediately.
+  useState(() => {
+    if (scene === 'colophon') setLensingActive(true);
+    return null;
+  });
+  const lensingActive = useSyncExternalStore(subscribeLensingActive, getLensingActive);
 
   // useLayoutEffect (not useEffect) so the previousScene state update commits
   // before the browser paints. useEffect fires after paint, leaving one frame
