@@ -38,13 +38,10 @@ interface CameraDriverProps {
 
 export function CameraDriver({ scene }: CameraDriverProps) {
   const camera = useThree((s) => s.camera);
-  // The look-at target is animated separately from camera.position, so we
-  // hold a Vector3 that the timeline interpolates and then call camera.lookAt
-  // each tick. R3F doesn't expose a `target` property on the perspective
-  // camera by default; this is the standard imperative dance.
   const lookAtRef = useRef<THREE.Vector3>(new THREE.Vector3());
   const tweenRef = useRef<gsap.core.Tween | null>(null);
   const firstRender = useRef(true);
+  const prevSceneRef = useRef<SceneName | null>(null);
 
   useEffect(() => {
     const anchor = SCENE_ANCHORS[scene];
@@ -53,6 +50,7 @@ export function CameraDriver({ scene }: CameraDriverProps) {
 
     if (firstRender.current) {
       firstRender.current = false;
+      prevSceneRef.current = scene;
       camera.position.copy(targetPos);
       lookAtRef.current.copy(targetLookAt);
       camera.lookAt(lookAtRef.current);
@@ -75,8 +73,16 @@ export function CameraDriver({ scene }: CameraDriverProps) {
       DEFAULT_TWEEN_DURATION_SEC,
       distance / DEFAULT_TWEEN_SPEED_UNITS_PER_SEC,
     );
-    const duration = anchor.tweenDuration ?? computedDuration;
-    const ease = anchor.tweenEase ?? DEFAULT_TWEEN_EASE;
+    // For symmetric tweens: if the destination has no override, fall back to
+    // the source anchor's values so the reverse journey matches the forward one
+    // (e.g. contact → projects mirrors projects → contact at 2.0s power3.out).
+    const srcAnchor = prevSceneRef.current ? SCENE_ANCHORS[prevSceneRef.current] : null;
+    const duration = anchor.tweenDuration ?? srcAnchor?.tweenDuration ?? computedDuration;
+    // tweenEaseReverse on the source anchor is the asymmetric reverse-direction
+    // ease (e.g. power3.in when leaving contact, vs power3.out when arriving).
+    const ease =
+      anchor.tweenEase ?? srcAnchor?.tweenEaseReverse ?? srcAnchor?.tweenEase ?? DEFAULT_TWEEN_EASE;
+    prevSceneRef.current = scene;
 
     tweenRef.current = gsap.to(proxy, {
       px: targetPos.x,

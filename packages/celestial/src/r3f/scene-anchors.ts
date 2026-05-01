@@ -51,6 +51,11 @@ export interface SceneAnchor {
   // Defaults: 1.2s with `power2.inOut`.
   readonly tweenDuration?: number;
   readonly tweenEase?: string;
+  // Ease used for the REVERSE tween (when this anchor is the SOURCE and the
+  // destination has no override). Allows asymmetric easing — e.g. power3.out
+  // forward (fast-leave gas giant, slow-settle into nebula) and power3.in
+  // reverse (slow-leave nebula, fast-arrive gas giant).
+  readonly tweenEaseReverse?: string;
 }
 
 export const SCENE_ANCHORS: Record<SceneName, SceneAnchor> = {
@@ -92,8 +97,11 @@ export const SCENE_ANCHORS: Record<SceneName, SceneAnchor> = {
     cameraPosition: [0, 0, 4025],
     lookAt: [0, 0, 4000],
     origin: [0, 0, 4000],
+    // 2.0s applied symmetrically: both projects→contact and contact→projects
+    // run at 2.0s with the default power2.inOut ease (slow-fast-slow), so each
+    // direction starts slow near its origin scene and ends slow near its
+    // destination scene.
     tweenDuration: 2.0,
-    tweenEase: 'power3.out',
   },
   colophon: {
     cameraPosition: [0, 0, -336],

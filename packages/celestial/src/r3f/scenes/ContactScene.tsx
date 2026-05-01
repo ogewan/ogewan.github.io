@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 import * as THREE from 'three';
@@ -30,7 +30,24 @@ interface ContactSceneProps {
 export function ContactScene({ scene, previousScene }: ContactSceneProps) {
   const config = useNebulaeConfig();
   const settings = useMobileSettings();
-  const sceneActive = scene === 'contact' || previousScene === 'contact';
+
+  // contact → projects: keep billboard visible only until the camera passes
+  // z=4000 (billboard center). With power2.inOut at 2.0s that takes ~115ms.
+  // Billboard hides at 150ms to match the beat where ProjectsScene shows the
+  // gas giant — clean swap, no simultaneous visibility of both scenes.
+  const [billboardActive, setBillboardActive] = useState(true);
+  const prevSceneRef = useRef(scene);
+  useEffect(() => {
+    const prev = prevSceneRef.current;
+    prevSceneRef.current = scene;
+    if (scene === 'projects' && prev === 'contact') {
+      const t = window.setTimeout(() => setBillboardActive(false), 150);
+      return () => window.clearTimeout(t);
+    }
+    setBillboardActive(true);
+  }, [scene]);
+
+  const sceneActive = (scene === 'contact' || previousScene === 'contact') && billboardActive;
 
   if (!config.visible) {
     return null;

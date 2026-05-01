@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SceneName } from '../../scenes.js';
@@ -148,7 +148,40 @@ interface ProjectsSceneProps {
 
 export function ProjectsScene({ sunDirection, scene, previousScene }: ProjectsSceneProps) {
   const [x, y, z] = SCENE_ANCHORS.projects.origin;
-  const projectsSceneVisible = scene === 'projects' || previousScene === 'projects';
+
+  // Visibility gate for the gas giant, coordinated with the contact scene:
+  //
+  // projects → contact (2.0s power2.inOut):
+  //   Camera starts slow near gas giant, fast in middle, slow near billboard.
+  //   Gas giant hides at 1600ms — when the billboard is entering the camera's
+  //   framing (~200 units away at that point in the ease curve).
+  //
+  // contact → projects (2.0s power2.inOut):
+  //   Camera starts slow near billboard, fast in middle, slow near gas giant.
+  //   Billboard exits the camera frustum when camera.z < 4000, which with
+  //   power2.inOut happens at ~115ms. Gas giant shows at 150ms (same beat as
+  //   ContactScene's billboard hide) so the two scenes swap cleanly.
+  const [gasGiantReady, setGasGiantReady] = useState(true);
+  const prevSceneRef = useRef(scene);
+  useEffect(() => {
+    const prev = prevSceneRef.current;
+    prevSceneRef.current = scene;
+    if (scene === 'contact' && prev === 'projects') {
+      // Hide gas giant when billboard enters framing
+      const t = window.setTimeout(() => setGasGiantReady(false), 1600);
+      return () => window.clearTimeout(t);
+    }
+    if (scene === 'projects' && prev === 'contact') {
+      // Keep gas giant hidden until billboard has passed behind the camera
+      setGasGiantReady(false);
+      const t = window.setTimeout(() => setGasGiantReady(true), 150);
+      return () => window.clearTimeout(t);
+    }
+    setGasGiantReady(true);
+  }, [scene]);
+
+  const projectsSceneVisible =
+    (scene === 'projects' || previousScene === 'projects') && gasGiantReady;
   const settings = useMobileSettings();
   const { visible: ringsVisible } = useRingsVisibility();
   const { clockVisible } = useRingsClockMarkers();

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SceneName } from '../scenes.js';
@@ -48,7 +48,13 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
   const [previousScene, setPreviousScene] = useState<SceneName | null>(null);
   const lastSceneRef = useRef(scene);
 
-  useEffect(() => {
+  // useLayoutEffect (not useEffect) so the previousScene state update commits
+  // before the browser paints. useEffect fires after paint, leaving one frame
+  // where scene has changed but previousScene is still null — the outgoing
+  // scene's visibility gate sees (newScene || null) = false and blinks out.
+  // useLayoutEffect fires synchronously after DOM mutations; React resolves
+  // the re-render before yielding to the browser, so the blink never shows.
+  useLayoutEffect(() => {
     if (lastSceneRef.current === scene) return undefined;
     setPreviousScene(lastSceneRef.current);
     lastSceneRef.current = scene;
