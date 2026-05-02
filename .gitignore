@@ -56,6 +56,9 @@ packages/shell/public/sitemap.html
 # Phase 8 may decide to track ARCHITECTURE.md and link it from the colophon page.
 ARCHITECTURE.md
 CONTINUE.md
+AGENTS.md
+CLAUDE.md
+CURRENT.md
 
 # Local debugging screenshots from Playwright/Puppeteer runs. Useful for
 # verifying behavior without a real browser; never committed.
@@ -66,3 +69,6 @@ CONTINUE.md
 # Contents are inputs to scripts/build-*.mjs scripts; the emitted
 # outputs ARE committed under packages/celestial/src/textures/.
 .scratch/
+
+# Claude Code session state (date-stamped flags written by .claude/hooks/).
+.claude/state/

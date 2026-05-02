@@ -57,6 +57,7 @@ export default tseslint.config(
     files: [
       'packages/manifest-builder/**/*.ts',
       'packages/ng-elements/scripts/**/*.{js,mjs}',
+      'packages/celestial/scripts/**/*.{js,mjs}',
       'scripts/**/*.{js,mjs}',
       '**/*.config.{ts,js,mjs}',
     ],
