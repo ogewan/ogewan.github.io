@@ -105,7 +105,14 @@ export const SCENE_ANCHORS: Record<SceneName, SceneAnchor> = {
     tweenDuration: 2.0,
   },
   colophon: {
-    cameraPosition: [0, 0, 7800],
+    // Y=2.5 ⇒ ~7° apparent elevation above the disk plane (the Gargantua
+    // signature framing). Runtime-tunable via the BH config's
+    // cameraElevation field — ColophonScene applies the live value per-frame
+    // once the camera tween has settled. The static value here is the
+    // tween TARGET; updating it would change the tween end-point but the
+    // per-frame override would immediately replace it on settle, so this
+    // value mostly matters for the in-flight tween.
+    cameraPosition: [0, 2.5, 7800],
     lookAt: [0, 0, 7780],
     origin: [0, 0, 7780],
     tweenDuration: 2.0,

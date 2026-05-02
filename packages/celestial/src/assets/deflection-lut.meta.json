@@ -1,0 +1,22 @@
+{
+  "description": "Schwarzschild gravitational-lensing deflection LUT.",
+  "units": "GM = c = 1; Schwarzschild radius Rs = 2M = 2; photon sphere at r = 1.5 Rs.",
+  "samples": 2048,
+  "channels": 4,
+  "format": "float32",
+  "byteLength": 32768,
+  "bMin": 0,
+  "bMax": 12,
+  "bCrit": 5.196152422706632,
+  "half": 1024,
+  "samplingFn": "piecewise: i < N/2 → b = b_c * i / (N/2 - 1); i ≥ N/2 → b = b_c + (B_MAX - b_c) * (i - N/2) / (N - 1 - N/2)",
+  "channelLayout": {
+    "r": "totalDeflectionPhi (radians; π = no bend, > π = bent toward BH)",
+    "g": "closestApproachU (1/r_min in units M=1; 0.5 = horizon)",
+    "b": "phiToPerihelion (radians; half of R for symmetric orbit)",
+    "a": "captureFlag (1.0 = ray escapes, 0.0 = captured by BH)"
+  },
+  "capturedSamples": 1023,
+  "bakedAt": "2026-05-01T20:19:37.055Z",
+  "scriptSha": "c14cf45b60068250"
+}

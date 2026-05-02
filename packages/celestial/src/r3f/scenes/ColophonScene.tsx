@@ -5,9 +5,11 @@ import gsap from 'gsap';
 import type { SceneName } from '../../scenes.js';
 import { SCENE_ANCHORS } from '../scene-anchors.js';
 import { useBlackHoleConfig } from '../../BlackHoleConfigContext.js';
+import { useMobileSettings } from '../MobileSettings.js';
 import { AccretionDisk } from './AccretionDisk.js';
 import { CAMERA_TWEEN_DURATION_SEC } from '../CameraDriver.js';
 import type { GravitationalLensingEffectImpl } from './GravitationalLensingEffect.js';
+import type { LegacyGravitationalLensingEffectImpl } from './GravitationalLensingEffect.legacy.js';
 
 // Colophon scene — Gargantua × M87 black hole (Phase 9.5).
 //
@@ -35,7 +37,9 @@ import type { GravitationalLensingEffectImpl } from './GravitationalLensingEffec
 interface ColophonSceneProps {
   readonly scene: SceneName;
   readonly previousScene: SceneName | null;
-  readonly lensingEffectRef: React.RefObject<GravitationalLensingEffectImpl | null>;
+  readonly lensingEffectRef: React.RefObject<
+    GravitationalLensingEffectImpl | LegacyGravitationalLensingEffectImpl | null
+  >;
 }
 
 type TweenPending = { kind: 'enter'; prev: SceneName } | { kind: 'exit' } | null;
@@ -43,9 +47,14 @@ type TweenPending = { kind: 'enter'; prev: SceneName } | { kind: 'exit' } | null
 // Reusable scratch objects — avoids per-frame allocation.
 const _bhWorld = new THREE.Vector3();
 const _edgeWorld = new THREE.Vector3();
+const _viewProj = new THREE.Matrix4();
+const _invViewProj = new THREE.Matrix4();
+const _diskNormal = new THREE.Vector3();
+const _diskRefDir = new THREE.Vector3(1, 0, 0);
 
 export function ColophonScene({ scene, previousScene, lensingEffectRef }: ColophonSceneProps) {
   const config = useBlackHoleConfig();
+  const { degraded } = useMobileSettings();
   const camera = useThree((s) => s.camera);
   const size = useThree((s) => s.size);
 
@@ -135,6 +144,15 @@ export function ColophonScene({ scene, previousScene, lensingEffectRef }: Coloph
       }
     }
 
+    // Apply the runtime cameraElevation knob once the route tween has
+    // settled (previousScene === null is the post-tween signal — Canvas3D
+    // clears it after CAMERA_TWEEN_DURATION_SEC). Skipping during the tween
+    // avoids fighting CameraDriver's gsap interpolation.
+    if (scene === 'colophon' && previousScene === null) {
+      camera.position.y = config.cameraElevation;
+      camera.lookAt(0, 0, SCENE_ANCHORS.colophon.origin[2]);
+    }
+
     // --- Per-frame uniform sync ---
     if (!effect) return;
 
@@ -144,7 +162,7 @@ export function ColophonScene({ scene, previousScene, lensingEffectRef }: Coloph
     const bhScreenX = _bhWorld.x * 0.5 + 0.5;
     const bhScreenY = _bhWorld.y * 0.5 + 0.5;
 
-    const uCenter = effect.uniforms.get('uBhCenter');
+    const uCenter = effect.uniforms.get('uBhScreenCenter');
     if (uCenter) uCenter.value.set(bhScreenX, bhScreenY);
 
     // Project a point at the shadow edge to compute screen-space radius.
@@ -152,7 +170,7 @@ export function ColophonScene({ scene, previousScene, lensingEffectRef }: Coloph
     _edgeWorld.set(origin[0] + shadowRadius, origin[1], origin[2]);
     _edgeWorld.project(camera);
     const edgeScreenX = _edgeWorld.x * 0.5 + 0.5;
-    const uRadius = effect.uniforms.get('uBhRadius');
+    const uRadius = effect.uniforms.get('uBhScreenRadius');
     if (uRadius) uRadius.value = Math.abs(edgeScreenX - bhScreenX);
 
     const uAspect = effect.uniforms.get('uAspect');
@@ -160,6 +178,42 @@ export function ColophonScene({ scene, previousScene, lensingEffectRef }: Coloph
 
     const uPhotonRing = effect.uniforms.get('uPhotonRing');
     if (uPhotonRing) uPhotonRing.value = config.photonRing ? 1.0 : 0.0;
+
+    // World-space uniforms for the geodesic raytrace path. The legacy effect
+    // ignores these — uniform.get returns undefined on the uniforms it doesn't
+    // declare and we no-op gracefully.
+    const uBhWorld = effect.uniforms.get('uBhWorld');
+    if (uBhWorld) uBhWorld.value.set(origin[0], origin[1], origin[2]);
+
+    const uCamPos = effect.uniforms.get('uCamPos');
+    if (uCamPos) uCamPos.value.copy(camera.position);
+
+    const uInvVP = effect.uniforms.get('uInvViewProj');
+    if (uInvVP) {
+      _viewProj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+      _invViewProj.copy(_viewProj).invert();
+      uInvVP.value.copy(_invViewProj);
+    }
+
+    // Disk normal in BH-local frame. AccretionDisk applies group rotation
+    // [π/2 + tiltRad, 0, 0] to a default-normal-+Z RingGeometry. Apply the
+    // same rotation to (0, 0, 1):
+    //   normal_y = -sin(π/2 + tilt) = -cos(tilt)
+    //   normal_z =  cos(π/2 + tilt) = -sin(tilt)
+    const tiltRad = (config.diskTilt * Math.PI) / 180;
+    _diskNormal.set(0, -Math.cos(tiltRad), -Math.sin(tiltRad));
+    const uDN = effect.uniforms.get('uDiskNormal');
+    if (uDN) uDN.value.copy(_diskNormal);
+    const uDR = effect.uniforms.get('uDiskRefDir');
+    if (uDR) uDR.value.copy(_diskRefDir);
+
+    const uRs = effect.uniforms.get('uRs');
+    if (uRs) uRs.value = config.schwarzschildRadius;
+
+    const uDIn = effect.uniforms.get('uDiskInner');
+    if (uDIn) uDIn.value = config.schwarzschildRadius * config.diskInnerFactor;
+    const uDOut = effect.uniforms.get('uDiskOuter');
+    if (uDOut) uDOut.value = config.schwarzschildRadius * config.diskOuterFactor;
 
     // Keep distortionStrength in sync even when tweening is not active
     // (e.g. user changes via dev console while on colophon).
@@ -185,20 +239,27 @@ export function ColophonScene({ scene, previousScene, lensingEffectRef }: Coloph
         <meshBasicMaterial color="#000000" side={THREE.FrontSide} />
       </mesh>
 
-      {/* Accretion disk */}
-      <AccretionDisk
-        schwarzschildRadius={config.schwarzschildRadius}
-        diskInnerFactor={config.diskInnerFactor}
-        diskOuterFactor={config.diskOuterFactor}
-        diskTilt={config.diskTilt}
-        diskBrightness={config.diskBrightness}
-        diskSaturation={config.diskSaturation}
-        diskTurbulence={config.diskTurbulence}
-        diskDrift={config.diskDrift}
-        diskRotationSpeed={config.diskRotationSpeed}
-        dopplerStrength={config.dopplerStrength}
-        diskClock={config.diskClock}
-      />
+      {/* Accretion disk mesh — only rendered for the legacy / degraded path,
+          where the screen-space lensing shader needs disk pixels in the
+          framebuffer to deflect. The non-degraded geodesic path samples
+          DiskRenderTarget instead, so the un-lensed mesh would just leak
+          through outside the lensing bounding box and look visibly straight
+          there. */}
+      {degraded && (
+        <AccretionDisk
+          schwarzschildRadius={config.schwarzschildRadius}
+          diskInnerFactor={config.diskInnerFactor}
+          diskOuterFactor={config.diskOuterFactor}
+          diskTilt={config.diskTilt}
+          diskBrightness={config.diskBrightness}
+          diskSaturation={config.diskSaturation}
+          diskTurbulence={config.diskTurbulence}
+          diskDrift={config.diskDrift}
+          diskRotationSpeed={config.diskRotationSpeed}
+          dopplerStrength={config.dopplerStrength}
+          diskClock={config.diskClock}
+        />
+      )}
     </group>
   );
 }
