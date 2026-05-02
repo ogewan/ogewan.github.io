@@ -92,6 +92,12 @@ export const SCENE_DEFAULTS = {
     // Dev diagnostic: 12-hour clock face labels in the disk plane.
     // All 12 positions are visible simultaneously due to gravitational lensing.
     diskClock: false,
+    // Camera Y offset (world units) at the colophon anchor. Combined with the
+    // camera-to-BH distance of 20 units this gives an apparent elevation above
+    // the disk plane: 2.5 ⇒ tan⁻¹(2.5/20) ≈ 7.1° (Gargantua-like edge-on framing).
+    // 0 puts the camera in the disk plane; values above ~6 start to expose the
+    // disk face from above.
+    cameraElevation: 2.5,
   },
   projects: {
     // Whether the particle ring system + colored bands render at all.
@@ -127,6 +133,42 @@ export const SCENE_DEFAULTS = {
     // differential offsets stack on top inside the fragment shader.
     gasGiantRotationRate: 0.018,
   },
+  // Three independent "background sets" — global skybox, colophon-only override
+  // (applied while the lensing EffectComposer is mounted), and the cubemap
+  // captured for the geodesic shader to sample. Each set has the same three
+  // knobs so the dev console can tune them symmetrically.
+  background: {
+    global: {
+      // Multiplier on the procedural nebula sphere's emitted RGB.
+      // 0 = invisible; 1 = palette baseline; > 1 = brighter.
+      nebulaBrightness: 0.5,
+      // 0 = grayscale, 1 = palette baseline, > 1 = oversaturated. The default
+      // is intentionally pushed past 1 — the dim base palette reads as nearly
+      // grey at saturation 1, and 3 lifts the violet/teal hints into a more
+      // recognisable nebula tint without making the sky distractingly colourful.
+      nebulaSaturation: 3,
+      // Multiplier on the points material's opacity (clamped 0..1).
+      // 1.0 = current default (opacity 0.9); 0 = invisible.
+      starBrightness: 1.0,
+    },
+    // Override values when the colophon's EffectComposer is mounted — the
+    // no-tone-mapping pass brightens the framebuffer, so the global nebula
+    // tends to read too strong and needs scaling down.
+    colophon: {
+      nebulaBrightness: 0.05,
+      nebulaSaturation: 3,
+      starBrightness: 1,
+    },
+    // BH-centered cubemap that the geodesic lensing shader samples by
+    // deflected world-direction. Tuned independently from colophon —
+    // the cubemap is a re-baked background for the lensing shader, so
+    // it needs lower brightness to avoid overwhelming the disk emission.
+    cubemap: {
+      nebulaBrightness: 0.045,
+      nebulaSaturation: 3,
+      starBrightness: 0.01,
+    },
+  },
 } as const;
 
 export type SceneDefaults = typeof SCENE_DEFAULTS;
@@ -149,13 +191,20 @@ export const BLACKHOLE_PRESETS = {
     dopplerStrength: 0.5,
     distortionStrength: 1.0,
     photonRing: true,
+    cameraElevation: 0.5,
   },
   // Gargantua — DNEG/Kip Thorne simulation from Interstellar (2014).
   // Nearly edge-on: disk sweeps horizontal, near-side below shadow, lensed
   // arc above. Cream-white → peach → dusty-rose palette.
   // Reference: Warner Bros. / Paramount, for educational comparison only.
+  //
+  // diskTilt = 0: the disk lies flat in the world XZ plane; the apparent
+  // edge-on angle comes from the camera elevation.
+  // distortionStrength = 1.0: full lensing — the geodesic path no longer warps
+  // the disk into a blob (that was a screen-space-shader limitation), so the
+  // signature secondary image arcs over the shadow.
   gargantua: {
-    diskTilt: 5,
+    diskTilt: 0,
     diskInnerFactor: 2.6,
     diskOuterFactor: 6.5,
     diskBrightness: 1.8,
@@ -163,7 +212,8 @@ export const BLACKHOLE_PRESETS = {
     diskTurbulence: 0.5,
     diskRotationSpeed: 0.12,
     dopplerStrength: 0.4,
-    distortionStrength: 0.3,
+    distortionStrength: 1.0,
     photonRing: true,
+    cameraElevation: 2.5,
   },
 } as const;
