@@ -1,23 +1,23 @@
 import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
-import { EffectComposer } from '@react-three/postprocessing';
 import type { SceneName } from '../scenes.js';
 import { CAMERA_TWEEN_DURATION_SEC, CameraDriver } from './CameraDriver.js';
 import { SharedStarField } from './SharedStarField.js';
 import { MobileSettingsProvider } from './MobileSettings.js';
+import { SCENE_ANCHORS } from './scene-anchors.js';
 import { EarthScene } from './scenes/EarthScene.js';
 import { ProjectsScene } from './scenes/ProjectsScene.js';
 import { ContactScene } from './scenes/ContactScene.js';
 import { ColophonScene } from './scenes/ColophonScene.js';
-import {
-  GravitationalLensing,
-  type GravitationalLensingEffectImpl,
-} from './scenes/GravitationalLensingEffect.js';
+import { type GravitationalLensingEffectImpl } from './scenes/GravitationalLensingEffect.js';
+import { type LegacyGravitationalLensingEffectImpl } from './scenes/GravitationalLensingEffect.legacy.js';
+import { LensingPostProcess } from './scenes/lensing/LensingPostProcess.js';
 import {
   getLensingActive,
   setLensingActive,
   subscribeLensingActive,
+  setColophonSceneActive,
 } from './lensing-active-store.js';
 import { getSunDirection } from './sun-direction.js';
 
@@ -55,7 +55,9 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
   // tween. When `scene` changes, we capture the outgoing name and schedule
   // a clear after CAMERA_TWEEN_DURATION_SEC. Each scene component checks
   // both `scene` and `previousScene` to decide whether to render itself.
-  const lensingEffectRef = useRef<GravitationalLensingEffectImpl | null>(null);
+  const lensingEffectRef = useRef<
+    GravitationalLensingEffectImpl | LegacyGravitationalLensingEffectImpl | null
+  >(null);
 
   const [previousScene, setPreviousScene] = useState<SceneName | null>(null);
   const lastSceneRef = useRef(scene);
@@ -73,7 +75,10 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
   // first paint via useState's lazy initializer — no transition is hiding the
   // brightness flash on cold-load, so the composer must mount immediately.
   useState(() => {
-    if (scene === 'colophon') setLensingActive(true);
+    if (scene === 'colophon') {
+      setColophonSceneActive(true);
+      setLensingActive(true);
+    }
     return null;
   });
   const lensingActive = useSyncExternalStore(subscribeLensingActive, getLensingActive);
@@ -94,6 +99,9 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
     let lensingTimer: number | undefined;
 
     if (scene === 'colophon') {
+      // Switch background config set immediately (no tween delay) so
+      // SharedStarField uses the colophon set from the first frame of entry.
+      setColophonSceneActive(true);
       // Delay EffectComposer mount until the camera has fully arrived — mirrors
       // the exit: just as the nebula is hidden behind EffectComposer on enter,
       // EffectComposer is gone before the nebula reappears on exit.
@@ -101,6 +109,7 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
     } else if (outgoing === 'colophon') {
       // Unmount immediately so EffectComposer's LinearSRGBColorSpace effect is
       // gone before the camera starts moving toward the contact nebula.
+      setColophonSceneActive(false);
       setLensingActive(false);
     }
 
@@ -142,11 +151,14 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
             completes (lensingActive), so EffectComposer's LinearSRGBColorSpace
             side-effect never touches other scenes or flashes during the
             contact→colophon transition. Stays mounted for the full exit-tween
-            window so the distortion fade-out completes before unmount. */}
+            window so the distortion fade-out completes before unmount.
+            On degraded devices LensingPostProcess swaps in the legacy effect
+            and skips the LUT / cubemap. */}
         {lensingActive && (
-          <EffectComposer multisampling={0} frameBufferType={THREE.UnsignedByteType}>
-            <GravitationalLensing ref={lensingEffectRef} />
-          </EffectComposer>
+          <LensingPostProcess
+            bhOrigin={SCENE_ANCHORS.colophon.origin}
+            lensingEffectRef={lensingEffectRef}
+          />
         )}
 
         <SharedStarField />

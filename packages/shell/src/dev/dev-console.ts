@@ -46,6 +46,12 @@ interface RingsConfig {
   clock: boolean;
 }
 
+interface BackgroundSetConfig {
+  nebulaBrightness: number;
+  nebulaSaturation: number;
+  starBrightness: number;
+}
+
 interface BlackHoleConfig {
   visible: boolean;
   schwarzschildRadius: number;
@@ -61,6 +67,7 @@ interface BlackHoleConfig {
   distortionStrength: number;
   photonRing: boolean;
   diskClock: boolean;
+  cameraElevation: number;
 }
 
 type NebulaVariantString = '01' | '02' | '03' | '04';
@@ -170,6 +177,17 @@ interface DevAPIRegistry {
   getBhPhotonRing?: () => boolean;
   setBhDiskClock?: Setter<boolean>;
   getBhDiskClock?: () => boolean;
+  setBhCameraElevation?: Setter<number>;
+  getBhCameraElevation?: () => number;
+  // Background sky — three independent sets (global / colophon / cubemap),
+  // each a {nebulaBrightness, nebulaSaturation, starBrightness} triple.
+  getBgGlobal?: () => BackgroundSetConfig;
+  setBgGlobal?: (partial: Partial<BackgroundSetConfig>) => void;
+  getBgColophon?: () => BackgroundSetConfig;
+  setBgColophon?: (partial: Partial<BackgroundSetConfig>) => void;
+  getBgCubemap?: () => BackgroundSetConfig;
+  setBgCubemap?: (partial: Partial<BackgroundSetConfig>) => void;
+  resetBackgroundConfig?: () => void;
 }
 
 const NEBULA_VARIANT_VALUES: readonly NebulaVariantString[] = ['01', '02', '03', '04'];
@@ -245,6 +263,7 @@ function resetBlackHoleDefaults(): void {
   registry.setBhDistortionStrength?.(D.distortionStrength);
   registry.setBhPhotonRing?.(D.photonRing);
   registry.setBhDiskClock?.(D.diskClock);
+  registry.setBhCameraElevation?.(D.cameraElevation);
   console.log('[portfolio] blackhole defaults reset');
 }
 
@@ -288,6 +307,54 @@ const QUALITY_ALIASES: Record<string, string> = {
 
 function normalizeQuality(q: string): string | null {
   return QUALITY_ALIASES[q.toLowerCase()] ?? null;
+}
+
+const BG_SET_KEYS = ['nebulaBrightness', 'nebulaSaturation', 'starBrightness'] as const;
+type BgSetName = 'global' | 'colophon' | 'cubemap';
+
+interface BgSetApi {
+  config(partial?: Record<string, unknown>): BackgroundSetConfig | void;
+}
+
+// Each of bg.global / bg.colophon / bg.cubemap exposes the same `config()`
+// shape. The getter / setter are looked up via the registry name so the
+// helper survives the bridge mounting later than module-load.
+function makeBgSetApi(name: BgSetName, defaults: () => BackgroundSetConfig): BgSetApi {
+  const getterKey = `getBg${name.charAt(0).toUpperCase() + name.slice(1)}` as
+    | 'getBgGlobal'
+    | 'getBgColophon'
+    | 'getBgCubemap';
+  const setterKey = `setBg${name.charAt(0).toUpperCase() + name.slice(1)}` as
+    | 'setBgGlobal'
+    | 'setBgColophon'
+    | 'setBgCubemap';
+  return {
+    config(partial?: Record<string, unknown>): BackgroundSetConfig | void {
+      const getter = registry[getterKey];
+      const setter = registry[setterKey];
+      if (partial === undefined) {
+        return getter ? getter() : defaults();
+      }
+      if (typeof partial !== 'object' || partial === null) {
+        console.warn(`[portfolio] bg.${name}.config(json): json must be an object.`);
+        return;
+      }
+      if (!setter) return notRegistered(`bg.${name}.config`);
+      const out: Partial<BackgroundSetConfig> = {};
+      for (const key of BG_SET_KEYS) {
+        if (!(key in partial)) continue;
+        const v = partial[key];
+        if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) {
+          console.warn(
+            `[portfolio] bg.${name}.config: ${key} must be a non-negative finite number; skipping.`,
+          );
+          continue;
+        }
+        out[key] = v;
+      }
+      if (Object.keys(out).length > 0) setter(out);
+    },
+  };
 }
 
 export function installDevConsole(): void {
@@ -349,7 +416,8 @@ export function installDevConsole(): void {
       },
     },
 
-    // Celestial backdrop (z-0 layer) — body-class toggle, no React state.
+    // Celestial backdrop (z-0 layer) — body-class toggle + per-set
+    // background-sky configuration.
     bg: {
       hide(): void {
         setBodyClass(HIDE_BG_CLASS, true);
@@ -359,6 +427,30 @@ export function installDevConsole(): void {
       },
       toggle(): void {
         setBodyClass(HIDE_BG_CLASS, !hasBodyClass(HIDE_BG_CLASS));
+      },
+
+      // Three independent background-sky sets, each with the same three
+      // knobs (nebulaBrightness, nebulaSaturation, starBrightness).
+      //   global   — used in earth / projects / contact (no lensing pass)
+      //   colophon — used while the colophon's EffectComposer is mounted
+      //              (compensates for the no-tone-mapping brightening)
+      //   cubemap  — applied to the BH-centered StarfieldCubemap that the
+      //              geodesic shader samples for deflected background light.
+      //              Cubemap re-renders on the fly (~1ms) when this set is
+      //              mutated so the change is visible without remounting.
+      // Usage:
+      //   portfolio.bg.global.config()                          → snapshot
+      //   portfolio.bg.global.config({ nebulaBrightness: 0.5 })
+      //   portfolio.bg.colophon.config({ starBrightness: 0.3 })
+      //   portfolio.bg.cubemap.config({ nebulaSaturation: 0 })
+      //   portfolio.bg.reset()                                  → restore all
+      global: makeBgSetApi('global', () => SCENE_DEFAULTS.background.global),
+      colophon: makeBgSetApi('colophon', () => SCENE_DEFAULTS.background.colophon),
+      cubemap: makeBgSetApi('cubemap', () => SCENE_DEFAULTS.background.cubemap),
+      reset(): void {
+        if (!registry.resetBackgroundConfig) return notRegistered('bg.reset');
+        registry.resetBackgroundConfig();
+        console.log('[portfolio] background sets reset to defaults');
       },
     },
 
@@ -770,6 +862,7 @@ export function installDevConsole(): void {
             distortionStrength: registry.getBhDistortionStrength?.() ?? D.distortionStrength,
             photonRing: registry.getBhPhotonRing?.() ?? D.photonRing,
             diskClock: registry.getBhDiskClock?.() ?? D.diskClock,
+            cameraElevation: registry.getBhCameraElevation?.() ?? D.cameraElevation,
           };
         }
         if (typeof partial !== 'object' || partial === null) {
@@ -811,6 +904,7 @@ export function installDevConsole(): void {
         setNum('distortionStrength', registry.setBhDistortionStrength, 0);
         setBool('photonRing', registry.setBhPhotonRing);
         setBool('diskClock', registry.setBhDiskClock);
+        setNum('cameraElevation', registry.setBhCameraElevation);
       },
 
       // Named presets. Apply via:
@@ -882,6 +976,11 @@ export function installDevConsole(): void {
           'Visibility:',
           '  portfolio.ui.hide() / show() / toggle()   // header, rail, footer, signature',
           '  portfolio.bg.hide() / show() / toggle()   // celestial backdrop',
+          '  portfolio.bg.global.config()              // → JSON of global skybox set',
+          '  portfolio.bg.global.config({ nebulaBrightness: 0.5 })',
+          '  portfolio.bg.colophon.config({ starBrightness: 0.3 })',
+          '  portfolio.bg.cubemap.config({ nebulaSaturation: 0 })  // re-bakes cubemap',
+          '  portfolio.bg.reset()                      // restore all three sets to defaults',
           '',
           'Quality:',
           "  portfolio.quality(q)  // 'full' | 'still' | 'lite' (aliases for 'quality' | 'static' | 'simple')",
@@ -918,6 +1017,7 @@ export function installDevConsole(): void {
           '  portfolio.blackhole.config({ distortionStrength: 0 })  // disable lensing',
           '  portfolio.blackhole.config({ diskTilt: 30, dopplerStrength: 0.8 })',
           '  portfolio.blackhole.config({ diskRotationSpeed: 0.2 })  // disk animation speed',
+          '  portfolio.blackhole.config({ cameraElevation: 4 })      // camera Y offset (~7° at 2.5)',
           '  portfolio.blackhole.presets              // { m87, gargantua } — reference configs',
           '  portfolio.blackhole.config(portfolio.blackhole.presets.gargantua)  // apply preset',
           '  portfolio.blackhole.clock.show() / hide() / toggle()  // 12-hour labels in disk plane',

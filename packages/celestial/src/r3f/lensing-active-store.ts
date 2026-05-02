@@ -12,6 +12,12 @@
 // at which point the auto-logic in Canvas3D takes over again — that's
 // the intended behavior; the override is a temporary diagnostic, not a
 // persistent setting.
+//
+// `colophonSceneActive` is a separate, simpler flag: true whenever the
+// colophon scene is the active destination (set immediately on scene
+// change, no tween delay). SharedStarField polls this each frame to pick
+// the right background config set (colophon vs global) independently of
+// when the EffectComposer actually mounts.
 
 let value = false;
 const listeners = new Set<() => void>();
@@ -29,4 +35,14 @@ export function setLensingActive(next: boolean): void {
 export function subscribeLensingActive(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
+}
+
+let colophonScene = false;
+
+export function getColophonSceneActive(): boolean {
+  return colophonScene;
+}
+
+export function setColophonSceneActive(next: boolean): void {
+  colophonScene = next;
 }

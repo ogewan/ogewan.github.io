@@ -1,126 +1,137 @@
 import { useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import { getBackgroundSnapshot } from '../BackgroundConfigContext.js';
+import { getColophonSceneActive } from './lensing-active-store.js';
 import { useMobileSettings } from './MobileSettings.js';
+import { SKYBOX_NEBULA_FRAG, SKYBOX_NEBULA_VERT } from './skybox-nebula-shader.js';
+import { buildStarBuffers, STAR_SEED, STARFIELD_RADIUS } from './star-buffers.js';
 
-// Persistent starfield rendered behind every scene on the tour line. Uses a
-// single Points geometry with instanced positions so the cost is one draw
-// call regardless of count.
+// Persistent starfield + procedural nebula skybox rendered behind every scene
+// on the tour line. One Points geometry for the stars (single draw call), one
+// inverted SphereGeometry for the nebula. Both follow the camera every frame
+// so they behave as a true skybox — stars and nebula stay at constant
+// apparent distance regardless of where the camera is along the tour line.
 //
-// Skybox semantics. Stars sit on a sphere of radius STARFIELD_RADIUS, but
-// the sphere itself is repositioned to follow the camera every frame —
-// the camera is always at the sphere's center, so stars appear at a
-// constant distance regardless of where the tour line is. This matters
-// for the post-9.4 anchor topology: contact sits at z=2048, far outside
-// any reasonable origin-centered sphere. Reparenting to the camera
-// avoids needing to either expand the sphere to ~2400 (which makes
-// stars 6× smaller under sizeAttenuation) or massively bump the count.
+// The stars and nebula both come from BackgroundConfigContext, which has two
+// independent sets that this component switches between based on whether the
+// colophon scene is active (colophonSceneActive flag, set immediately on scene
+// change — no tween delay):
+//   global   — used in earth / projects / contact
+//   colophon — used whenever the colophon scene is the active destination
+//              (compensates for the EffectComposer's no-tone-mapping brightening)
+// Both sets share the same three knobs: nebulaBrightness, nebulaSaturation,
+// starBrightness. The dev console exposes them via portfolio.bg.global.config
+// and portfolio.bg.colophon.config.
 //
-// Real starfields don't have motion parallax for a human-scale observer
-// anyway — stars are effectively at infinity — so the skybox is also
-// the physically-correct behavior.
-//
-// Color palette mirrors the Phase 3 CSS placeholder palette: cool whites
-// shading toward cyan and violet. Sizes vary slightly so the field has depth.
+// Star generation is deterministic via the shared LCG in star-buffers.ts —
+// using the same seed as StarfieldCubemap means the cubemap's lensed star
+// positions line up with the un-lensed stars in the rest of the frame.
 
-const STARFIELD_RADIUS = 400;
+const NEBULA_RADIUS = 600; // sits behind the stars but well inside the camera far plane
 const DESKTOP_COUNT = 2000;
 const MOBILE_COUNT = 800;
-
-// Phase-3 placeholder Stars layer used six dot colors; the same OKLCH values
-// converted to linear-RGB approximations for Three's color management.
-// Using THREE.Color with the OKLCH equivalent string isn't supported, so we
-// pre-bake the palette as sRGB hex.
-const STAR_COLORS = [
-  new THREE.Color('#ebe9f5'), // 0.95 0.02 280
-  new THREE.Color('#bbe6f1'), // 0.88 0.04 210
-  new THREE.Color('#dde5f1'), // 0.92 0.03 290
-  new THREE.Color('#a8d8e8'), // 0.85 0.04 200
-  new THREE.Color('#f0eef7'), // 0.96 0.02 280
-  new THREE.Color('#aab1cc'), // 0.80 0.05 290
-];
-
-interface StarBufferData {
-  positions: Float32Array;
-  colors: Float32Array;
-  sizes: Float32Array;
-}
-
-function buildStars(count: number): StarBufferData {
-  const positions = new Float32Array(count * 3);
-  const colors = new Float32Array(count * 3);
-  const sizes = new Float32Array(count);
-  // Deterministic-ish PRNG so the field is stable across renders within a
-  // session (no per-frame mutation; this only runs at mount). Math.random is
-  // fine — re-rolls between sessions are imperceptible and welcome.
-  for (let i = 0; i < count; i++) {
-    // Uniform sphere sampling: pick a random point on a sphere of radius R.
-    const u = Math.random();
-    const v = Math.random();
-    const theta = 2 * Math.PI * u;
-    const phi = Math.acos(2 * v - 1);
-    const r = STARFIELD_RADIUS * (0.7 + 0.3 * Math.random()); // jitter inward
-    positions[i * 3 + 0] = r * Math.sin(phi) * Math.cos(theta);
-    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-    positions[i * 3 + 2] = r * Math.cos(phi);
-
-    const color = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)] ?? STAR_COLORS[0]!;
-    colors[i * 3 + 0] = color.r;
-    colors[i * 3 + 1] = color.g;
-    colors[i * 3 + 2] = color.b;
-
-    sizes[i] = 0.8 + Math.random() * 1.6;
-  }
-  return { positions, colors, sizes };
-}
+const BASE_STAR_OPACITY = 0.9; // matches the previous hardcoded opacity
 
 export function SharedStarField() {
   const settings = useMobileSettings();
   const count = settings.isMobile ? MOBILE_COUNT : DESKTOP_COUNT;
-  const data = useMemo(() => buildStars(count), [count]);
-  const ref = useRef<THREE.Points>(null);
+  const data = useMemo(() => buildStarBuffers(count, STARFIELD_RADIUS, STAR_SEED), [count]);
+  const pointsRef = useRef<THREE.Points>(null);
+  const pointsMatRef = useRef<THREE.PointsMaterial>(null);
+  const nebulaRef = useRef<THREE.Mesh>(null);
+  const nebulaMatRef = useRef<THREE.ShaderMaterial>(null);
   const camera = useThree((s) => s.camera);
 
-  // Skybox: copy the camera's world position into the points group every
-  // frame so the star sphere is always centered on the viewer. Cost is
-  // one Vector3.copy per frame — negligible.
+  // Initial uniforms object — read once at mount for the JSX prop.
+  // Updates are applied via nebulaMatRef.current.uniforms directly in useFrame;
+  // mutating this object is not reliable because R3F may not preserve the
+  // reference between the JSX prop and the material's internal uniforms.
+  const nebulaUniforms = useMemo(
+    () => ({
+      uBrightness: { value: getBackgroundSnapshot().global.nebulaBrightness },
+      uSaturation: { value: getBackgroundSnapshot().global.nebulaSaturation },
+    }),
+    [],
+  );
+
+  // Poll config stores directly each frame. The useState + useEffect
+  // subscription pattern doesn't reliably deliver re-renders inside R3F's
+  // Canvas root when stores are updated from outside React's event loop
+  // (console calls, setTimeout callbacks). Reading module-scoped variables
+  // in useFrame is free, and Three.js picks up uniform/opacity mutations on
+  // the very next draw call.
   useFrame(() => {
-    if (ref.current) ref.current.position.copy(camera.position);
+    if (pointsRef.current) pointsRef.current.position.copy(camera.position);
+    if (nebulaRef.current) nebulaRef.current.position.copy(camera.position);
+
+    const snapshot = getBackgroundSnapshot();
+    const activeSet = getColophonSceneActive() ? snapshot.colophon : snapshot.global;
+    if (nebulaMatRef.current) {
+      const u = nebulaMatRef.current.uniforms;
+      if (u['uBrightness']) u['uBrightness'].value = activeSet.nebulaBrightness;
+      if (u['uSaturation']) u['uSaturation'].value = activeSet.nebulaSaturation;
+    }
+    if (pointsMatRef.current) {
+      pointsMatRef.current.opacity = Math.min(1.0, activeSet.starBrightness * BASE_STAR_OPACITY);
+    }
   });
 
   return (
-    <points ref={ref} frustumCulled={false}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[data.positions, 3]}
-          count={count}
-          array={data.positions}
-          itemSize={3}
+    <>
+      {/* Procedural nebula skybox — sits behind every scene as the global
+          background. Same shader the colophon's StarfieldCubemap uses, so
+          the lensed background stays visually continuous with the un-lensed
+          sky outside the BH region (no "bubble" of nebula contrasting with
+          a pitch-black skybox). renderOrder=-2 so it draws first; depthTest
+          off so it's always behind everything in the depth buffer. */}
+      <mesh ref={nebulaRef} frustumCulled={false} renderOrder={-2}>
+        <sphereGeometry args={[NEBULA_RADIUS, 32, 16]} />
+        <shaderMaterial
+          ref={nebulaMatRef}
+          vertexShader={SKYBOX_NEBULA_VERT}
+          fragmentShader={SKYBOX_NEBULA_FRAG}
+          uniforms={nebulaUniforms}
+          side={THREE.BackSide}
+          depthWrite={false}
+          depthTest={false}
         />
-        <bufferAttribute
-          attach="attributes-color"
-          args={[data.colors, 3]}
-          count={count}
-          array={data.colors}
-          itemSize={3}
+      </mesh>
+
+      <points ref={pointsRef} frustumCulled={false} renderOrder={-1}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[data.positions, 3]}
+            count={count}
+            array={data.positions}
+            itemSize={3}
+          />
+          <bufferAttribute
+            attach="attributes-color"
+            args={[data.colors, 3]}
+            count={count}
+            array={data.colors}
+            itemSize={3}
+          />
+          <bufferAttribute
+            attach="attributes-size"
+            args={[data.sizes, 1]}
+            count={count}
+            array={data.sizes}
+            itemSize={1}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          ref={pointsMatRef}
+          vertexColors
+          size={1.2}
+          sizeAttenuation
+          transparent
+          opacity={BASE_STAR_OPACITY}
+          depthWrite={false}
         />
-        <bufferAttribute
-          attach="attributes-size"
-          args={[data.sizes, 1]}
-          count={count}
-          array={data.sizes}
-          itemSize={1}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        vertexColors
-        size={1.2}
-        sizeAttenuation
-        transparent
-        opacity={0.9}
-        depthWrite={false}
-      />
-    </points>
+      </points>
+    </>
   );
 }

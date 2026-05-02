@@ -83,6 +83,13 @@ export {
   type BlackHoleConfigValue,
 } from './BlackHoleConfigContext.js';
 export {
+  BackgroundConfigProvider,
+  useBackgroundConfig,
+  type BackgroundConfigValue,
+  type BackgroundSetConfig,
+  type BackgroundSetName,
+} from './BackgroundConfigContext.js';
+export {
   NEBULA_VARIANTS,
   NEBULA_VARIANTS_ORDER,
   type NebulaVariant,

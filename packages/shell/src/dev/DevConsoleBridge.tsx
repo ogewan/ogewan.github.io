@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import {
+  useBackgroundConfig,
   useBlackHoleConfig,
   useCelestialQuality,
   useEarthPlaceholderMode,
@@ -39,6 +40,7 @@ export function DevConsoleBridge() {
   } = useRingsEffects();
   const nebulae = useNebulaeConfig();
   const bh = useBlackHoleConfig();
+  const bg = useBackgroundConfig();
 
   useEffect(() => {
     registerDevAPI({
@@ -125,6 +127,16 @@ export function DevConsoleBridge() {
       getBhPhotonRing: () => bh.photonRing,
       setBhDiskClock: (on) => bh.setDiskClock(on),
       getBhDiskClock: () => bh.diskClock,
+      setBhCameraElevation: (n) => bh.setCameraElevation(n),
+      getBhCameraElevation: () => bh.cameraElevation,
+      // Background sky — three independent sets.
+      getBgGlobal: () => bg.global,
+      setBgGlobal: (partial) => bg.setSet('global', partial),
+      getBgColophon: () => bg.colophon,
+      setBgColophon: (partial) => bg.setSet('colophon', partial),
+      getBgCubemap: () => bg.cubemap,
+      setBgCubemap: (partial) => bg.setSet('cubemap', partial),
+      resetBackgroundConfig: () => bg.reset(),
     });
   }, [
     navigate,
@@ -147,6 +159,7 @@ export function DevConsoleBridge() {
     scenePreserveTilt,
     nebulae,
     bh,
+    bg,
   ]);
 
   return null;
