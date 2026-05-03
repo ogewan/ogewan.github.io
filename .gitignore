@@ -76,3 +76,6 @@ CURRENT.md
 .dump/
 # Generated resume (renamed from source PDF by prebuild script)
 packages/shell/public/resume.pdf
+
+# a11y audit output
+a11y-report/
