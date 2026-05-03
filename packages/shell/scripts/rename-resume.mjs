@@ -1,18 +1,20 @@
 #!/usr/bin/env node
-// Finds the first *.pdf in public/ (excluding resume.pdf itself) and copies
-// it to public/resume.pdf. Drop any named PDF into public/ and it becomes
-// the live resume link automatically — no code changes needed.
-import { copyFileSync, readdirSync } from 'node:fs';
+// Finds the most-recently-modified *.pdf in public/ (excluding resume.pdf
+// itself) and copies it to public/resume.pdf. The newest file wins when
+// multiple PDFs are present — drop a new copy in and it takes over.
+import { copyFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const publicDir = resolve(dirname(fileURLToPath(import.meta.url)), '../public');
-const source = readdirSync(publicDir).find(
-  (f) => f.endsWith('.pdf') && f !== 'resume.pdf',
-);
+const candidates = readdirSync(publicDir)
+  .filter((f) => f.endsWith('.pdf') && f !== 'resume.pdf')
+  .map((f) => ({ name: f, mtimeMs: statSync(resolve(publicDir, f)).mtimeMs }))
+  .sort((a, b) => b.mtimeMs - a.mtimeMs);
+const source = candidates[0]?.name;
 
 if (!source) {
-  console.log('[resume] no non-resume PDF found in public/ — skipping.');
+  console.log('[resume] no source PDF found in public/ — skipping.');
   process.exit(0);
 }
 
