@@ -70,8 +70,8 @@ for (const route of ROUTES) {
   console.log('  keyboard...');
   await page.focus('body');
   const keyboardIssues = [];
-  const visitedSelectors = new Set();
-  let prevSelector = null;
+  const visitedDomIndices = new Set();
+  let prevDomIndex = null;
   let trapCount = 0;
 
   for (let i = 0; i < 150; i++) {
@@ -88,7 +88,11 @@ for (const route of ROUTES) {
           ? active.tagName.toLowerCase() + '.' + [...active.classList].join('.')
           : active.tagName.toLowerCase();
       const selector = id ?? (testid ? '[data-testid="' + testid + '"]' : cls);
+      // domIndex is the element's position in the full DOM — unique even when
+      // multiple elements share identical class lists (e.g. repeated filter pills).
+      const domIndex = [...document.querySelectorAll('*')].indexOf(active);
       return {
+        domIndex,
         selector,
         tag: active.tagName,
         role: active.getAttribute('role'),
@@ -105,21 +109,21 @@ for (const route of ROUTES) {
 
     if (!el) break;
 
-    if (el.selector === prevSelector) {
-      // Same element as immediately previous — genuine focus trap
+    if (el.domIndex === prevDomIndex) {
+      // Same DOM element as immediately previous — genuine focus trap
       trapCount++;
       if (trapCount >= 3) {
         keyboardIssues.push({ type: 'trap', selector: el.selector, tag: el.tag });
         break;
       }
-    } else if (visitedSelectors.has(el.selector)) {
-      // Selector seen before but not immediately — Tab has wrapped around, done
+    } else if (visitedDomIndices.has(el.domIndex)) {
+      // Element seen before (by DOM position) — Tab has wrapped around, done
       break;
     } else {
       trapCount = 0;
     }
-    prevSelector = el.selector;
-    visitedSelectors.add(el.selector);
+    prevDomIndex = el.domIndex;
+    visitedDomIndices.add(el.domIndex);
 
     const hasOutline =
       el.outlineStyle !== 'none' && el.outlineWidth !== '0px' && el.outlineWidth !== '';
