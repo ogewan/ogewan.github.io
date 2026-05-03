@@ -26,6 +26,8 @@ import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+const BASE_URL = process.argv.find((a) => a.startsWith('--url='))?.slice(6) ?? 'http://localhost:5173';
+
 const SCENES = [
   { name: 'earth', path: '/en/' },
   { name: 'about', path: '/en/about' },
@@ -55,7 +57,7 @@ const hideChrome = `
 `;
 
 for (const scene of SCENES) {
-  await page.goto(`http://localhost:5173${scene.path}`, {
+  await page.goto(`${BASE_URL}${scene.path}`, {
     waitUntil: 'networkidle',
     timeout: 30000,
   });
