@@ -38,9 +38,9 @@
     <!-- Hint to search engines that this site has a Spanish alternate. The
          live <link rel="alternate" hreflang> tags get rewritten by the
          per-locale meta hook on every route change. -->
-    <link rel="alternate" hreflang="en" href="/en/" />
-    <link rel="alternate" hreflang="es" href="/es/" />
-    <link rel="alternate" hreflang="x-default" href="/en/" />
+    <link rel="alternate" hreflang="en" href="%VITE_CANONICAL_URL%/en/" />
+    <link rel="alternate" hreflang="es" href="%VITE_CANONICAL_URL%/es/" />
+    <link rel="alternate" hreflang="x-default" href="%VITE_CANONICAL_URL%/en/" />
 
     <!-- Suppress font-swap FOUC. Self-hosted variable fonts load asynchronously
          via @fontsource-variable; without this gate the page paints with system

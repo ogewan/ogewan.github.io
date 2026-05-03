@@ -55,10 +55,11 @@ function setHreflangAlternates(pathnameSansLocale: string) {
   // Update or insert exactly two hreflang links + the x-default. The static
   // index.html ships these for /; we rewrite the href on every route change
   // so the canonical/alternates point at the actual page.
+  const origin = window.location.origin;
   const updates: Array<{ lang: string; href: string }> = [
-    { lang: 'en', href: `/en${pathnameSansLocale}` },
-    { lang: 'es', href: `/es${pathnameSansLocale}` },
-    { lang: 'x-default', href: `/en${pathnameSansLocale}` },
+    { lang: 'en', href: `${origin}/en${pathnameSansLocale}` },
+    { lang: 'es', href: `${origin}/es${pathnameSansLocale}` },
+    { lang: 'x-default', href: `${origin}/en${pathnameSansLocale}` },
   ];
   for (const { lang, href } of updates) {
     let link = document.head.querySelector<HTMLLinkElement>(
