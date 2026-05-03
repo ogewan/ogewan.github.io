@@ -30,6 +30,7 @@ const STORAGE_KEY = {
   photonRing: 'portfolio:blackhole-photon-ring',
   diskClock: 'portfolio:blackhole-disk-clock',
   cameraElevation: 'portfolio:blackhole-camera-elevation',
+  bloomIntensity: 'portfolio:blackhole-bloom-intensity',
 } as const;
 
 export interface BlackHoleConfigValue {
@@ -48,6 +49,7 @@ export interface BlackHoleConfigValue {
   readonly photonRing: boolean;
   readonly diskClock: boolean;
   readonly cameraElevation: number;
+  readonly bloomIntensity: number;
   readonly setVisible: (on: boolean) => void;
   readonly setSchwarschildRadius: (n: number) => void;
   readonly setDiskTilt: (n: number) => void;
@@ -63,6 +65,7 @@ export interface BlackHoleConfigValue {
   readonly setPhotonRing: (on: boolean) => void;
   readonly setDiskClock: (on: boolean) => void;
   readonly setCameraElevation: (n: number) => void;
+  readonly setBloomIntensity: (n: number) => void;
 }
 
 function readBoolStored(key: string, fallback: boolean): boolean {
@@ -163,6 +166,9 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
   );
   const [cameraElevation, setCameraElevationState] = useState(() =>
     readNumStored(STORAGE_KEY.cameraElevation, D.cameraElevation),
+  );
+  const [bloomIntensity, setBloomIntensityState] = useState(() =>
+    readNumStored(STORAGE_KEY.bloomIntensity, D.bloomIntensity),
   );
 
   const setVisible = useCallback(
@@ -270,6 +276,13 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
     },
     [D.cameraElevation],
   );
+  const setBloomIntensity = useCallback(
+    (n: number) => {
+      setBloomIntensityState(n);
+      writeNumStored(STORAGE_KEY.bloomIntensity, n, D.bloomIntensity);
+    },
+    [D.bloomIntensity],
+  );
 
   // Cross-tab sync.
   useEffect(() => {
@@ -327,6 +340,9 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
         case STORAGE_KEY.cameraElevation:
           setCameraElevationState(readNumStored(STORAGE_KEY.cameraElevation, D.cameraElevation));
           break;
+        case STORAGE_KEY.bloomIntensity:
+          setBloomIntensityState(readNumStored(STORAGE_KEY.bloomIntensity, D.bloomIntensity));
+          break;
       }
     };
     window.addEventListener('storage', handler);
@@ -350,6 +366,7 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
       photonRing,
       diskClock,
       cameraElevation,
+      bloomIntensity,
       setVisible,
       setSchwarschildRadius,
       setDiskTilt,
@@ -365,6 +382,7 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
       setPhotonRing,
       setDiskClock,
       setCameraElevation,
+      setBloomIntensity,
     }),
     [
       visible,
@@ -382,6 +400,7 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
       photonRing,
       diskClock,
       cameraElevation,
+      bloomIntensity,
       setVisible,
       setSchwarschildRadius,
       setDiskTilt,
@@ -397,6 +416,7 @@ export function BlackHoleConfigProvider({ children }: { children: ReactNode }) {
       setPhotonRing,
       setDiskClock,
       setCameraElevation,
+      setBloomIntensity,
     ],
   );
 

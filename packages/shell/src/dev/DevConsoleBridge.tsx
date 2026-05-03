@@ -129,6 +129,8 @@ export function DevConsoleBridge() {
       getBhDiskClock: () => bh.diskClock,
       setBhCameraElevation: (n) => bh.setCameraElevation(n),
       getBhCameraElevation: () => bh.cameraElevation,
+      setBhBloomIntensity: (n) => bh.setBloomIntensity(n),
+      getBhBloomIntensity: () => bh.bloomIntensity,
       // Background sky — three independent sets.
       getBgGlobal: () => bg.global,
       setBgGlobal: (partial) => bg.setSet('global', partial),

@@ -1,5 +1,5 @@
 import { useEffect, useState, type RefObject } from 'react';
-import { EffectComposer } from '@react-three/postprocessing';
+import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
 import { useBlackHoleConfig } from '../../../BlackHoleConfigContext.js';
@@ -99,6 +99,18 @@ export function LensingPostProcess({ bhOrigin, lensingEffectRef }: LensingPostPr
             diskRenderTarget={diskRt}
           />
         )}
+        {/* Bloom after the lensing effect — the photon ring and inner disk edges
+            only exist in the lensing output, not the raw scene framebuffer.
+            luminanceThreshold=0.85 catches the near-1.0 bright edges in the
+            LDR (UnsignedByteType) buffer without blooming dim space. */}
+        <Bloom
+          intensity={config.bloomIntensity}
+          luminanceThreshold={0.85}
+          luminanceSmoothing={0.025}
+          mipmapBlur
+          radius={0.4}
+          levels={6}
+        />
       </EffectComposer>
     </>
   );

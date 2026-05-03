@@ -68,6 +68,7 @@ interface BlackHoleConfig {
   photonRing: boolean;
   diskClock: boolean;
   cameraElevation: number;
+  bloomIntensity: number;
 }
 
 type NebulaVariantString = '01' | '02' | '03' | '04';
@@ -179,6 +180,8 @@ interface DevAPIRegistry {
   getBhDiskClock?: () => boolean;
   setBhCameraElevation?: Setter<number>;
   getBhCameraElevation?: () => number;
+  setBhBloomIntensity?: Setter<number>;
+  getBhBloomIntensity?: () => number;
   // Background sky — three independent sets (global / colophon / cubemap),
   // each a {nebulaBrightness, nebulaSaturation, starBrightness} triple.
   getBgGlobal?: () => BackgroundSetConfig;
@@ -264,6 +267,7 @@ function resetBlackHoleDefaults(): void {
   registry.setBhPhotonRing?.(D.photonRing);
   registry.setBhDiskClock?.(D.diskClock);
   registry.setBhCameraElevation?.(D.cameraElevation);
+  registry.setBhBloomIntensity?.(D.bloomIntensity);
   console.log('[portfolio] blackhole defaults reset');
 }
 
@@ -863,6 +867,7 @@ export function installDevConsole(): void {
             photonRing: registry.getBhPhotonRing?.() ?? D.photonRing,
             diskClock: registry.getBhDiskClock?.() ?? D.diskClock,
             cameraElevation: registry.getBhCameraElevation?.() ?? D.cameraElevation,
+            bloomIntensity: registry.getBhBloomIntensity?.() ?? D.bloomIntensity,
           };
         }
         if (typeof partial !== 'object' || partial === null) {
@@ -905,6 +910,7 @@ export function installDevConsole(): void {
         setBool('photonRing', registry.setBhPhotonRing);
         setBool('diskClock', registry.setBhDiskClock);
         setNum('cameraElevation', registry.setBhCameraElevation);
+        setNum('bloomIntensity', registry.setBhBloomIntensity, 0);
       },
 
       // Named presets. Apply via:
@@ -1018,6 +1024,7 @@ export function installDevConsole(): void {
           '  portfolio.blackhole.config({ diskTilt: 30, dopplerStrength: 0.8 })',
           '  portfolio.blackhole.config({ diskRotationSpeed: 0.2 })  // disk animation speed',
           '  portfolio.blackhole.config({ cameraElevation: 4 })      // camera Y offset (~7° at 2.5)',
+          '  portfolio.blackhole.config({ bloomIntensity: 0.6 })    // bloom on photon ring + inner disk (0 = off)',
           '  portfolio.blackhole.presets              // { m87, gargantua } — reference configs',
           '  portfolio.blackhole.config(portfolio.blackhole.presets.gargantua)  // apply preset',
           '  portfolio.blackhole.clock.show() / hide() / toggle()  // 12-hour labels in disk plane',

@@ -98,6 +98,11 @@ export const SCENE_DEFAULTS = {
     // 0 puts the camera in the disk plane; values above ~6 start to expose the
     // disk face from above.
     cameraElevation: 2.5,
+    // Bloom intensity in the colophon EffectComposer. 0 disables bloom; the
+    // 0.5–0.7 range makes the photon ring and inner disk edges glimmer without
+    // washing out the dark space background. Works with LDR (UnsignedByteType)
+    // framebuffer — luminanceThreshold=0.85 catches the near-1.0 bright edges.
+    bloomIntensity: 0.6,
   },
   projects: {
     // Whether the particle ring system + colored bands render at all.
