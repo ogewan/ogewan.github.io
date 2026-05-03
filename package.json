@@ -22,6 +22,7 @@
     "test:visual": "node scripts/visual-test.mjs",
     "capture:scenes": "node scripts/capture-scenes.mjs",
     "audit:a11y": "node scripts/audit-a11y.mjs",
+    "probe:mobile": "node scripts/probe-mobile.mjs",
     "prepare": "husky"
   },
   "devDependencies": {
