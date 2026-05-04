@@ -57,14 +57,14 @@ export function SiteHeader() {
           variant="chrome"
           as="nav"
           aria-label={t('ariaPrimary')}
-          className="pointer-events-auto flex items-center gap-3 px-3 py-2 max-w-[min(720px,100%-32px)] w-full"
+          className="pointer-events-auto flex items-center gap-3 px-3 py-2 max-w-[min(920px,calc(100%-32px))] w-full"
         >
           {/* Resume PDF — left slot, replaces the brand mark per the chat */}
           <a
             href="/resume.pdf"
             target="_blank"
             rel="noreferrer noopener"
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-mono text-micro tracking-[0.14em] uppercase text-fg-secondary border border-glass-hairline-inner hover:text-cyan hover:border-[color:oklch(0.84_0.12_210/0.4)] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)] transition-colors ${focusRingClassName}`}
+            className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm font-mono text-micro tracking-[0.14em] uppercase text-fg-secondary border border-glass-hairline-inner hover:text-cyan hover:border-[color:oklch(0.84_0.12_210/0.4)] [transition-duration:var(--dur-fast)] [transition-timing-function:var(--ease-smooth)] transition-colors ${focusRingClassName}`}
           >
             <span>{t('resume')}</span>
             <span aria-hidden="true">↗</span>
@@ -107,9 +107,14 @@ export function SiteHeader() {
           </ul>
 
           {/* Backdrop quality (Full · Still · Lite) and locale (EN · ES) —
-              both single-button dropdowns. Always visible (mobile included). */}
-          <QualitySwitcher />
-          <LocaleSwitcher />
+              both single-button dropdowns. Always visible (mobile included).
+              shrink-0 prevents flex from squeezing these when nav links are wide. */}
+          <div className="shrink-0">
+            <QualitySwitcher />
+          </div>
+          <div className="shrink-0">
+            <LocaleSwitcher />
+          </div>
 
           {/* Mobile hamburger — only shown below md breakpoint. 44×44 minimum
               tap target per the brief. */}
