@@ -18,14 +18,15 @@ export interface GlassPanelProps extends HTMLAttributes<HTMLElement> {
 // Usage:
 //   <GlassPanel variant="chrome">…</GlassPanel>
 //   <GlassPanel as="section" className="p-6">…</GlassPanel>
+// Suppress canvas text-shadow for all descendants — text inside glass has its
+// own backdrop so the multi-layer shadow would over-darken it.
+const SUPPRESS = '[&_*]:![text-shadow:none]';
+
 const VARIANT_CLASS: Record<GlassVariant, string> = {
-  chrome:
-    'bg-glass-chrome [backdrop-filter:blur(16px)_saturate(150%)] [-webkit-backdrop-filter:blur(16px)_saturate(150%)] border border-glass-hairline-inner [box-shadow:var(--glass-hairline-box)] rounded-md',
-  panel:
-    'bg-glass-panel [backdrop-filter:blur(14px)_saturate(140%)] [-webkit-backdrop-filter:blur(14px)_saturate(140%)] border border-glass-hairline-inner [box-shadow:var(--glass-hairline-box)] rounded-md',
-  inset:
-    'bg-glass-inset [backdrop-filter:blur(10px)] [-webkit-backdrop-filter:blur(10px)] border border-glass-hairline-inner rounded-sm',
-  elev: 'bg-glass-elev [backdrop-filter:blur(20px)_saturate(160%)] [-webkit-backdrop-filter:blur(20px)_saturate(160%)] border border-glass-hairline-inner [box-shadow:var(--glass-hairline-box-elev)] rounded-md',
+  chrome: `bg-glass-chrome [backdrop-filter:blur(16px)_saturate(150%)] [-webkit-backdrop-filter:blur(16px)_saturate(150%)] border border-glass-hairline-inner [box-shadow:var(--glass-hairline-box)] rounded-md ${SUPPRESS}`,
+  panel: `bg-glass-panel [backdrop-filter:blur(14px)_saturate(140%)] [-webkit-backdrop-filter:blur(14px)_saturate(140%)] border border-glass-hairline-inner [box-shadow:var(--glass-hairline-box)] rounded-md ${SUPPRESS}`,
+  inset: `bg-glass-inset [backdrop-filter:blur(10px)] [-webkit-backdrop-filter:blur(10px)] border border-glass-hairline-inner rounded-sm ${SUPPRESS}`,
+  elev: `bg-glass-elev [backdrop-filter:blur(20px)_saturate(160%)] [-webkit-backdrop-filter:blur(20px)_saturate(160%)] border border-glass-hairline-inner [box-shadow:var(--glass-hairline-box-elev)] rounded-md ${SUPPRESS}`,
 };
 
 // Polymorphic via `as`. Renders through createElement instead of JSX so the

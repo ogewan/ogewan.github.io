@@ -173,7 +173,7 @@ function Section({
 function PullQuote({ children }: { children: React.ReactNode }) {
   return (
     <blockquote
-      className="mt-6 pl-6 border-l-2 border-[color:oklch(0.84_0.12_210/0.4)] py-3 font-display text-h3 text-fg-secondary italic"
+      className="mt-6 pl-6 border-l-2 border-[color:oklch(0.84_0.12_210/0.4)] py-3 font-display text-h3 text-fg-secondary italic [text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]"
       style={{
         background: 'linear-gradient(to right, oklch(0.84 0.12 210 / 0.06), transparent 60%)',
       }}
@@ -206,7 +206,7 @@ function TalkRow({
   link: string;
 }) {
   return (
-    <li className="flex flex-wrap items-baseline gap-3 py-3 border-t border-dashed border-glass-hairline-inner first:border-t-0">
+    <li className="flex flex-wrap items-baseline gap-3 py-3 border-t border-dashed border-glass-hairline-inner first:border-t-0 [&_span,&_a]:[text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]">
       <span className="font-mono text-small text-fg-muted w-20">{year}</span>
       <span className="font-mono text-micro text-fg-muted uppercase tracking-[0.14em] w-16">
         {kind}
@@ -227,7 +227,9 @@ function TalkRow({
 function ShelfRow({ num, title, author }: { num: string; title: string; author: string }) {
   return (
     <li className="flex items-baseline gap-3 py-3 border-t border-dashed border-glass-hairline-inner first:border-t-0">
-      <span className="font-mono text-micro text-fg-muted w-8">{num}</span>
+      <span className="font-mono text-micro text-fg-muted w-8 [text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]">
+        {num}
+      </span>
       <div className="flex-1">
         <Text className="text-fg-primary">{title}</Text>
         <Text variant="small">{author}</Text>

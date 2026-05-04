@@ -17,12 +17,18 @@ export interface TextProps extends HTMLAttributes<HTMLElement> {
 //
 // The `as` prop controls the element (default <p>). Use `as="span"` for inline
 // fragments, `as="dd"` for definition lists, etc.
+
+// Canvas text-shadow: ensures legibility against the animated R3F backdrop.
+// GlassPanel resets this for all its descendants via [&_*]:![text-shadow:none].
+const TS =
+  '[text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]';
+
 const VARIANT_CLASS: Record<TextVariant, string> = {
-  lead: 'font-sans font-normal text-lead leading-[1.5] text-fg-secondary text-pretty',
-  body: 'font-sans font-normal text-body leading-[1.6] text-fg-primary',
-  small: 'font-sans font-normal text-small leading-[1.55] text-fg-secondary',
-  label: 'font-mono font-medium text-label tracking-[0.14em] uppercase text-fg-muted',
-  micro: 'font-mono font-medium text-micro tracking-[0.1em] uppercase text-fg-muted',
+  lead: `font-sans font-normal text-lead leading-[1.5] text-fg-secondary text-pretty ${TS}`,
+  body: `font-sans font-normal text-body leading-[1.6] text-fg-primary ${TS}`,
+  small: `font-sans font-normal text-small leading-[1.55] text-fg-secondary ${TS}`,
+  label: `font-mono font-medium text-label tracking-[0.14em] uppercase text-fg-muted ${TS}`,
+  micro: `font-mono font-medium text-micro tracking-[0.1em] uppercase text-fg-muted ${TS}`,
 };
 
 // Polymorphic via `as`. Renders through createElement (see Container.tsx).
