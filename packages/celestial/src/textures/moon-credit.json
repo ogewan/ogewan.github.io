@@ -1,0 +1,9 @@
+{
+  "slug": "moon",
+  "name": "CGI Moon Kit — LRO WAC Global Morphology Mosaic (2k color)",
+  "instrument": "Lunar Reconnaissance Orbiter Wide Angle Camera (LRO WAC)",
+  "releaseDate": "2019-01-01",
+  "pageUrl": "https://svs.gsfc.nasa.gov/4720",
+  "license": "Public domain (NASA)",
+  "credit": "NASA's Scientific Visualization Studio / Ernie Wright"
+}
