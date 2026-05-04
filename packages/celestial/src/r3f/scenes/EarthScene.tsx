@@ -6,7 +6,7 @@ import type { SceneName } from '../../scenes.js';
 import { useCelestialFocus } from '../../CelestialContext.js';
 import { CANONICAL_CITIES } from '../../cities.js';
 import { getEarthRotationRate } from '../../earth-rotation-rate.js';
-import { useEarthPlaceholderMode } from '../../EarthPlaceholderModeContext.js';
+import { useEarthTextureMode } from '../../EarthTextureModeContext.js';
 import { useEarthTestMode } from '../../EarthTestModeContext.js';
 import { useMobileSettings } from '../MobileSettings.js';
 import { SCENE_ANCHORS } from '../scene-anchors.js';
@@ -27,6 +27,7 @@ import {
 import earthDayUrl from '../../textures/earth-day-4k.webp';
 import earthNightUrl from '../../textures/earth-night-4k.webp';
 import earthCloudsUrl from '../../textures/earth-clouds-2k.webp';
+import moonUrl from '../../textures/moon-4k.webp';
 
 // Earth scene — Phase 9.1.
 //
@@ -135,7 +136,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   const settings = useMobileSettings();
   const focus = useCelestialFocus();
   const { testMode } = useEarthTestMode();
-  const { placeholderMode } = useEarthPlaceholderMode();
+  const { textureMode } = useEarthTextureMode();
 
   const earthRef = useRef<THREE.Group>(null);
   const cloudsRef = useRef<THREE.Mesh>(null);
@@ -155,12 +156,16 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   const [dayMap, setDayMap] = useState<THREE.Texture>(placeholder.day);
   const [nightMap, setNightMap] = useState<THREE.Texture>(placeholder.night);
   const [cloudsMap, setCloudsMap] = useState<THREE.Texture>(fallbackClouds);
+  const [moonTex, setMoonTex] = useState<THREE.Texture | null>(null);
 
   // Imperative texture load with per-texture error tolerance. If a file fails
   // to decode (placeholder stubs in the wrong format, missing files, etc.)
   // the corresponding fallback stays in place silently. console.warn surfaces
   // the first failure for debugging without breaking the scene.
+  // Only runs when textureMode === 'nasa' — procedural mode never touches the
+  // webp files, keeping the default canvas look without network requests.
   useEffect(() => {
+    if (textureMode !== 'nasa') return;
     const loader = new THREE.TextureLoader();
     let cancelled = false;
     const load = (url: string, onLoad: (t: THREE.Texture) => void) => {
@@ -177,11 +182,10 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
         },
       );
     };
-    // Stub-detection: the committed earth-day-4k.webp / earth-night-4k.webp are
-    // 34-byte placeholder files that decode "successfully" to 1×1 black. Reject
-    // anything <64×64 so the canvas-drawn placeholder stays visible until real
-    // Blue Marble imagery is dropped in. Real NASA Blue Marble at 4096×2048
-    // sails past this threshold.
+    // Stub-detection: the committed webps are 34-byte placeholder files that
+    // decode "successfully" to 1×1 black. Reject anything <64×64 so the
+    // canvas-drawn placeholder stays visible until real NASA imagery is dropped
+    // in. Real Blue Marble at 4096×2048 sails past this threshold.
     load(earthDayUrl, (tex) => {
       if (isLikelyStubTexture(tex)) return;
       configureSurfaceTexture(tex);
@@ -198,10 +202,16 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
       tex.needsUpdate = true;
       setCloudsMap(tex);
     });
+    load(moonUrl, (tex) => {
+      if (isLikelyStubTexture(tex)) return;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.needsUpdate = true;
+      setMoonTex(tex);
+    });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [textureMode]);
 
   // Sun direction is computed once at mount in Earth-LOCAL frame (where +X is
   // lng=0). UTC drifts only ~15°/hr so freezing it per-session is fine; what
@@ -220,12 +230,12 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   // each frame — gotcha #28 stands: don't break the reference identity.
   const sunDirectionUniform = sunDirection;
 
-  // When placeholderMode is on, force the canvas-drawn placeholder maps even
-  // if real webps have loaded. Otherwise use whatever's in dayMap/nightMap
-  // state (which starts at the placeholder and is replaced only when a
-  // non-stub webp finishes loading — see the load callbacks below).
-  const effectiveDayMap = placeholderMode ? placeholder.day : dayMap;
-  const effectiveNightMap = placeholderMode ? placeholder.night : nightMap;
+  // In 'procedural' mode: always use canvas-drawn maps regardless of what has
+  // loaded into state. In 'nasa' mode: use the loaded texture (starts as
+  // placeholder, replaced when a non-stub webp finishes loading).
+  const effectiveDayMap = textureMode === 'nasa' ? (dayMap ?? placeholder.day) : placeholder.day;
+  const effectiveNightMap =
+    textureMode === 'nasa' ? (nightMap ?? placeholder.night) : placeholder.night;
 
   const uniforms = useMemo(
     () => ({
@@ -245,15 +255,24 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   // Moon uniforms. Shares the sunDirection uniform reference with the earth
   // shader so the per-frame mutation in useFrame propagates here too.
   // shadowFactor is updated each frame by the umbra-cone test below.
+  // moonMap/useMap are updated reactively via a separate useEffect when
+  // textureMode or moonTex changes (direct mutation, same pattern as shadowFactor).
   const moonUniforms = useMemo(
     () => ({
       sunDirection: sunDirectionUniform,
       baseColor: { value: new THREE.Color('#cccdd0') },
       ambient: { value: 0.05 },
       shadowFactor: { value: 0 },
+      moonMap: { value: new THREE.Texture() },
+      useMap: { value: false },
     }),
     [sunDirectionUniform],
   );
+
+  useEffect(() => {
+    moonUniforms.moonMap.value = moonTex ?? new THREE.Texture();
+    moonUniforms.useMap.value = moonTex !== null && textureMode === 'nasa';
+  }, [moonTex, textureMode, moonUniforms]);
 
   // Auto-rotation. Rate read per-frame from getEarthRotationRate() so the
   // dev console can change it live (incl. negative for reverse, 0 to halt).
@@ -414,7 +433,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
             <meshStandardMaterial map={cloudsMap} transparent opacity={0.45} depthWrite={false} />
           </mesh>
         ) : null}
-        {testMode || placeholderMode
+        {testMode
           ? cityPositions.map(({ key, position, uniforms: dotUniforms }) => (
               <mesh key={key} position={position}>
                 <sphereGeometry args={[CITY_DOT_RADIUS, 16, 16]} />

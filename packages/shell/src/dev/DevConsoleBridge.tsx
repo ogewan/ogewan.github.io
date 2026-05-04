@@ -4,13 +4,14 @@ import {
   useBackgroundConfig,
   useBlackHoleConfig,
   useCelestialQuality,
-  useEarthPlaceholderMode,
+  useEarthTextureMode,
   useEarthTestMode,
   useNebulaeConfig,
   useRingsClockMarkers,
   useRingsEffects,
   useRingsVisibility,
   type CelestialQuality,
+  type EarthTextureMode,
   type NebulaVariant,
 } from '@portfolio/celestial';
 import { registerDevAPI } from './dev-console';
@@ -23,7 +24,7 @@ export function DevConsoleBridge() {
   const navigate = useNavigate();
   const { setQuality } = useCelestialQuality();
   const { setTestMode } = useEarthTestMode();
-  const { setPlaceholderMode } = useEarthPlaceholderMode();
+  const { textureMode, setTextureMode } = useEarthTextureMode();
   const { visible: ringsVisible, setVisible: setRingsVisible } = useRingsVisibility();
   const { clockVisible, setClockVisible } = useRingsClockMarkers();
   const {
@@ -47,7 +48,8 @@ export function DevConsoleBridge() {
       navigate: (path: string) => navigate(path),
       setQuality: (q: string) => setQuality(q as CelestialQuality),
       setEarthTestMode: (on: boolean) => setTestMode(on),
-      setEarthPlaceholderMode: (on: boolean) => setPlaceholderMode(on),
+      setEarthTextureMode: (m: string) => setTextureMode(m as EarthTextureMode),
+      getEarthTextureMode: () => textureMode,
       setRingsVisible: (on: boolean) => setRingsVisible(on),
       getRingsVisible: () => ringsVisible,
       setRingsClockVisible: (on: boolean) => setClockVisible(on),
@@ -144,7 +146,8 @@ export function DevConsoleBridge() {
     navigate,
     setQuality,
     setTestMode,
-    setPlaceholderMode,
+    textureMode,
+    setTextureMode,
     setRingsVisible,
     ringsVisible,
     setClockVisible,

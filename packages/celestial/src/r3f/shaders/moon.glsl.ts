@@ -4,14 +4,17 @@
 // `shadowFactor` uniform (JS-driven) darkens the moon when it enters Earth's
 // umbra — see EarthScene's useFrame for the cone test that produces it.
 //
-// The moon has no day/night map; we use a single tinted base color and let
-// the lambert + shadow factor do all the visual work.
+// When `useMap` is true, the `moonMap` sampler replaces `baseColor` as the
+// surface color source (NASA LRO texture in 'nasa' texture mode). The same
+// Lambertian + shadow factor logic applies regardless of source.
 
 export const moonVertexShader = /* glsl */ `
 varying vec3 vNormal;
+varying vec2 vUv;
 
 void main() {
   vNormal = normalize(mat3(modelMatrix) * normal);
+  vUv = uv;
   gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
 }
 `;
@@ -21,8 +24,11 @@ uniform vec3 sunDirection;
 uniform vec3 baseColor;
 uniform float ambient;
 uniform float shadowFactor;
+uniform sampler2D moonMap;
+uniform bool useMap;
 
 varying vec3 vNormal;
+varying vec2 vUv;
 
 void main() {
   vec3 normal = normalize(vNormal);
@@ -30,7 +36,8 @@ void main() {
   // Clamp at zero so the unlit hemisphere doesn't go negative (which would
   // make the night side darker than the ambient floor).
   float lambert = max(0.0, dot(normal, sunDir));
-  vec3 lit = baseColor * (ambient + (1.0 - ambient) * lambert);
+  vec3 base = useMap ? texture2D(moonMap, vUv).rgb : baseColor;
+  vec3 lit = base * (ambient + (1.0 - ambient) * lambert);
   // Earth's umbra: shadowFactor in [0..1], 1 = fully shadowed. Cap the
   // attenuation at 0.85 so a fully-eclipsed moon reads as a dim red-ish
   // disc rather than disappearing entirely.

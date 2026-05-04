@@ -37,10 +37,10 @@ export {
   type EarthTestModeValue,
 } from './EarthTestModeContext.js';
 export {
-  EarthPlaceholderModeProvider,
-  useEarthPlaceholderMode,
-  type EarthPlaceholderModeValue,
-} from './EarthPlaceholderModeContext.js';
+  EarthTextureModeProvider,
+  useEarthTextureMode,
+  type EarthTextureModeValue,
+} from './EarthTextureModeContext.js';
 export {
   DEFAULT_GAS_GIANT_ROTATION_RATE,
   getGasGiantRotationRate,
@@ -95,4 +95,10 @@ export {
   type NebulaVariant,
   type NebulaParams,
 } from './r3f/scenes/nebula-variants.js';
-export { SCENE_DEFAULTS, BLACKHOLE_PRESETS, type SceneDefaults } from './scene-defaults.js';
+export {
+  SCENE_DEFAULTS,
+  BLACKHOLE_PRESETS,
+  EARTH_TEXTURE_MODES,
+  type SceneDefaults,
+  type EarthTextureMode,
+} from './scene-defaults.js';

@@ -26,6 +26,8 @@ import {
   setLensingActive,
   SCENE_DEFAULTS,
   BLACKHOLE_PRESETS,
+  EARTH_TEXTURE_MODES,
+  type EarthTextureMode,
 } from '@portfolio/celestial';
 
 const HIDE_UI_CLASS = 'dev-hide-ui';
@@ -98,7 +100,8 @@ interface DevAPIRegistry {
   setQuality?: Setter<string>;
   navigate?: Setter<string>;
   setEarthTestMode?: Setter<boolean>;
-  setEarthPlaceholderMode?: Setter<boolean>;
+  setEarthTextureMode?: Setter<string>;
+  getEarthTextureMode?: () => EarthTextureMode;
   setRingsVisible?: Setter<boolean>;
   getRingsVisible?: () => boolean;
   setRingsClockVisible?: Setter<boolean>;
@@ -199,6 +202,10 @@ function isNebulaVariant(v: unknown): v is NebulaVariantString {
   return typeof v === 'string' && (NEBULA_VARIANT_VALUES as readonly string[]).includes(v);
 }
 
+function isEarthTextureMode(v: unknown): v is EarthTextureMode {
+  return typeof v === 'string' && (EARTH_TEXTURE_MODES as readonly string[]).includes(v);
+}
+
 const registry: DevAPIRegistry = {};
 
 // Scene-defaults reset helpers. Each writes every per-scene setter
@@ -208,7 +215,7 @@ const registry: DevAPIRegistry = {};
 function resetEarthDefaults(): void {
   setEarthRotationRate(SCENE_DEFAULTS.earth.rotationRate);
   registry.setEarthTestMode?.(SCENE_DEFAULTS.earth.testMode);
-  registry.setEarthPlaceholderMode?.(SCENE_DEFAULTS.earth.placeholderMode);
+  registry.setEarthTextureMode?.(SCENE_DEFAULTS.earth.textureMode);
   console.log('[portfolio] earth defaults reset');
 }
 
@@ -468,16 +475,21 @@ export function installDevConsole(): void {
         registry.setEarthTestMode(Boolean(on));
       },
 
-      // portfolio.earth.placeholder()       → on
-      // portfolio.earth.placeholder(true)   → on
-      // portfolio.earth.placeholder(false)  → off
-      // Forces the canvas-drawn placeholder day/night maps regardless of
-      // whether real Blue Marble webps have loaded. Also makes the city
-      // dots visible (lambert-aware: dim red on day side, bright yellow
-      // city-lights glow on night side).
-      placeholder(on: boolean = true): void {
-        if (!registry.setEarthPlaceholderMode) return notRegistered('earth.placeholder');
-        registry.setEarthPlaceholderMode(Boolean(on));
+      // portfolio.earth.textureMode()                → current mode
+      // portfolio.earth.textureMode('nasa')          → switch to NASA textures (requires real webp files)
+      // portfolio.earth.textureMode('procedural')    → switch back to canvas (default)
+      textureMode(mode?: string): EarthTextureMode | void {
+        if (mode === undefined) {
+          return registry.getEarthTextureMode?.() ?? SCENE_DEFAULTS.earth.textureMode;
+        }
+        if (!isEarthTextureMode(mode)) {
+          console.warn(
+            `[portfolio] earth.textureMode(m): m must be one of ${EARTH_TEXTURE_MODES.join(' | ')}.`,
+          );
+          return;
+        }
+        if (!registry.setEarthTextureMode) return notRegistered('earth.textureMode');
+        registry.setEarthTextureMode(mode);
       },
 
       // Get/set earth auto-rotation rate.
@@ -992,10 +1004,12 @@ export function installDevConsole(): void {
           "  portfolio.quality(q)  // 'full' | 'still' | 'lite' (aliases for 'quality' | 'static' | 'simple')",
           '',
           'Earth test mode:',
-          '  portfolio.earth.test(on?)             // on=true by default; UV checker + red city dots',
-          '  portfolio.earth.placeholder(on?)      // on=true; force green/blue placeholder map + lambert-aware city dots',
-          '  portfolio.earth.rotationSpeed()       // get current rate, in rad/sec (default 0.025)',
-          '  portfolio.earth.rotationSpeed(rate)   // set; negative reverses, 0 halts. Persists in localStorage.',
+          '  portfolio.earth.test(on?)                   // on=true by default; UV checker + red city dots',
+          "  portfolio.earth.textureMode()               // → current mode ('procedural' | 'nasa')",
+          "  portfolio.earth.textureMode('nasa')         // switch to NASA textures (requires real webp files in textures/)",
+          "  portfolio.earth.textureMode('procedural')   // switch back to canvas (default)",
+          '  portfolio.earth.rotationSpeed()             // get current rate, in rad/sec (default 0.025)',
+          '  portfolio.earth.rotationSpeed(rate)         // set; negative reverses, 0 halts. Persists in localStorage.',
           '',
           'Projects-scene rings:',
           '  portfolio.rings.show() / hide() / toggle()',

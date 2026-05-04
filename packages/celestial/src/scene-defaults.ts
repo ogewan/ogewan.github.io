@@ -14,15 +14,20 @@
 // value equals the default (after this refactor); existing stored
 // values from before the refactor still read correctly.
 
+export const EARTH_TEXTURE_MODES = ['procedural', 'nasa'] as const;
+export type EarthTextureMode = (typeof EARTH_TEXTURE_MODES)[number];
+
 export const SCENE_DEFAULTS = {
   earth: {
     // rad/sec auto-rotation. Default ~1.43°/sec at session timescale.
     rotationRate: 0.025,
     // UV-checker shader + bright city-marker dots — diagnostic only.
     testMode: false,
-    // Force the canvas-drawn green/blue placeholder maps even when
-    // real Blue Marble webps are available.
-    placeholderMode: false,
+    // Texture mode: 'procedural' = canvas-drawn placeholder maps (default);
+    // 'nasa' = load real Blue Marble / Black Marble webps from textures/.
+    // In 'nasa' mode, stubs (isLikelyStubTexture) silently fall back to
+    // procedural so the scene always renders correctly.
+    textureMode: 'procedural' as EarthTextureMode,
   },
   contact: {
     // Active nebula variant. Source-of-truth lives in the URL `?neb`

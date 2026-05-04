@@ -24,10 +24,13 @@ Convert from JPEG/TIFF to WebP at quality 80 with `cwebp -q 80 input.jpg -o eart
 (or your tool of choice). All three should be equirectangular (lat/lng grid)
 projections — that's what the sphere geometry's UV unwrap expects.
 
-### Other scenes (Phase 9.2+)
+### Moon (Phase 9.6)
 
-Future textures (moon, gas giant rings, nebula references) drop in as those
-phases land.
+| File           | Source                                                                                                               | Suggested size |
+| -------------- | -------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `moon-4k.webp` | NASA LRO WAC Global Morphology Mosaic — [CGI Moon Kit](https://svs.gsfc.nasa.gov/4720) or LRO WAC mosaic (equirect.) | 4096 × 2048    |
+
+Convert: `cwebp -q 80 lro_moon.jpg -o moon-4k.webp`. Only loaded when `portfolio.earth.textureMode('nasa')` is active.
 
 ## Why webp
 

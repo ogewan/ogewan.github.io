@@ -7,7 +7,7 @@ import {
   CelestialBackdrop,
   CelestialFocusProvider,
   CelestialQualityProvider,
-  EarthPlaceholderModeProvider,
+  EarthTextureModeProvider,
   EarthTestModeProvider,
   NebulaeConfigProvider,
   RingsClockMarkersProvider,
@@ -61,7 +61,7 @@ export function App() {
     <CelestialQualityProvider>
       <CelestialFocusProvider>
         <EarthTestModeProvider>
-          <EarthPlaceholderModeProvider>
+          <EarthTextureModeProvider>
             <RingsVisibilityProvider>
               <RingsEffectsProvider>
                 <RingsClockMarkersProvider>
@@ -108,7 +108,7 @@ export function App() {
                 </RingsClockMarkersProvider>
               </RingsEffectsProvider>
             </RingsVisibilityProvider>
-          </EarthPlaceholderModeProvider>
+          </EarthTextureModeProvider>
         </EarthTestModeProvider>
       </CelestialFocusProvider>
     </CelestialQualityProvider>

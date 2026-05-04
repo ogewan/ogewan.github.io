@@ -79,3 +79,6 @@ packages/shell/public/resume.pdf
 
 # a11y audit output
 a11y-report/
+
+# git backup
+.git-backup/
