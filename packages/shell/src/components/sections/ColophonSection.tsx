@@ -56,11 +56,11 @@ export function ColophonSection() {
             </Spec>
             <Spec label={t('sections.stack.labels.threeD')}>
               <Pill>R3F · Three.js</Pill>
-              <span className="text-fg-muted">{t('sections.stack.notes.threeD')}</span>
+              <span className="text-fg-secondary">{t('sections.stack.notes.threeD')}</span>
             </Spec>
             <Spec label={t('sections.stack.labels.polyglot')}>
               <Pill>Angular Elements</Pill>
-              <span className="text-fg-muted">{t('sections.stack.notes.polyglot')}</span>
+              <span className="text-fg-secondary">{t('sections.stack.notes.polyglot')}</span>
             </Spec>
             <Spec label={t('sections.stack.labels.style')}>
               <Pill>Tailwind v4</Pill>
@@ -68,7 +68,7 @@ export function ColophonSection() {
             </Spec>
             <Spec label={t('sections.stack.labels.i18n')}>
               <Pill>react-i18next</Pill>
-              <span className="text-fg-muted">{t('sections.stack.notes.i18n')}</span>
+              <span className="text-fg-secondary">{t('sections.stack.notes.i18n')}</span>
             </Spec>
             <Spec label={t('sections.stack.labels.hosting')}>
               <Pill>GitHub Pages</Pill>
@@ -87,7 +87,7 @@ export function ColophonSection() {
         subtitle={t('sections.build.subtitle')}
       >
         <GlassPanel variant="inset" className="p-6 overflow-x-auto">
-          <pre className="font-mono text-micro leading-[1.7] text-fg-secondary">
+          <pre className="font-mono text-micro leading-[1.7] text-fg-primary">
             {`portfolio/
 ├── packages/
 │   ├── shell/                — React 19 SPA, Vite, locale-prefixed routes
@@ -109,7 +109,7 @@ export function ColophonSection() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <GlassPanel className="p-5">
-            <Text variant="label" className="mb-3 block">
+            <Text variant="label" className="mb-3 block text-fg-secondary">
               {t('sections.perf.cwvHeading')}
             </Text>
             <ul className="font-mono text-small">
@@ -121,7 +121,7 @@ export function ColophonSection() {
             </ul>
           </GlassPanel>
           <GlassPanel className="p-5">
-            <Text variant="label" className="mb-3 block">
+            <Text variant="label" className="mb-3 block text-fg-secondary">
               {t('sections.perf.wcagHeading')}
             </Text>
             <ul className="font-mono text-small">
@@ -143,7 +143,7 @@ export function ColophonSection() {
         <GlassPanel className="p-6">
           <table className="w-full font-mono text-small">
             <thead>
-              <tr className="text-fg-muted">
+              <tr className="text-fg-secondary">
                 <th className="text-left pb-3 px-2 w-20">{t('sections.changelog.headers.ver')}</th>
                 <th className="text-left pb-3 px-2 w-32">{t('sections.changelog.headers.date')}</th>
                 <th className="text-left pb-3 px-2">{t('sections.changelog.headers.note')}</th>
@@ -275,7 +275,7 @@ function Section({
 function Spec({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <>
-      <dt className="text-fg-muted">{label}</dt>
+      <dt className="text-fg-secondary">{label}</dt>
       <dd className="text-fg-primary flex flex-wrap items-center gap-2">{children}</dd>
     </>
   );
@@ -292,7 +292,7 @@ function Pill({ children }: { children: React.ReactNode }) {
 function PerfRow({ k, v }: { k: string; v: string }) {
   return (
     <li className="flex items-baseline justify-between py-2 border-t border-dashed border-glass-hairline-inner first:border-t-0">
-      <span className="text-fg-muted">{k}</span>
+      <span className="text-fg-secondary">{k}</span>
       <span className="text-cyan">{v}</span>
     </li>
   );
@@ -302,7 +302,7 @@ function ChangeRow({ ver, date, note }: { ver: string; date: string; note: strin
   return (
     <tr className="border-t border-dashed border-glass-hairline-inner">
       <td className="py-3 px-2 text-cyan">v{ver}</td>
-      <td className="py-3 px-2 text-fg-muted">{date}</td>
+      <td className="py-3 px-2 text-fg-secondary">{date}</td>
       <td className="py-3 px-2 text-fg-primary">{note}</td>
     </tr>
   );
