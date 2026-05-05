@@ -27,6 +27,22 @@ export {
   setEarthRotationRate,
 } from './earth-rotation-rate.js';
 export {
+  DEFAULT_CLOUD_DRIFT_RATE,
+  getCloudDriftRate,
+  setCloudDriftRate,
+} from './earth-cloud-rate.js';
+export {
+  DEFAULT_CLOUD_SHARPNESS,
+  getCloudSharpness,
+  setCloudSharpness,
+} from './placeholder-earth-texture.js';
+export {
+  getMoonAngleOverride,
+  setMoonAngleOverride,
+  updateMoonAngle,
+  getMoonCurrentAngle,
+} from './moon-orbit-angle.js';
+export {
   getLensingActive,
   setLensingActive,
   subscribeLensingActive,

@@ -25,7 +25,9 @@ uniform vec3 baseColor;
 uniform float ambient;
 uniform float shadowFactor;
 uniform sampler2D moonMap;
-uniform bool useMap;
+// float instead of bool — bool uniforms have driver-consistency issues in WebGL.
+// JS side: 0.0 = base color, 1.0 = texture map.
+uniform float useMap;
 
 varying vec3 vNormal;
 varying vec2 vUv;
@@ -36,7 +38,7 @@ void main() {
   // Clamp at zero so the unlit hemisphere doesn't go negative (which would
   // make the night side darker than the ambient floor).
   float lambert = max(0.0, dot(normal, sunDir));
-  vec3 base = useMap ? texture2D(moonMap, vUv).rgb : baseColor;
+  vec3 base = useMap > 0.5 ? texture2D(moonMap, vUv).rgb : baseColor;
   vec3 lit = base * (ambient + (1.0 - ambient) * lambert);
   // Earth's umbra: shadowFactor in [0..1], 1 = fully shadowed. Cap the
   // attenuation at 0.85 so a fully-eclipsed moon reads as a dim red-ish

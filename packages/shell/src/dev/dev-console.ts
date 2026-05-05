@@ -15,6 +15,13 @@
 import {
   getEarthRotationRate,
   setEarthRotationRate,
+  getCloudDriftRate,
+  setCloudDriftRate,
+  getCloudSharpness,
+  setCloudSharpness,
+  getMoonAngleOverride,
+  setMoonAngleOverride,
+  getMoonCurrentAngle,
   getProjectsRingsRotationRate,
   setProjectsRingsRotationRate,
   getProjectsSceneRotationRate,
@@ -32,6 +39,7 @@ import {
 
 const HIDE_UI_CLASS = 'dev-hide-ui';
 const HIDE_BG_CLASS = 'dev-hide-bg';
+let _moonWatchTimer: ReturnType<typeof setInterval> | null = null;
 
 type Setter<T> = (v: T) => void;
 
@@ -214,6 +222,9 @@ const registry: DevAPIRegistry = {};
 
 function resetEarthDefaults(): void {
   setEarthRotationRate(SCENE_DEFAULTS.earth.rotationRate);
+  setCloudDriftRate(SCENE_DEFAULTS.earth.cloudDriftRate);
+  setCloudSharpness(SCENE_DEFAULTS.earth.cloudSharpness);
+  setMoonAngleOverride(null);
   registry.setEarthTestMode?.(SCENE_DEFAULTS.earth.testMode);
   registry.setEarthTextureMode?.(SCENE_DEFAULTS.earth.textureMode);
   console.log('[portfolio] earth defaults reset');
@@ -398,6 +409,9 @@ export function installDevConsole(): void {
         console.warn(`[portfolio] go('${target}'): no #${target} on page (not on MainPage?).`);
         return;
       }
+      // Sections live inside data-ui-root, which is display:none when UI is
+      // hidden. scrollIntoView on a hidden element is a no-op; show UI first.
+      if (hasBodyClass(HIDE_UI_CLASS)) setBodyClass(HIDE_UI_CLASS, false);
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     },
 
@@ -504,6 +518,63 @@ export function installDevConsole(): void {
           return;
         }
         setEarthRotationRate(rate);
+      },
+
+      // Get/set cloud-layer drift rate (independent of earth body rotation).
+      //   portfolio.earth.cloudSpeed()        → number (rad/sec)
+      //   portfolio.earth.cloudSpeed(0.015)   → set default speed
+      //   portfolio.earth.cloudSpeed(0.05)    → faster drift
+      //   portfolio.earth.cloudSpeed(0)       → halt clouds
+      cloudSpeed(rate?: number): number | void {
+        if (rate === undefined) return getCloudDriftRate();
+        if (typeof rate !== 'number' || !Number.isFinite(rate)) {
+          console.warn(`[portfolio] earth.cloudSpeed(rate): rate must be a finite number.`);
+          return;
+        }
+        setCloudDriftRate(rate);
+      },
+
+      // Get/set procedural cloud sharpness (inner-radius fraction, 0–0.95).
+      //   portfolio.earth.cloudSharpness()       → current value (default 0.2)
+      //   portfolio.earth.cloudSharpness(0)      → pure feather / maximum blur
+      //   portfolio.earth.cloudSharpness(0.5)    → defined solid core
+      //   portfolio.earth.cloudSharpness(0.95)   → near hard-edge blobs
+      // Only affects procedural mode; NASA texture sharpness is the webp as-is.
+      cloudSharpness(v?: number): number | void {
+        if (v === undefined) return getCloudSharpness();
+        if (typeof v !== 'number' || !Number.isFinite(v)) {
+          console.warn(`[portfolio] earth.cloudSharpness(v): v must be a finite number.`);
+          return;
+        }
+        setCloudSharpness(v);
+      },
+
+      // Get/set moon orbital position (radians). Overrides the UTC-derived
+      // orbit so the moon can be positioned for screenshots / Playwright probes.
+      //   portfolio.earth.moonAngle()            → current override (null = tracking)
+      //   portfolio.earth.moonAngle(Math.PI / 2) → lock moon to 90° position
+      //   portfolio.earth.moonAngle(null)         → release; resume UTC tracking
+      moonAngle(radians?: number | null): number | null | void {
+        if (radians === undefined) return getMoonAngleOverride();
+        if (radians !== null && (typeof radians !== 'number' || !Number.isFinite(radians))) {
+          console.warn(`[portfolio] earth.moonAngle(r): r must be a finite number or null.`);
+          return;
+        }
+        setMoonAngleOverride(radians ?? null);
+      },
+
+      //   portfolio.earth.moonWatch()  → toggle live angle logging (once/sec)
+      moonWatch(): void {
+        if (_moonWatchTimer !== null) {
+          clearInterval(_moonWatchTimer);
+          _moonWatchTimer = null;
+          console.log('[celestial] moonWatch stopped');
+        } else {
+          _moonWatchTimer = setInterval(() => {
+            console.log(`[celestial] moonAngle = ${getMoonCurrentAngle().toFixed(4)} rad`);
+          }, 1000);
+          console.log('[celestial] moonWatch started — call again to stop');
+        }
       },
 
       reset: resetEarthDefaults,
@@ -1010,6 +1081,14 @@ export function installDevConsole(): void {
           "  portfolio.earth.textureMode('procedural')   // switch back to canvas (default)",
           '  portfolio.earth.rotationSpeed()             // get current rate, in rad/sec (default 0.025)',
           '  portfolio.earth.rotationSpeed(rate)         // set; negative reverses, 0 halts. Persists in localStorage.',
+          '  portfolio.earth.cloudSpeed()                // get cloud drift rate, rad/sec (default 0.015)',
+          '  portfolio.earth.cloudSpeed(rate)            // set; 0 halts clouds. Persists in localStorage.',
+          '  portfolio.earth.cloudSharpness()            // get procedural cloud inner-radius (0=blur, 0.95=sharp)',
+          '  portfolio.earth.cloudSharpness(v)           // set; redraws canvas texture live.',
+          '  portfolio.earth.moonAngle()                 // get moon orbit override (null = UTC tracking)',
+          '  portfolio.earth.moonAngle(Math.PI/2)        // lock moon to angle for screenshots',
+          '  portfolio.earth.moonAngle(null)             // release moon back to UTC tracking',
+          '  portfolio.earth.moonWatch()                 // toggle live angle logging (prints once/sec)',
           '',
           'Projects-scene rings:',
           '  portfolio.rings.show() / hide() / toggle()',

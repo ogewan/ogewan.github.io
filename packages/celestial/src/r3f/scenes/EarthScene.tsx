@@ -6,6 +6,8 @@ import type { SceneName } from '../../scenes.js';
 import { useCelestialFocus } from '../../CelestialContext.js';
 import { CANONICAL_CITIES } from '../../cities.js';
 import { getEarthRotationRate } from '../../earth-rotation-rate.js';
+import { getCloudDriftRate } from '../../earth-cloud-rate.js';
+import { getMoonAngleOverride, updateMoonAngle } from '../../moon-orbit-angle.js';
 import { useEarthTextureMode } from '../../EarthTextureModeContext.js';
 import { useEarthTestMode } from '../../EarthTestModeContext.js';
 import { useMobileSettings } from '../MobileSettings.js';
@@ -19,10 +21,12 @@ import {
   cityDotFragmentShader,
 } from '../shaders/earth.glsl.js';
 import { moonVertexShader, moonFragmentShader } from '../shaders/moon.glsl.js';
+import { cloudVertexShader, cloudFragmentShader } from '../shaders/cloud.glsl.js';
 import { getSunDirection, positionFromLatLng, rotationForFocus } from '../sun-direction.js';
 import {
   isLikelyStubTexture,
   makePlaceholderEarthTextures,
+  makeProceduralCloudTexture,
 } from '../../placeholder-earth-texture.js';
 import earthDayUrl from '../../textures/earth-day-4k.webp';
 import earthNightUrl from '../../textures/earth-night-4k.webp';
@@ -59,7 +63,6 @@ import moonUrl from '../../textures/moon-4k.webp';
 // getEarthRotationRate() so window.portfolio.earth.rotationSpeed() can tweak
 // it live without re-rendering this component. Default is
 // DEFAULT_EARTH_ROTATION_RATE (0.025) ≈ 1.43°/sec at session timescale.
-const CLOUD_DRIFT_RATE = 0.015;
 const FOCUS_TWEEN_DURATION_SEC = 2;
 // Marker dot radius and orbit radius (slightly above the unit-radius earth so
 // dots don't z-fight with the surface).
@@ -97,15 +100,6 @@ function moonOrbitOffsetFromUtc(date: Date): number {
 
 // Build a 1×1 RGBA DataTexture used as the procedural fallback while real
 // textures load (or if they fail). The shader samples the same color at every
-// UV; the day/night terminator and atmospheric rim still render correctly.
-function makeSolidTexture(rgba: [number, number, number, number]): THREE.DataTexture {
-  const data = new Uint8Array(rgba);
-  const tex = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat);
-  tex.needsUpdate = true;
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
-}
-
 function configureSurfaceTexture(tex: THREE.Texture) {
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.wrapS = THREE.RepeatWrapping;
@@ -151,7 +145,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   // 1×1 black; the load callback below uses isLikelyStubTexture to skip
   // overriding the placeholder when that's the case.
   const placeholder = useMemo(() => makePlaceholderEarthTextures(), []);
-  const fallbackClouds = useMemo(() => makeSolidTexture([255, 255, 255, 0]), []);
+  const fallbackClouds = useMemo(() => makeProceduralCloudTexture(), []);
 
   const [dayMap, setDayMap] = useState<THREE.Texture>(placeholder.day);
   const [nightMap, setNightMap] = useState<THREE.Texture>(placeholder.night);
@@ -236,6 +230,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   const effectiveDayMap = textureMode === 'nasa' ? (dayMap ?? placeholder.day) : placeholder.day;
   const effectiveNightMap =
     textureMode === 'nasa' ? (nightMap ?? placeholder.night) : placeholder.night;
+  const effectiveCloudsMap = textureMode === 'nasa' ? cloudsMap : fallbackClouds;
 
   const uniforms = useMemo(
     () => ({
@@ -264,15 +259,36 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
       ambient: { value: 0.05 },
       shadowFactor: { value: 0 },
       moonMap: { value: new THREE.Texture() },
-      useMap: { value: false },
+      useMap: { value: 0 },
     }),
     [sunDirectionUniform],
   );
 
   useEffect(() => {
+    const active = moonTex !== null && textureMode === 'nasa';
     moonUniforms.moonMap.value = moonTex ?? new THREE.Texture();
-    moonUniforms.useMap.value = moonTex !== null && textureMode === 'nasa';
+    moonUniforms.useMap.value = active ? 1 : 0;
+    // Force material to re-bind the texture slot when the reference changes.
+    if (moonRef.current) {
+      (moonRef.current.material as THREE.ShaderMaterial).needsUpdate = true;
+    }
   }, [moonTex, textureMode, moonUniforms]);
+
+  // Cloud uniforms. cloudMap is updated imperatively when effectiveCloudsMap
+  // changes (same pattern as moonUniforms). sunDirection is the shared ref so
+  // the per-frame mutation in useFrame propagates here too.
+  const cloudUniforms = useMemo(
+    () => ({
+      cloudMap: { value: fallbackClouds as THREE.Texture },
+      sunDirection: sunDirectionUniform,
+      cloudOpacity: { value: 0.45 },
+    }),
+    [sunDirectionUniform, fallbackClouds],
+  );
+
+  useEffect(() => {
+    cloudUniforms.cloudMap.value = effectiveCloudsMap;
+  }, [effectiveCloudsMap, cloudUniforms]);
 
   // Auto-rotation. Rate read per-frame from getEarthRotationRate() so the
   // dev console can change it live (incl. negative for reverse, 0 to halt).
@@ -304,7 +320,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
       earthRef.current.rotation.y += getEarthRotationRate() * delta;
     }
     if (cloudsRef.current && !settings.degraded) {
-      cloudsRef.current.rotation.y += CLOUD_DRIFT_RATE * delta;
+      cloudsRef.current.rotation.y += getCloudDriftRate() * delta;
     }
     if (earthRef.current) {
       sunWorldRef.current.copy(sunLocal).applyQuaternion(earthRef.current.quaternion);
@@ -314,7 +330,12 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
     // Lock moon orbit to earth.rotation.y + UTC-derived offset, then compute
     // earth-shadow darkening from the resulting moon world position.
     if (moonOrbitRef.current && moonRef.current && earthRef.current) {
-      moonOrbitRef.current.rotation.y = earthRef.current.rotation.y + moonOrbitOffset;
+      const moonAngleOverride = getMoonAngleOverride();
+      moonOrbitRef.current.rotation.y =
+        moonAngleOverride !== null
+          ? moonAngleOverride
+          : earthRef.current.rotation.y + moonOrbitOffset;
+      updateMoonAngle(moonOrbitRef.current.rotation.y);
 
       // Earth umbra cone: project earth→moon onto -sunDirection, measure the
       // perpendicular distance from the sun-axis-through-earth. If that
@@ -430,7 +451,13 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
         {showClouds ? (
           <mesh ref={cloudsRef}>
             <sphereGeometry args={[1.005, segments, segments]} />
-            <meshStandardMaterial map={cloudsMap} transparent opacity={0.45} depthWrite={false} />
+            <shaderMaterial
+              vertexShader={cloudVertexShader}
+              fragmentShader={cloudFragmentShader}
+              uniforms={cloudUniforms}
+              transparent={true}
+              depthWrite={false}
+            />
           </mesh>
         ) : null}
         {testMode

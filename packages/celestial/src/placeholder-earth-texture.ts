@@ -255,6 +255,146 @@ export function makePlaceholderEarthTextures(): {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Procedural cloud texture — multi-octave value noise
+// ---------------------------------------------------------------------------
+// A pre-baked 48×32 grid of random values (LCG, seed 0xdeadbeef) is sampled
+// at 5 octaves with asymmetric UV frequencies (freqU >> freqV) to produce
+// horizontally-elongated cloud formations that resemble real cloud systems.
+// NOISE_W=48 is chosen so every freqU (3,6,12,24,48) divides it exactly,
+// giving perfect seamless tiling in the horizontal (longitude) direction.
+
+const NOISE_W = 48;
+const NOISE_H = 32;
+
+const _noiseGrid: Float32Array = (() => {
+  const g = new Float32Array(NOISE_W * NOISE_H);
+  let s = 0xdeadbeef;
+  for (let i = 0; i < g.length; i++) {
+    s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+    g[i] = s / 0xffffffff;
+  }
+  return g;
+})();
+
+// Bilinear value noise — wraps horizontally (seamless longitude), open vertically.
+function _vnoise(fx: number, fy: number): number {
+  const xi = Math.floor(fx) | 0;
+  const yi = Math.floor(fy) | 0;
+  const xf = fx - xi;
+  const yf = fy - yi;
+  const u = xf * xf * (3 - 2 * xf); // smoothstep
+  const v = yf * yf * (3 - 2 * yf);
+  const x0 = xi % NOISE_W;
+  const x1 = (xi + 1) % NOISE_W;
+  const y0 = Math.min(yi, NOISE_H - 1);
+  const y1 = Math.min(yi + 1, NOISE_H - 1);
+  const n00 = _noiseGrid[y0 * NOISE_W + x0] ?? 0;
+  const n10 = _noiseGrid[y0 * NOISE_W + x1] ?? 0;
+  const n01 = _noiseGrid[y1 * NOISE_W + x0] ?? 0;
+  const n11 = _noiseGrid[y1 * NOISE_W + x1] ?? 0;
+  return n00 * (1 - u) * (1 - v) + n10 * u * (1 - v) + n01 * (1 - u) * v + n11 * u * v;
+}
+
+// Five octaves; horizontal frequency 2× vertical → elongated cloud bands.
+function _cloudDensity(tu: number, tv: number): number {
+  return (
+    _vnoise(tu * 3, tv * 1.5) * 0.45 +
+    _vnoise(tu * 6, tv * 3) * 0.25 +
+    _vnoise(tu * 12, tv * 6) * 0.15 +
+    _vnoise(tu * 24, tv * 12) * 0.1 +
+    _vnoise(tu * 48, tv * 24) * 0.05
+  ); // sum range ≈ [0, 1]
+}
+
+// Cloud sharpness controls the noise threshold (coverage) and edge transition
+// width. 0 = soft/hazy; 0.95 = crisp edges with less overall coverage.
+export const DEFAULT_CLOUD_SHARPNESS = 0.35;
+let _cloudSharpness = DEFAULT_CLOUD_SHARPNESS;
+let _cloudTex: THREE.CanvasTexture | null = null;
+
+export function getCloudSharpness(): number {
+  return _cloudSharpness;
+}
+
+export function setCloudSharpness(v: number): void {
+  _cloudSharpness = Math.max(0, Math.min(0.95, v));
+  if (!_cloudTex) return;
+  const canvas = _cloudTex.image as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  _paintCloudNoise(ctx, canvas.width, canvas.height, _cloudSharpness);
+  _cloudTex.needsUpdate = true;
+}
+
+function _paintCloudNoise(
+  ctx: CanvasRenderingContext2D,
+  W: number,
+  H: number,
+  sharpness: number,
+): void {
+  // Higher sharpness → higher threshold (less coverage) + narrower transition.
+  const threshold = 0.44 + sharpness * 0.18; // [0.44 … 0.61]
+  const edge = 0.22 - sharpness * 0.2; // [0.22 … 0.02]
+
+  const imgData = ctx.createImageData(W, H);
+  const data = imgData.data;
+
+  for (let py = 0; py < H; py++) {
+    const tv = py / H;
+    for (let px = 0; px < W; px++) {
+      const tu = px / W;
+      const density = _cloudDensity(tu, tv);
+
+      let a: number;
+      if (density >= threshold) {
+        a = 220;
+      } else if (density <= threshold - edge) {
+        a = 0;
+      } else {
+        a = Math.round(((density - (threshold - edge)) / edge) * 220);
+      }
+
+      const i = (py * W + px) * 4;
+      data[i] = 255;
+      data[i + 1] = 255;
+      data[i + 2] = 255;
+      data[i + 3] = a;
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+}
+
+// Procedural cloud texture for placeholder (procedural) mode. 512×256 canvas
+// painted with value-noise clouds. Seamlessly tiles in U (longitude).
+// Sharpness is controlled live via setCloudSharpness().
+export function makeProceduralCloudTexture(): THREE.CanvasTexture {
+  const W = 512;
+  const H = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    const fallback = new THREE.DataTexture(
+      new Uint8Array([255, 255, 255, 0]),
+      1,
+      1,
+      THREE.RGBAFormat,
+    );
+    fallback.needsUpdate = true;
+    return fallback as unknown as THREE.CanvasTexture;
+  }
+
+  _paintCloudNoise(ctx, W, H, _cloudSharpness);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.needsUpdate = true;
+  _cloudTex = tex;
+  return tex;
+}
+
 // Treat any image with width or height < 64 as a stub (the committed webps
 // at packages/celestial/src/textures/ are 34-byte placeholder files that
 // decode to 1×1). Real Blue Marble at 4096×2048 sails past this threshold.

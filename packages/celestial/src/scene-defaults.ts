@@ -21,6 +21,10 @@ export const SCENE_DEFAULTS = {
   earth: {
     // rad/sec auto-rotation. Default ~1.43°/sec at session timescale.
     rotationRate: 0.025,
+    // rad/sec cloud-layer drift (independent of earth body rotation).
+    cloudDriftRate: 0.015,
+    // Procedural cloud inner-radius fraction [0, 0.95]. 0 = pure feather; 0.95 = near hard edge.
+    cloudSharpness: 0.2,
     // UV-checker shader + bright city-marker dots — diagnostic only.
     testMode: false,
     // Texture mode: 'procedural' = canvas-drawn placeholder maps (default);
