@@ -77,7 +77,9 @@ const orderedJs = allJs.sort((a, b) => {
 let combined = '';
 for (const file of orderedJs) {
   const body = readFileSync(join(sourceDir, file), 'utf8');
-  combined += `// === ${file} ===\n${body}\n`;
+  combined += `// === ${file} ===
+;(function(){${body}})();
+`;
 }
 
 const cssFiles = readdirSync(sourceDir).filter((f) => f.endsWith('.css'));

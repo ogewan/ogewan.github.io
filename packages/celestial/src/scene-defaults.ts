@@ -23,8 +23,8 @@ export const SCENE_DEFAULTS = {
     rotationRate: 0.025,
     // rad/sec cloud-layer drift (independent of earth body rotation).
     cloudDriftRate: 0.015,
-    // Procedural cloud inner-radius fraction [0, 0.95]. 0 = pure feather; 0.95 = near hard edge.
-    cloudSharpness: 0.2,
+    // Cloud texture mode: null = no clouds; 'nasa' = load earth-clouds-2k.webp.
+    cloudTextureMode: null as 'nasa' | null,
     // UV-checker shader + bright city-marker dots — diagnostic only.
     testMode: false,
     // Texture mode: 'procedural' = canvas-drawn placeholder maps (default);

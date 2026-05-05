@@ -32,10 +32,12 @@ export {
   setCloudDriftRate,
 } from './earth-cloud-rate.js';
 export {
-  DEFAULT_CLOUD_SHARPNESS,
-  getCloudSharpness,
-  setCloudSharpness,
-} from './placeholder-earth-texture.js';
+  getCloudTextureMode,
+  setCloudTextureMode,
+  useCloudTextureMode,
+  type CloudTextureMode,
+} from './earth-cloud-texture-mode.js';
+
 export {
   getMoonAngleOverride,
   setMoonAngleOverride,

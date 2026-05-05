@@ -2,6 +2,10 @@ import { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 
+// Module-level guard: React StrictMode double-invokes effects in dev;
+// this ensures the easter egg fires once per page load regardless.
+let _easterEggFired = false;
+
 // Colophon section. Six sub-sections per the user's mockup (type section
 // dropped): 01 Stack · 02 Build notes · 03 Perf & access · 04 Changelog ·
 // 05 Credits · 06 License & source. The black-hole backdrop is wired by
@@ -10,9 +14,10 @@ import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 export function ColophonSection() {
   const { t } = useTranslation(['colophon', 'common']);
 
-  // Console easter egg — fires once per page load.
+  // Console easter egg — fires once per page load (guard bypasses StrictMode double-fire).
   useEffect(() => {
-    if (typeof console === 'undefined') return;
+    if (_easterEggFired || typeof console === 'undefined') return;
+    _easterEggFired = true;
     const big =
       'font-family: "Space Grotesk", sans-serif; font-size: 36px; font-weight: 300; ' +
       'color: oklch(0.84 0.12 210); text-shadow: 0 0 12px oklch(0.84 0.12 210 / 0.35); padding: 16px 0;';

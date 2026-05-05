@@ -17,8 +17,8 @@ import {
   setEarthRotationRate,
   getCloudDriftRate,
   setCloudDriftRate,
-  getCloudSharpness,
-  setCloudSharpness,
+  getCloudTextureMode,
+  setCloudTextureMode,
   getMoonAngleOverride,
   setMoonAngleOverride,
   getMoonCurrentAngle,
@@ -35,6 +35,7 @@ import {
   BLACKHOLE_PRESETS,
   EARTH_TEXTURE_MODES,
   type EarthTextureMode,
+  type CloudTextureMode,
 } from '@portfolio/celestial';
 
 const HIDE_UI_CLASS = 'dev-hide-ui';
@@ -214,6 +215,10 @@ function isEarthTextureMode(v: unknown): v is EarthTextureMode {
   return typeof v === 'string' && (EARTH_TEXTURE_MODES as readonly string[]).includes(v);
 }
 
+function isCloudTextureMode(v: unknown): v is CloudTextureMode {
+  return v === 'nasa' || v === null;
+}
+
 const registry: DevAPIRegistry = {};
 
 // Scene-defaults reset helpers. Each writes every per-scene setter
@@ -223,7 +228,7 @@ const registry: DevAPIRegistry = {};
 function resetEarthDefaults(): void {
   setEarthRotationRate(SCENE_DEFAULTS.earth.rotationRate);
   setCloudDriftRate(SCENE_DEFAULTS.earth.cloudDriftRate);
-  setCloudSharpness(SCENE_DEFAULTS.earth.cloudSharpness);
+  setCloudTextureMode(SCENE_DEFAULTS.earth.cloudTextureMode);
   setMoonAngleOverride(null);
   registry.setEarthTestMode?.(SCENE_DEFAULTS.earth.testMode);
   registry.setEarthTextureMode?.(SCENE_DEFAULTS.earth.textureMode);
@@ -534,19 +539,19 @@ export function installDevConsole(): void {
         setCloudDriftRate(rate);
       },
 
-      // Get/set procedural cloud sharpness (inner-radius fraction, 0–0.95).
-      //   portfolio.earth.cloudSharpness()       → current value (default 0.2)
-      //   portfolio.earth.cloudSharpness(0)      → pure feather / maximum blur
-      //   portfolio.earth.cloudSharpness(0.5)    → defined solid core
-      //   portfolio.earth.cloudSharpness(0.95)   → near hard-edge blobs
-      // Only affects procedural mode; NASA texture sharpness is the webp as-is.
-      cloudSharpness(v?: number): number | void {
-        if (v === undefined) return getCloudSharpness();
-        if (typeof v !== 'number' || !Number.isFinite(v)) {
-          console.warn(`[portfolio] earth.cloudSharpness(v): v must be a finite number.`);
-          return;
-        }
-        setCloudSharpness(v);
+      // Cloud layer. Independent of earth texture mode.
+      //   portfolio.earth.clouds.textureMode()         -> current mode (null | 'nasa')
+      //   portfolio.earth.clouds.textureMode('nasa')   -> enable NASA cloud layer
+      //   portfolio.earth.clouds.textureMode(null)     -> disable cloud layer
+      clouds: {
+        textureMode(mode?: 'nasa' | null): CloudTextureMode | void {
+          if (mode === undefined) return getCloudTextureMode();
+          if (!isCloudTextureMode(mode)) {
+            console.warn(`[portfolio] earth.clouds.textureMode(m): m must be 'nasa' or null.`);
+            return;
+          }
+          setCloudTextureMode(mode);
+        },
       },
 
       // Get/set moon orbital position (radians). Overrides the UTC-derived
@@ -1083,8 +1088,9 @@ export function installDevConsole(): void {
           '  portfolio.earth.rotationSpeed(rate)         // set; negative reverses, 0 halts. Persists in localStorage.',
           '  portfolio.earth.cloudSpeed()                // get cloud drift rate, rad/sec (default 0.015)',
           '  portfolio.earth.cloudSpeed(rate)            // set; 0 halts clouds. Persists in localStorage.',
-          '  portfolio.earth.cloudSharpness()            // get procedural cloud inner-radius (0=blur, 0.95=sharp)',
-          '  portfolio.earth.cloudSharpness(v)           // set; redraws canvas texture live.',
+          "  portfolio.earth.clouds.textureMode()         // null | 'nasa' — get cloud layer mode",
+          "  portfolio.earth.clouds.textureMode('nasa')  // enable NASA cloud texture (earth-clouds-2k.webp)",
+          '  portfolio.earth.clouds.textureMode(null)    // disable cloud layer (default)',
           '  portfolio.earth.moonAngle()                 // get moon orbit override (null = UTC tracking)',
           '  portfolio.earth.moonAngle(Math.PI/2)        // lock moon to angle for screenshots',
           '  portfolio.earth.moonAngle(null)             // release moon back to UTC tracking',

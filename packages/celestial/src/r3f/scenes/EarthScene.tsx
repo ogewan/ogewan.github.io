@@ -26,8 +26,8 @@ import { getSunDirection, positionFromLatLng, rotationForFocus } from '../sun-di
 import {
   isLikelyStubTexture,
   makePlaceholderEarthTextures,
-  makeProceduralCloudTexture,
 } from '../../placeholder-earth-texture.js';
+import { useCloudTextureMode } from '../../earth-cloud-texture-mode.js';
 import earthDayUrl from '../../textures/earth-day-4k.webp';
 import earthNightUrl from '../../textures/earth-night-4k.webp';
 import earthCloudsUrl from '../../textures/earth-clouds-2k.webp';
@@ -130,6 +130,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   const settings = useMobileSettings();
   const focus = useCelestialFocus();
   const { testMode } = useEarthTestMode();
+  const cloudTextureMode = useCloudTextureMode();
   const { textureMode } = useEarthTextureMode();
 
   const earthRef = useRef<THREE.Group>(null);
@@ -145,11 +146,9 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   // 1×1 black; the load callback below uses isLikelyStubTexture to skip
   // overriding the placeholder when that's the case.
   const placeholder = useMemo(() => makePlaceholderEarthTextures(), []);
-  const fallbackClouds = useMemo(() => makeProceduralCloudTexture(), []);
-
   const [dayMap, setDayMap] = useState<THREE.Texture>(placeholder.day);
   const [nightMap, setNightMap] = useState<THREE.Texture>(placeholder.night);
-  const [cloudsMap, setCloudsMap] = useState<THREE.Texture>(fallbackClouds);
+  const [cloudsMap, setCloudsMap] = useState<THREE.Texture | null>(null);
   const [moonTex, setMoonTex] = useState<THREE.Texture | null>(null);
 
   // Imperative texture load with per-texture error tolerance. If a file fails
@@ -190,12 +189,6 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
       configureSurfaceTexture(tex);
       setNightMap(tex);
     });
-    load(earthCloudsUrl, (tex) => {
-      if (isLikelyStubTexture(tex)) return;
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.needsUpdate = true;
-      setCloudsMap(tex);
-    });
     load(moonUrl, (tex) => {
       if (isLikelyStubTexture(tex)) return;
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -230,7 +223,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   const effectiveDayMap = textureMode === 'nasa' ? (dayMap ?? placeholder.day) : placeholder.day;
   const effectiveNightMap =
     textureMode === 'nasa' ? (nightMap ?? placeholder.night) : placeholder.night;
-  const effectiveCloudsMap = textureMode === 'nasa' ? cloudsMap : fallbackClouds;
+  const effectiveCloudsMap = cloudsMap;
 
   const uniforms = useMemo(
     () => ({
@@ -279,16 +272,43 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   // the per-frame mutation in useFrame propagates here too.
   const cloudUniforms = useMemo(
     () => ({
-      cloudMap: { value: fallbackClouds as THREE.Texture },
+      cloudMap: { value: new THREE.Texture() },
       sunDirection: sunDirectionUniform,
       cloudOpacity: { value: 0.45 },
     }),
-    [sunDirectionUniform, fallbackClouds],
+    [sunDirectionUniform],
   );
 
   useEffect(() => {
-    cloudUniforms.cloudMap.value = effectiveCloudsMap;
+    if (effectiveCloudsMap) cloudUniforms.cloudMap.value = effectiveCloudsMap;
   }, [effectiveCloudsMap, cloudUniforms]);
+
+  // Load NASA cloud texture when cloudTextureMode === 'nasa', independent of
+  // earth textureMode. Reverts to null (hides cloud layer) when mode is cleared.
+  useEffect(() => {
+    if (cloudTextureMode !== 'nasa') {
+      setCloudsMap(null);
+      return;
+    }
+    const loader = new THREE.TextureLoader();
+    let cancelled = false;
+    loader.load(
+      earthCloudsUrl,
+      (tex) => {
+        if (cancelled || isLikelyStubTexture(tex)) return;
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.needsUpdate = true;
+        setCloudsMap(tex);
+      },
+      undefined,
+      (err) => {
+        if (!cancelled) console.warn('[celestial] cloud texture load failed:', err);
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [cloudTextureMode]);
 
   // Auto-rotation. Rate read per-frame from getEarthRotationRate() so the
   // dev console can change it live (incl. negative for reverse, 0 to halt).
@@ -390,7 +410,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   const segments = settings.isMobile ? 32 : 64;
   // Clouds hidden in test mode regardless of device — the test material is
   // unlit and cloud overlay would obscure the city markers.
-  const showClouds = !settings.degraded && !testMode;
+  const showClouds = !settings.degraded && !testMode && cloudsMap !== null;
 
   // Precompute city marker positions + per-dot shader uniforms once. The dots
   // are children of the rotating earth group, so they rotate with the planet
