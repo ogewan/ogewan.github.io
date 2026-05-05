@@ -5,6 +5,7 @@ import { SiteFooter } from './SiteFooter';
 import { LocationRail } from '../components/LocationRail';
 import { useFocusOnRouteChange } from './useFocusOnRouteChange';
 import { useDocumentMeta } from './useDocumentMeta';
+import { useFavicon } from './useFavicon';
 
 // Scenes where the right-side location rail is visible. Brief: Earth and
 // About scenes only. Project / Contact / Colophon scenes hide the rail
@@ -19,6 +20,7 @@ interface SiteLayoutProps {
 export function SiteLayout({ children }: SiteLayoutProps) {
   useFocusOnRouteChange();
   useDocumentMeta();
+  useFavicon();
   const activeScene = useActiveScene();
   const showRail = activeScene === 'earth' || activeScene === 'about';
 
