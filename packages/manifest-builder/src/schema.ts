@@ -45,6 +45,7 @@ export const PortfolioYmlSchema = z
     ended_at: IsoDateSchema.optional(),
     pages_url: z.string().url().optional(),
     demo_video: z.string().url().optional(),
+    hero: z.string().min(1).optional(),
     screenshots: z.array(z.string().min(1)).optional(),
     docs_link: z.string().url().optional(),
   })

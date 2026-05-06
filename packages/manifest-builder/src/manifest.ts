@@ -24,6 +24,7 @@ export interface ManifestEntry {
   ended_at: PortfolioYml['ended_at'];
   pages_url: PortfolioYml['pages_url'];
   demo_video: PortfolioYml['demo_video'];
+  hero?: string;
   screenshots: string[];
   docs_link: PortfolioYml['docs_link'];
 }
@@ -60,6 +61,9 @@ export function resolveScreenshotUrl(
 }
 
 export function enrichEntry(yml: PortfolioYml, repo: RepoContext): ManifestEntry {
+  const hero = yml.hero
+    ? resolveScreenshotUrl(yml.hero, repo.owner, repo.name, repo.default_branch)
+    : undefined;
   const screenshots = (yml.screenshots ?? []).map((path) =>
     resolveScreenshotUrl(path, repo.owner, repo.name, repo.default_branch),
   );
@@ -85,6 +89,7 @@ export function enrichEntry(yml: PortfolioYml, repo: RepoContext): ManifestEntry
     ended_at: yml.ended_at,
     pages_url: yml.pages_url,
     demo_video: yml.demo_video,
+    ...(hero !== undefined ? { hero } : {}),
     screenshots,
     docs_link: yml.docs_link,
   };
