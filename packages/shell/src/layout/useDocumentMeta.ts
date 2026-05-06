@@ -84,11 +84,19 @@ export function useDocumentMeta() {
   useEffect(() => {
     const pageKey = pageKeyFromPathname(location.pathname, locale);
 
+    // params.slug is unavailable at the SiteLayout level — :slug is a child
+    // route param not visible to parent useParams(). Derive it from pathname.
+    const slugFromPath = (() => {
+      const parts = location.pathname.replace(/^\/[a-z]{2}\//, '').split('/');
+      return parts[1]; // "projects/:slug" → index 1
+    })();
+    const slug = params.slug ?? slugFromPath;
+
     // Resolve dynamic title/description for project detail / redirect pages.
     let title = t(`pages.${pageKey}.title`);
     let description = t(`pages.${pageKey}.description`);
-    if ((pageKey === 'projectDetail' || pageKey === 'projectRedirect') && params.slug) {
-      const entry = findEntryBySlug(params.slug);
+    if ((pageKey === 'projectDetail' || pageKey === 'projectRedirect') && slug) {
+      const entry = findEntryBySlug(slug);
       if (entry) {
         title = t(`pages.${pageKey}.title`, { project: entry.title });
         description = t(`pages.${pageKey}.description`, {

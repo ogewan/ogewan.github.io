@@ -88,6 +88,17 @@ export function useFocusOnRouteChange() {
     // Skip when staying within the one-page (scroll-driven URL replace).
     if (previous === next && next === 'main') return;
 
+    // Scroll-to-top on cross-family navigations into a top-of-page route
+    // (projectDetail / projectRedirect / dev / notFound). Without this the
+    // viewport keeps the previous page's scroll offset — e.g. clicking a
+    // card from /projects (scrolled near the bottom) into /projects/:slug
+    // (a much shorter document) lands the user at the bottom of the new
+    // page. We exclude transitions INTO 'main' because MainPage owns its
+    // own scroll restoration via the cold-load section-scroll effect.
+    if (next !== 'main') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+
     queueMicrotask(() => {
       const heading = findHeadingFor(pathname);
       if (heading) {
