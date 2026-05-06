@@ -55,21 +55,33 @@ export function ProjectCard({ entry, locale, feature = false }: ProjectCardProps
       }
       style={{ viewTransitionName: `card-${entry.slug}` }}
     >
-      {/* Media — placeholder gradient tinted by data-hue */}
+      {/* Media — hero image when provided, gradient fallback otherwise */}
       <div
         aria-hidden="true"
         className={
-          'relative ' + (feature ? 'md:w-1/2 md:aspect-auto md:min-h-[280px]' : 'aspect-[16/10]')
+          'relative overflow-hidden ' +
+          (feature ? 'md:w-1/2 md:aspect-auto md:min-h-[280px]' : 'aspect-[16/10]')
         }
         style={{ background: `linear-gradient(135deg, ${hueA}, ${hueB})` }}
       >
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(135deg, oklch(0.98 0.005 280 / 0.05) 0 1px, transparent 1px 8px)',
-          }}
-        />
+        {entry.hero ? (
+          <img
+            src={entry.hero}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        ) : (
+          <div
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(135deg, oklch(0.98 0.005 280 / 0.05) 0 1px, transparent 1px 8px)',
+            }}
+          />
+        )}
       </div>
 
       <div className="flex flex-col gap-3 p-5 flex-1">
