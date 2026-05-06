@@ -6,6 +6,14 @@
     <meta name="theme-color" content="#05070d" />
     <meta name="color-scheme" content="dark" />
 
+    <!-- Critical-path background. theme.css sets `html { background: var(--color-backdrop-base) }`
+         but it's an external stylesheet that loads after the first paint and
+         after page unload begins. Without this inline rule, reloads (and any
+         WebGL context loss) briefly expose the browser default white while
+         the canvas is blank. Hex matches the oklch(0.06 0.02 275) backdrop
+         token in @portfolio/ui/tokens/theme.css. -->
+    <style>html, body { background: #05070d; }</style>
+
     <!-- Cross-document View Transitions: opt in for same-origin navigations
          (e.g. /projects/<slug>/redirect → external pages_url). Browsers that
          don't support the API ignore this header. -->
@@ -64,8 +72,320 @@
         }
       })();
     </script>
+
+    <!-- Initial loading overlay. Pure-CSS visuals + tiny inline JS to listen
+         for window.load. Masks popin from R3F canvas chunk fetch (~270 KB gz),
+         Angular bundle on /about, and React hydration. Shown only on first
+         page load — inter-route transitions use the View Transitions API.
+         visibility: visible overrides the font-FOUC gate above so the overlay
+         is the one thing visible during font load. -->
+    <style>
+      #loading-overlay {
+        position: fixed;
+        inset: 0;
+        /* Max int32 — beats every other stacking context on the page. */
+        z-index: 2147483647;
+        /* Solid, fully opaque fallback (oklch + hex) so the page underneath
+           never bleeds through during cold load even on browsers that paint
+           the static HTML before the inline <style> applies. */
+        background: #05070d;
+        background: oklch(0.06 0.02 275);
+        visibility: visible;
+        opacity: 1;
+        /* Short fade — page is fully settled when this runs (waits for
+           window.load + app:scene-ready + min duration), so we want to
+           reveal quickly rather than linger semi-transparent. */
+        transition: opacity 220ms ease-out, visibility 0s linear 220ms;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
+        /* Isolate so no descendant blend-mode or filter can ever leak
+           coverage of the page beneath. */
+        isolation: isolate;
+        will-change: opacity;
+      }
+      body.loaded #loading-overlay {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      /* View Transitions API pseudo-elements paint in a snapshot layer that
+         sits ABOVE all in-document z-index — even the overlay's max-int.
+         Without suppressing them while the overlay is up, a cold-load
+         section navigation (MainPage scroll-to-section uses viewTransition)
+         flashes the snapshot above the overlay. Once `body.loaded` is
+         set, the overlay starts fading and view transitions resume normally.
+         `:has()` is needed because ::view-transition is attached to the root
+         pseudo-tree, not a body descendant. */
+      html:has(body:not(.loaded))::view-transition,
+      html:has(body:not(.loaded))::view-transition-group(*),
+      html:has(body:not(.loaded))::view-transition-image-pair(*),
+      html:has(body:not(.loaded))::view-transition-old(*),
+      html:has(body:not(.loaded))::view-transition-new(*) {
+        animation: none !important;
+        display: none !important;
+      }
+      .loading-stars {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image:
+          radial-gradient(2px 2px at 20% 30%, oklch(0.95 0.02 280 / 0.8), transparent),
+          radial-gradient(1.5px 1.5px at 60% 70%, oklch(0.92 0.03 200 / 0.7), transparent),
+          radial-gradient(1px 1px at 35% 80%, oklch(0.95 0.02 280 / 0.8), transparent),
+          radial-gradient(1.5px 1.5px at 85% 25%, oklch(0.94 0.02 75 / 0.6), transparent),
+          radial-gradient(1px 1px at 15% 60%, oklch(0.95 0.02 280 / 0.7), transparent),
+          radial-gradient(2px 2px at 75% 50%, oklch(0.93 0.03 250 / 0.7), transparent);
+      }
+      .loading-orbital {
+        position: relative;
+        width: 250px;
+        height: 250px;
+      }
+      /* Amber sun at the center */
+      .loading-sun {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 32px;
+        height: 32px;
+        margin: -16px 0 0 -16px;
+        border-radius: 50%;
+        background: oklch(0.83 0.13 75);
+        box-shadow:
+          0 0 20px oklch(0.83 0.13 75 / 0.6),
+          0 0 48px oklch(0.83 0.13 75 / 0.3);
+      }
+      /* Static visual track for the earth's orbit around the sun */
+      .loading-earth-track {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 1px dashed oklch(0.94 0.02 280 / 0.16);
+      }
+      /* Earth's orbit-around-sun system — rotates the earth+moon together
+         around the sun. Children inherit this rotation; the moon's separate
+         orbit is layered on top via its own rotating container. Explicit
+         top/left/width/height (instead of inset) for older browser parity. */
+      .loading-earth-system {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform-origin: 50% 50%;
+        animation: loading-orbit-cw 8s linear infinite;
+        will-change: transform;
+      }
+      /* Earth body — positioned on the right edge of the orbit (3 o'clock).
+         As the parent rotates, this point traces the orbit ring. */
+      .loading-earth {
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        width: 14px;
+        height: 14px;
+        margin: -7px 0 0 -7px;
+        border-radius: 50%;
+        background: oklch(0.62 0.14 240);
+        box-shadow: 0 0 10px oklch(0.62 0.14 240 / 0.6);
+      }
+      /* Moon's orbit-around-earth system — co-located with the earth (same
+         top/left), with its own rotation. Compounds with the earth-system
+         rotation so the moon traces an epicyclic path around the sun while
+         orbiting the earth in its local frame. */
+      .loading-moon-system {
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        width: 36px;
+        height: 36px;
+        margin: -18px 0 0 -18px;
+        transform-origin: 50% 50%;
+        animation: loading-orbit-cw 1.6s linear infinite;
+        will-change: transform;
+      }
+      /* Moon body — at the edge of the moon orbit. */
+      .loading-moon {
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        width: 6px;
+        height: 6px;
+        margin: -3px 0 0 -3px;
+        border-radius: 50%;
+        background: oklch(0.95 0.02 280);
+        box-shadow: 0 0 6px oklch(0.95 0.02 280 / 0.6);
+      }
+      @keyframes loading-orbit-cw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      /* Reduced-motion: slow the orbits dramatically rather than freezing
+         them. The overlay is brief (typically <2s) and the orbital model is
+         decorative, not informational — gentle movement is OK and reads as
+         "still loading" rather than "stuck". */
+      @media (prefers-reduced-motion: reduce) {
+        .loading-earth-system { animation-duration: 60s; }
+        .loading-moon-system { animation-duration: 12s; }
+      }
+    </style>
+    <script>
+      (function () {
+        // Default minimum visible duration (ms). Overrideable at runtime via
+        // window.__loadingOverlay.setMinMs(ms) or portfolio.loading.minMs(ms).
+        // Persists across reloads via localStorage.
+        var DEFAULT_MIN_MS = 2000;
+        var STORAGE_KEY = 'portfolio:loadingOverlayMinMs';
+        // Failsafe — dismiss regardless after this many ms, in case a
+        // readiness signal never fires (R3F init failed silently, network
+        // stalled, fonts.ready never resolves, etc.).
+        var FAILSAFE_MS = 8000;
+
+        var stored = null;
+        try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+        var parsed = stored != null ? parseInt(stored, 10) : NaN;
+        var initialMinMs = isNaN(parsed) ? DEFAULT_MIN_MS : Math.max(0, parsed);
+
+        var state = {
+          t0: performance.now(),
+          minMs: initialMinMs,
+          resourcesReady: false,
+          fontsReady: false,
+          sceneReady: false,
+          reactReady: false,
+          dismissed: false,
+        };
+
+        // Fade duration must match CSS opacity transition on #loading-overlay.
+        var FADE_MS = 220;
+
+        function dismiss() {
+          if (state.dismissed) return;
+          if (
+            !state.resourcesReady ||
+            !state.fontsReady ||
+            !state.sceneReady ||
+            !state.reactReady
+          ) return;
+          state.dismissed = true;
+          var elapsed = performance.now() - state.t0;
+          var wait = Math.max(0, state.minMs - elapsed);
+          setTimeout(function () {
+            document.body.classList.add('loaded');
+            // After the CSS fade completes, REMOVE the overlay from the DOM
+            // entirely. This makes dismissal irreversible — no class toggle,
+            // HMR cycle, or third-party script can bring the overlay back.
+            // Also frees up the WebGL context limit slot the overlay's
+            // compositor layer would otherwise hold.
+            setTimeout(function () {
+              var el = document.getElementById('loading-overlay');
+              if (el && el.parentNode) el.parentNode.removeChild(el);
+            }, FADE_MS + 50);
+          }, wait);
+        }
+
+        // Public API — bridged into the dev-console as `portfolio.loading.*`.
+        window.__loadingOverlay = {
+          minMs: function () { return state.minMs; },
+          setMinMs: function (ms) {
+            if (typeof ms !== 'number' || !isFinite(ms) || ms < 0) {
+              console.warn('[portfolio] loading.minMs(ms): ms must be a non-negative number');
+              return;
+            }
+            state.minMs = ms;
+            try { localStorage.setItem(STORAGE_KEY, String(ms)); } catch (e) { /* ignore */ }
+          },
+          status: function () {
+            return {
+              minMs: state.minMs,
+              elapsedMs: Math.round(performance.now() - state.t0),
+              resourcesReady: state.resourcesReady,
+              fontsReady: state.fontsReady,
+              sceneReady: state.sceneReady,
+              reactReady: state.reactReady,
+              dismissed: state.dismissed,
+            };
+          },
+          dismissNow: function () {
+            state.resourcesReady = true;
+            state.fontsReady = true;
+            state.sceneReady = true;
+            state.reactReady = true;
+            state.minMs = 0;
+            dismiss();
+          },
+        };
+
+        // Signal 1: window.load — all initial static resources fetched.
+        if (document.readyState === 'complete') {
+          state.resourcesReady = true;
+        } else {
+          window.addEventListener('load', function () {
+            state.resourcesReady = true;
+            dismiss();
+          });
+        }
+
+        // Signal 2: document.fonts.ready — webfonts fully loaded. Without
+        // this we'd dismiss while a late font is still swapping in.
+        if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+          document.fonts.ready.then(function () {
+            state.fontsReady = true;
+            dismiss();
+          });
+        } else {
+          state.fontsReady = true;
+        }
+
+        // Signal 3: app:scene-ready — dispatched by React when the backdrop
+        // is rendered. R3F path fires on first useFrame; terminal non-canvas
+        // paths (simple / static / webgl-fallback) fire on mount.
+        window.addEventListener('app:scene-ready', function () {
+          state.sceneReady = true;
+          dismiss();
+        });
+
+        // Signal 4: app:react-ready — fired by SiteLayout after React has
+        // mounted the route and the browser has painted. Without this, the
+        // overlay could dismiss while React is still rendering / styling
+        // applies, leaving a blank page momentarily visible.
+        window.addEventListener('app:react-ready', function () {
+          state.reactReady = true;
+          dismiss();
+        });
+
+        // Failsafe: force-dismiss if all signals haven't fired in time.
+        setTimeout(function () {
+          state.resourcesReady = true;
+          state.fontsReady = true;
+          state.sceneReady = true;
+          state.reactReady = true;
+          dismiss();
+        }, FAILSAFE_MS);
+      })();
+    </script>
   </head>
   <body>
+    <div id="loading-overlay" aria-hidden="true">
+      <div class="loading-stars"></div>
+      <div class="loading-orbital">
+        <div class="loading-sun"></div>
+        <div class="loading-earth-track"></div>
+        <div class="loading-earth-system">
+          <div class="loading-earth"></div>
+          <div class="loading-moon-system">
+            <div class="loading-moon"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

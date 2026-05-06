@@ -446,6 +446,52 @@ export function installDevConsole(): void {
       },
     },
 
+    // Initial loading overlay — proxy to the inline-script API installed on
+    // window.__loadingOverlay in index.html. The inline script holds the real
+    // state (it runs before React); this just exposes it under the
+    // `portfolio.*` namespace for ergonomics. minMs persists to localStorage
+    // so changes survive reloads.
+    //   portfolio.loading.minMs()       → current minimum visible duration (ms)
+    //   portfolio.loading.minMs(3000)   → set to 3s, persists across reloads
+    //   portfolio.loading.minMs(0)      → effectively disable the floor
+    //   portfolio.loading.status()      → readiness flags + elapsed time
+    //   portfolio.loading.dismiss()     → force-dismiss now (bypass signals)
+    loading: {
+      minMs(ms?: number): number | void {
+        const w = window as unknown as {
+          __loadingOverlay?: {
+            minMs: () => number;
+            setMinMs: (n: number) => void;
+          };
+        };
+        if (!w.__loadingOverlay) {
+          console.warn('[portfolio] loading: overlay API not installed (production build?)');
+          return;
+        }
+        if (ms === undefined) return w.__loadingOverlay.minMs();
+        if (typeof ms !== 'number' || !Number.isFinite(ms) || ms < 0) {
+          console.warn('[portfolio] loading.minMs(ms): ms must be a non-negative finite number');
+          return;
+        }
+        w.__loadingOverlay.setMinMs(ms);
+        console.log(
+          `[portfolio] loading.minMs set to ${ms}ms (applies to current and future loads)`,
+        );
+      },
+      status(): unknown {
+        const w = window as unknown as {
+          __loadingOverlay?: { status: () => unknown };
+        };
+        return w.__loadingOverlay?.status();
+      },
+      dismiss(): void {
+        const w = window as unknown as {
+          __loadingOverlay?: { dismissNow: () => void };
+        };
+        w.__loadingOverlay?.dismissNow();
+      },
+    },
+
     // Celestial backdrop (z-0 layer) — body-class toggle + per-set
     // background-sky configuration.
     bg: {

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SceneName } from '../scenes.js';
 import { CAMERA_TWEEN_DURATION_SEC, CameraDriver } from './CameraDriver.js';
@@ -32,6 +32,23 @@ import { getSunDirection } from './sun-direction.js';
 // tween completes — so the user sees the previous scene smoothly recede
 // as the camera carries them to the next anchor, rather than the
 // previous scene popping out of existence at the start of the warp.
+
+// One-shot beacon — fires `app:scene-ready` on the very first useFrame call.
+// Placed inside <Canvas> (sibling of scenes), so it only mounts once R3F has
+// initialized the renderer; first useFrame implies a frame has been queued
+// by the render loop. By that point any synchronous state-init that mounts
+// EffectComposer (cold-load colophon: see useState lazy initializer below)
+// has already run, so the lensed scene is fully composited before the
+// loading overlay receives the dismissal signal.
+function R3FReadyBeacon() {
+  const fired = useRef(false);
+  useFrame(() => {
+    if (fired.current) return;
+    fired.current = true;
+    window.dispatchEvent(new Event('app:scene-ready'));
+  });
+  return null;
+}
 
 interface Canvas3DProps {
   scene: SceneName;
@@ -163,6 +180,7 @@ export default function Canvas3D({ scene }: Canvas3DProps) {
 
         <SharedStarField />
         <CameraDriver scene={scene} />
+        <R3FReadyBeacon />
 
         {/* About no longer mounts a separate scene — its camera anchor in
             scene-anchors.ts shares the Earth lookAt, just pulled back. The

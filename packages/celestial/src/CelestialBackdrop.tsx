@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { sceneFromPathname, type SceneName } from './scenes.js';
 import { useActiveScene } from './useActiveScene.js';
@@ -66,6 +66,24 @@ export function CelestialBackdrop({ sceneOverride }: CelestialBackdropProps = {}
   // resolving to true mounts Canvas3D.
   const canRunCanvas = quality === 'quality' && webgl === true;
   const shouldFallbackToStatic = quality === 'quality' && webgl === false;
+
+  // Fire the loading-overlay dismissal signal — but ONLY from terminal
+  // non-canvas paths. The WebGL probe is async (webgl === null while
+  // pending); during that window the StaticBackdrop is shown as a
+  // placeholder, but we might still end up on the R3F path once the probe
+  // resolves to true. If we dispatched here, the overlay would dismiss
+  // while the placeholder PNG is showing and the user would see the swap
+  // to Canvas3D moments later. Instead: dispatch only when we know we'll
+  // stay on a non-R3F path (user picked simple/static, or WebGL probe
+  // resolved to false). The R3F path dispatches its own signal from inside
+  // Canvas3D after the first useFrame.
+  useEffect(() => {
+    const isTerminalNonCanvas =
+      quality === 'simple' || quality === 'static' || (quality === 'quality' && webgl === false);
+    if (isTerminalNonCanvas) {
+      window.dispatchEvent(new Event('app:scene-ready'));
+    }
+  }, [quality, webgl]);
 
   return (
     <div aria-hidden="true" className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
