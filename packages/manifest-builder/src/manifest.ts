@@ -13,6 +13,7 @@ export interface ManifestEntry {
   stars: number;
   pushed_at: string;
   schema_version: PortfolioYml['schema_version'];
+  uuid: PortfolioYml['uuid'];
   title: PortfolioYml['title'];
   summary: PortfolioYml['summary'];
   tech: PortfolioYml['tech'];
@@ -20,6 +21,7 @@ export interface ManifestEntry {
   status: PortfolioYml['status'];
   featured: PortfolioYml['featured'];
   order: PortfolioYml['order'];
+  role?: string;
   started_at: PortfolioYml['started_at'];
   ended_at: PortfolioYml['ended_at'];
   pages_url: PortfolioYml['pages_url'];
@@ -78,6 +80,7 @@ export function enrichEntry(yml: PortfolioYml, repo: RepoContext): ManifestEntry
     stars: repo.stars,
     pushed_at: repo.pushed_at,
     schema_version: yml.schema_version,
+    uuid: yml.uuid,
     title: yml.title,
     summary: yml.summary,
     tech: yml.tech,
@@ -85,6 +88,7 @@ export function enrichEntry(yml: PortfolioYml, repo: RepoContext): ManifestEntry
     status: yml.status,
     featured: yml.featured,
     order: yml.order,
+    ...(yml.role !== undefined ? { role: yml.role } : {}),
     started_at: yml.started_at,
     ended_at: yml.ended_at,
     pages_url: yml.pages_url,

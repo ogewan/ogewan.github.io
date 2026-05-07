@@ -104,7 +104,9 @@ export function AboutSection() {
       render: () => (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <CurrentlyCard label={get('sections.currently.reading')} value={c.reading} />
-          <CurrentlyCard label={get('sections.currently.building')} value={c.building} />
+          {c.building ? (
+            <CurrentlyCard label={get('sections.currently.building')} value={c.building} />
+          ) : null}
           <CurrentlyCard label={get('sections.currently.listening')} value={c.listening} />
         </div>
       ),

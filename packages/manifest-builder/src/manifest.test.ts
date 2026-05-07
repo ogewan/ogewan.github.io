@@ -20,7 +20,8 @@ const repo: RepoContext = {
 };
 
 const yml: PortfolioYml = {
-  schema_version: 1,
+  schema_version: 2,
+  uuid: '22222222-2222-4222-8222-222222222222',
   title: 'Hello',
   summary: 'A friendly greeting project.',
   tech: ['typescript'],

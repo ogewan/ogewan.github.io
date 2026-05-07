@@ -6,12 +6,14 @@
     "pronouns": "they / them",
     "languages": ["English", "Español"],
     "stack": ["React", "R3F", "TypeScript", "Rust", "GLSL"],
-    "github": "username"
+    "github": "username",
+    "availability": ""
   },
   "site": {
     "url": "https://username.github.io",
     "source_repo": "username/portfolio"
   },
+  "selected": {},
   "about": {
     "speaking": [
       {
@@ -48,5 +50,6 @@
       "building": "Atlas Console v3.2 — telemetry rewrite",
       "listening": "Obsidian Soundfields — field recordings"
     }
-  }
+  },
+  "timeline": []
 }

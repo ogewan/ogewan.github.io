@@ -7,8 +7,13 @@
 #
 # Schema source: packages/manifest-builder/src/schema.ts (Zod, .strict()).
 
-# Schema version — currently always 1. Bumped only on breaking schema changes.
-schema_version: 1
+# Schema version — currently 2. Bumped only on breaking schema changes.
+schema_version: 2
+
+# Required UUID v4. Stable cross-reference identifier — config.json points at
+# manifest entries by uuid (e.g. for the timeline or current_focus selection),
+# so this must not change once published. Generate with `uuidgen` or any v4 tool.
+uuid: 00000000-0000-4000-8000-000000000000
 
 # Required string. 1–120 chars. Card heading + detail page <h1>.
 title: Atlas Console
@@ -48,6 +53,11 @@ featured: true
 # for pinning a specific project as the hero card. Among non-featured entries,
 # secondary sort is by GitHub `pushed_at` descending.
 order: 1
+
+# Optional string. Owner's role on this project (e.g. "Lead engineer"). Surfaces
+# in the project detail spec table and — when this entry is current_focus — in
+# the Hero block on Home.
+# role: Lead engineer
 
 # Required ISO calendar date (YYYY-MM-DD). Day-level precision; full timestamps fail.
 started_at: 2024-03-15

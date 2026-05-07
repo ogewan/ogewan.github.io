@@ -1,5 +1,6 @@
 import type { ManifestEntry } from '@portfolio/manifest-builder';
 import fixture from './manifest.fixture.json';
+import { siteConfig } from './site-config';
 
 // Phase 7: prefer the real manifest.json that the GH Actions workflow commits
 // to the repo root. Fall back to the hand-written fixture during local dev
@@ -15,12 +16,43 @@ const realManifests = import.meta.glob('../../../../manifest.json', {
 }) as Record<string, readonly ManifestEntry[]>;
 const realManifest = Object.values(realManifests)[0];
 
-export const manifest: readonly ManifestEntry[] =
-  realManifest ?? (fixture as readonly ManifestEntry[]);
+const rawManifest: readonly ManifestEntry[] = realManifest ?? (fixture as readonly ManifestEntry[]);
+
+// Sort comparator used across the SPA:
+//   1. current_focus (config.current_focus → matched by uuid) first
+//   2. featured: true, by pushed_at descending
+//   3. everything else, by pushed_at descending
+function compareEntries(a: ManifestEntry, b: ManifestEntry): number {
+  const focusUuid = siteConfig.current_focus;
+  if (focusUuid) {
+    if (a.uuid === focusUuid) return -1;
+    if (b.uuid === focusUuid) return 1;
+  }
+  if (a.featured !== b.featured) return a.featured ? -1 : 1;
+  return b.pushed_at.localeCompare(a.pushed_at);
+}
+
+export const manifest: readonly ManifestEntry[] = [...rawManifest].sort(compareEntries);
 
 export function findEntryBySlug(slug: string): ManifestEntry | undefined {
   return manifest.find((entry) => entry.slug === slug);
 }
+
+export function findEntryByUuid(uuid: string): ManifestEntry | undefined {
+  return manifest.find((entry) => entry.uuid === uuid);
+}
+
+// The entry pinned via config.current_focus, when it resolves. Falls back to
+// the most recently pushed featured entry. Returns undefined when neither
+// exists — Hero / About-Currently consumers should hide their slots in that
+// case rather than rendering empty placeholders.
+export const currentFocusEntry: ManifestEntry | undefined = (() => {
+  if (siteConfig.current_focus) {
+    const pinned = findEntryByUuid(siteConfig.current_focus);
+    if (pinned) return pinned;
+  }
+  return manifest.find((e) => e.featured);
+})();
 
 // Pre-derived collections used by the projects page chrome.
 export const featuredEntries = manifest.filter((e) => e.featured);

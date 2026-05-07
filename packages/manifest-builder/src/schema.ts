@@ -15,7 +15,7 @@ import { z } from 'zod';
 //   happens during enrichment, not here.
 // - .strict() rejects unknown keys so misspellings (`techs`, `catagory`) fail loudly.
 
-export const PORTFOLIO_YML_SCHEMA_VERSION = 1;
+export const PORTFOLIO_YML_SCHEMA_VERSION = 2;
 
 export const PortfolioStatusSchema = z.enum([
   'active',
@@ -34,6 +34,10 @@ const IsoDateSchema = z
 export const PortfolioYmlSchema = z
   .object({
     schema_version: z.literal(PORTFOLIO_YML_SCHEMA_VERSION),
+    // Stable cross-reference identifier. Required so config.json can point at
+    // a specific manifest entry (current_focus, timeline UUID resolution)
+    // without relying on slug or repo name, which can change.
+    uuid: z.string().uuid(),
     title: z.string().min(1).max(120),
     summary: z.string().min(10).max(280),
     tech: z.array(z.string().min(1)).min(1),
@@ -41,6 +45,9 @@ export const PortfolioYmlSchema = z
     status: PortfolioStatusSchema,
     featured: z.boolean().default(false),
     order: z.number().int().optional(),
+    // Owner's role on this project (e.g. "Lead engineer"). Per-project metadata
+    // — the SPA reads this only when displaying that project.
+    role: z.string().min(1).optional(),
     started_at: IsoDateSchema,
     ended_at: IsoDateSchema.optional(),
     pages_url: z.string().url().optional(),

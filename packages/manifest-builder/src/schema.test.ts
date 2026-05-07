@@ -45,7 +45,8 @@ describe('PortfolioYmlSchema — fixtures', () => {
 
 describe('PortfolioYmlSchema — edge cases', () => {
   const base = {
-    schema_version: 1,
+    schema_version: 2,
+    uuid: '11111111-1111-4111-8111-111111111111',
     title: 'T',
     summary: 'Ten chars minimum summary.',
     tech: ['typescript'],
@@ -53,9 +54,26 @@ describe('PortfolioYmlSchema — edge cases', () => {
     started_at: '2024-01-01',
   } as const;
 
-  it('rejects schema_version other than 1', () => {
-    const result = PortfolioYmlSchema.safeParse({ ...base, schema_version: 2 });
+  it('rejects schema_version other than 2', () => {
+    const result = PortfolioYmlSchema.safeParse({ ...base, schema_version: 1 });
     expect(result.success).toBe(false);
+  });
+
+  it('rejects a missing uuid', () => {
+    const { uuid: _u, ...rest } = base;
+    void _u;
+    const result = PortfolioYmlSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a non-uuid string in the uuid field', () => {
+    const result = PortfolioYmlSchema.safeParse({ ...base, uuid: 'not-a-uuid' });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts an optional role string', () => {
+    const result = PortfolioYmlSchema.safeParse({ ...base, role: 'Lead engineer' });
+    expect(result.success).toBe(true);
   });
 
   it('rejects unknown status values', () => {
