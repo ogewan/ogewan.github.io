@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
+import { siteConfig } from '../../data/site-config';
 
 // Module-level guard: React StrictMode double-invokes effects in dev;
 // this ensures the easter egg fires once per page load regardless.
@@ -227,7 +228,7 @@ export function ColophonSection() {
           </div>
           <div className="flex flex-col gap-2">
             <a
-              href="https://github.com/username/portfolio"
+              href={`https://github.com/${siteConfig.site.source_repo}`}
               target="_blank"
               rel="noreferrer noopener"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-glass-hairline-inner bg-glass-elev text-fg-primary hover:text-cyan font-mono text-small uppercase tracking-[0.14em]"

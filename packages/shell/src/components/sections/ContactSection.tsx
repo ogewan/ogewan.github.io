@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { SchedulePanel } from '../contact/SchedulePanel';
 import { useVisitorLocation } from '../useVisitorLocation';
+import { siteConfig } from '../../data/site-config';
 
 const ContactMap = lazy(() => import('../contact/ContactMap'));
 
@@ -40,9 +41,9 @@ export function ContactSection() {
         <ul className="border-y border-glass-hairline-inner">
           <ChannelRow
             label={t('sections.direct.channels.email.label')}
-            title={t('sections.direct.channels.email.title')}
+            title={siteConfig.owner.email}
             subtitle={t('sections.direct.channels.email.subtitle')}
-            href="mailto:hello@example.com"
+            href={`mailto:${siteConfig.owner.email}`}
             glyph="↗"
           />
           <ChannelRow

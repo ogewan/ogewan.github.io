@@ -10,7 +10,6 @@
       "channels": {
         "email": {
           "label": "Email",
-          "title": "hello@example.com",
           "subtitle": "Best for briefs · 48h reply window"
         },
         "calendly": {

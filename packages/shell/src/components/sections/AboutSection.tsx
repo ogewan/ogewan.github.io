@@ -1,19 +1,149 @@
+import { type ReactNode } from 'react';
 import { useParams } from 'react-router';
 import { Trans, useTranslation } from 'react-i18next';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TimelineWrapper } from '../TimelineWrapper';
 import { SectionLink } from '../SectionLink';
+import { siteConfig } from '../../data/site-config';
 
-// About section. Was the old About page; now stacks on the one-page MainPage
-// after the Hero.
+// About section. Identity (profile dl) is sourced from `config.json` via
+// `siteConfig`; the persona sections (Posture/Trajectory/Work) are sourced
+// from `about.json` i18n copy; the data-backed sections (Currently/Speaking/
+// Shelf) are sourced from `config.about.*`.
 //
-// Sections, mirroring the mockup grammar:
-//   01 Posture · 02 Trajectory (timeline) · 03 What I work on / how I work ·
-//   04 Currently · 05 Speaking & writing · 06 Shelf · CTA
+// All six sections honor "skip if empty": persona sections check that title +
+// body strings resolve to non-empty in the active locale, data sections check
+// that the corresponding config field is present and non-empty. Order numbers
+// (01..N) are computed at render time over the set of *present* sections, so
+// removing one renumbers the rest.
 export function AboutSection() {
   const params = useParams<{ locale?: string }>();
   const locale = params.locale ?? 'en';
   const { t } = useTranslation(['about']);
+  const { owner, about } = siteConfig;
+
+  const get = (key: string): string => t(key, { defaultValue: '' });
+
+  const posture = {
+    title: get('sections.posture.title'),
+    body: get('sections.posture.body'),
+    quote: get('sections.posture.quote'),
+  };
+  const trajectory = {
+    title: get('sections.trajectory.title'),
+    body: get('sections.trajectory.body'),
+  };
+  const work = {
+    title: get('sections.work.title'),
+    subhead1: get('sections.work.subhead1'),
+    body1: get('sections.work.body1'),
+    subhead2: get('sections.work.subhead2'),
+    body2: get('sections.work.body2'),
+  };
+  const currentlyTitle = get('sections.currently.title');
+  const speakingTitle = get('sections.speaking.title');
+  const shelfTitle = get('sections.shelf.title');
+
+  type SectionDescriptor = { title: string; render: () => ReactNode };
+  const sections: SectionDescriptor[] = [];
+
+  if (posture.title && posture.body) {
+    sections.push({
+      title: posture.title,
+      render: () => (
+        <>
+          <Text>{posture.body}</Text>
+          {posture.quote ? <PullQuote>{posture.quote}</PullQuote> : null}
+        </>
+      ),
+    });
+  }
+
+  if (trajectory.title && trajectory.body) {
+    sections.push({
+      title: trajectory.title,
+      render: () => (
+        <>
+          <Text variant="lead" className="mb-6">
+            {trajectory.body}
+          </Text>
+          <GlassPanel variant="inset" className="p-6">
+            <TimelineWrapper locale={locale} />
+          </GlassPanel>
+        </>
+      ),
+    });
+  }
+
+  if (work.title && (work.body1 || work.body2)) {
+    sections.push({
+      title: work.title,
+      render: () => (
+        <>
+          {work.subhead1 ? (
+            <Heading level={4} className="mt-2 mb-2">
+              {work.subhead1}
+            </Heading>
+          ) : null}
+          {work.body1 ? <Text>{work.body1}</Text> : null}
+          {work.subhead2 ? (
+            <Heading level={4} className="mt-6 mb-2">
+              {work.subhead2}
+            </Heading>
+          ) : null}
+          {work.body2 ? <Text>{work.body2}</Text> : null}
+        </>
+      ),
+    });
+  }
+
+  if (currentlyTitle && about?.currently) {
+    const c = about.currently;
+    sections.push({
+      title: currentlyTitle,
+      render: () => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CurrentlyCard label={get('sections.currently.reading')} value={c.reading} />
+          <CurrentlyCard label={get('sections.currently.building')} value={c.building} />
+          <CurrentlyCard label={get('sections.currently.listening')} value={c.listening} />
+        </div>
+      ),
+    });
+  }
+
+  if (speakingTitle && about?.speaking && about.speaking.length > 0) {
+    const items = about.speaking;
+    sections.push({
+      title: speakingTitle,
+      render: () => (
+        <ul className="space-y-3">
+          {items.map((item) => (
+            <TalkRow
+              key={`${item.year}-${item.title}`}
+              year={item.year}
+              kind={item.kind}
+              title={item.title}
+              link={item.href}
+            />
+          ))}
+        </ul>
+      ),
+    });
+  }
+
+  if (shelfTitle && about?.shelf && about.shelf.length > 0) {
+    const items = about.shelf;
+    sections.push({
+      title: shelfTitle,
+      render: () => (
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+          {items.map((item) => (
+            <ShelfRow key={item.num} num={item.num} title={item.title} author={item.author} />
+          ))}
+        </ul>
+      ),
+    });
+  }
 
   return (
     <Container width="reading" className="pb-20">
@@ -33,96 +163,23 @@ export function AboutSection() {
       <GlassPanel className="mt-10 p-6">
         <dl className="grid grid-cols-[140px_1fr] gap-y-3 gap-x-6 font-mono text-small">
           <dt className="text-fg-muted">{t('profile.name')}</dt>
-          <dd className="text-fg-primary">&lt;your-name&gt;</dd>
+          <dd className="text-fg-primary">{owner.name}</dd>
           <dt className="text-fg-muted">{t('profile.pronouns')}</dt>
-          <dd className="text-fg-primary">they / them</dd>
+          <dd className="text-fg-primary">{owner.pronouns}</dd>
           <dt className="text-fg-muted">{t('profile.languages')}</dt>
-          <dd className="text-fg-primary">English · Español</dd>
+          <dd className="text-fg-primary">{owner.languages.join(' · ')}</dd>
           <dt className="text-fg-muted">{t('profile.stack')}</dt>
-          <dd className="text-fg-primary">React · R3F · TypeScript · Rust · GLSL</dd>
+          <dd className="text-fg-primary">{owner.stack.join(' · ')}</dd>
           <dt className="text-fg-muted">{t('profile.email')}</dt>
-          <dd className="text-fg-primary">hello@example.com</dd>
+          <dd className="text-fg-primary">{owner.email}</dd>
         </dl>
       </GlassPanel>
 
-      {/* Section spacing */}
-      <Section order={t('sections.posture.order')} title={t('sections.posture.title')}>
-        <Text>{t('sections.posture.body')}</Text>
-        <PullQuote>{t('sections.posture.quote')}</PullQuote>
-      </Section>
-
-      <Section order={t('sections.trajectory.order')} title={t('sections.trajectory.title')}>
-        <Text variant="lead" className="mb-6">
-          {t('sections.trajectory.body')}
-        </Text>
-        <GlassPanel variant="inset" className="p-6">
-          <TimelineWrapper locale={locale} />
-        </GlassPanel>
-      </Section>
-
-      <Section order={t('sections.work.order')} title={t('sections.work.title')}>
-        <Heading level={4} className="mt-2 mb-2">
-          {t('sections.work.subhead1')}
-        </Heading>
-        <Text>{t('sections.work.body1')}</Text>
-        <Heading level={4} className="mt-6 mb-2">
-          {t('sections.work.subhead2')}
-        </Heading>
-        <Text>{t('sections.work.body2')}</Text>
-      </Section>
-
-      <Section order={t('sections.currently.order')} title={t('sections.currently.title')}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <CurrentlyCard
-            label={t('sections.currently.reading')}
-            value="The Mushroom at the End of the World — Anna Tsing"
-          />
-          <CurrentlyCard
-            label={t('sections.currently.building')}
-            value="Atlas Console v3.2 — telemetry rewrite"
-          />
-          <CurrentlyCard
-            label={t('sections.currently.listening')}
-            value="Obsidian Soundfields — field recordings"
-          />
-        </div>
-      </Section>
-
-      <Section order={t('sections.speaking.order')} title={t('sections.speaking.title')}>
-        <ul className="space-y-3">
-          <TalkRow
-            year="2025"
-            kind="talk"
-            title="Reading the room: console UX for high-trust settings"
-            link="https://example.com/talk-1"
-          />
-          <TalkRow
-            year="2024"
-            kind="essay"
-            title="Why your design system needs a calendar, not a roadmap"
-            link="https://example.com/essay-1"
-          />
-          <TalkRow
-            year="2023"
-            kind="slides"
-            title="OKLCH for engineers"
-            link="https://example.com/slides-1"
-          />
-        </ul>
-      </Section>
-
-      <Section order={t('sections.shelf.order')} title={t('sections.shelf.title')}>
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
-          <ShelfRow num="01" title="Ways of Seeing" author="John Berger · 1972" />
-          <ShelfRow num="02" title="The Design of Everyday Things" author="Don Norman · 1988" />
-          <ShelfRow
-            num="03"
-            title="The Visual Display of Quantitative Information"
-            author="Edward Tufte · 1983"
-          />
-          <ShelfRow num="04" title="Image and Brain" author="Stephen Kosslyn · 1994" />
-        </ul>
-      </Section>
+      {sections.map((s, i) => (
+        <Section key={s.title} order={String(i + 1).padStart(2, '0')} title={s.title}>
+          {s.render()}
+        </Section>
+      ))}
 
       <GlassPanel
         variant="elev"

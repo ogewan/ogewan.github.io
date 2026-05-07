@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "owner": {
+    "name": "<your-name>",
+    "email": "hello@example.com",
+    "pronouns": "they / them",
+    "languages": ["English", "Español"],
+    "stack": ["React", "R3F", "TypeScript", "Rust", "GLSL"],
+    "github": "username"
+  },
+  "site": {
+    "url": "https://username.github.io",
+    "source_repo": "username/portfolio"
+  },
+  "about": {
+    "speaking": [
+      {
+        "year": "2025",
+        "kind": "talk",
+        "title": "Reading the room: console UX for high-trust settings",
+        "href": "https://example.com/talk-1"
+      },
+      {
+        "year": "2024",
+        "kind": "essay",
+        "title": "Why your design system needs a calendar, not a roadmap",
+        "href": "https://example.com/essay-1"
+      },
+      {
+        "year": "2023",
+        "kind": "slides",
+        "title": "OKLCH for engineers",
+        "href": "https://example.com/slides-1"
+      }
+    ],
+    "shelf": [
+      { "num": "01", "title": "Ways of Seeing", "author": "John Berger · 1972" },
+      { "num": "02", "title": "The Design of Everyday Things", "author": "Don Norman · 1988" },
+      {
+        "num": "03",
+        "title": "The Visual Display of Quantitative Information",
+        "author": "Edward Tufte · 1983"
+      },
+      { "num": "04", "title": "Image and Brain", "author": "Stephen Kosslyn · 1994" }
+    ],
+    "currently": {
+      "reading": "The Mushroom at the End of the World — Anna Tsing",
+      "building": "Atlas Console v3.2 — telemetry rewrite",
+      "listening": "Obsidian Soundfields — field recordings"
+    }
+  }
+}
