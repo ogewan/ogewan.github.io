@@ -6,14 +6,11 @@
   "ctaContact": "Book a call",
   "currentlyAria": "Currently",
   "currently": {
-    "label": "Currently",
-    "long": "Atlas Console · available for a console-shaped problem in Q3 2026.",
-    "short": "Atlas Console",
-    "role": "· Lead engineer"
+    "label": "Currently"
   },
   "selected": {
-    "label": "Selected · 2026",
-    "value": "6 things in orbit",
+    "label": "Selected · {{year}}",
+    "value": "{{count}} things in orbit",
     "link": "see all →"
   },
   "next": {

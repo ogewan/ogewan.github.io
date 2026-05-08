@@ -5,6 +5,7 @@ import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TimelineWrapper } from '../TimelineWrapper';
 import { SectionLink } from '../SectionLink';
 import { siteConfig } from '../../data/site-config';
+import { currentFocusEntry } from '../../data/manifest';
 
 // About section. Identity (profile dl) is sourced from `config.json` via
 // `siteConfig`; the persona sections (Posture/Trajectory/Work) are sourced
@@ -99,13 +100,14 @@ export function AboutSection() {
 
   if (currentlyTitle && about?.currently) {
     const c = about.currently;
+    const buildingValue = c.building ?? currentFocusEntry?.title;
     sections.push({
       title: currentlyTitle,
       render: () => (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <CurrentlyCard label={get('sections.currently.reading')} value={c.reading} />
-          {c.building ? (
-            <CurrentlyCard label={get('sections.currently.building')} value={c.building} />
+          {buildingValue ? (
+            <CurrentlyCard label={get('sections.currently.building')} value={buildingValue} />
           ) : null}
           <CurrentlyCard label={get('sections.currently.listening')} value={c.listening} />
         </div>

@@ -7,14 +7,11 @@
   "ctaContact": "Agendar una llamada",
   "currentlyAria": "Actualmente",
   "currently": {
-    "label": "Actualmente",
-    "long": "Atlas Console · disponible para un problema con forma de consola en Q3 2026.",
-    "short": "Atlas Console",
-    "role": "· Director de técnica"
+    "label": "Actualmente"
   },
   "selected": {
-    "label": "Seleccionado · 2026",
-    "value": "6 trabajos en órbita",
+    "label": "Seleccionado · {{year}}",
+    "value": "{{count}} trabajos en órbita",
     "link": "ver todos →"
   },
   "next": {
