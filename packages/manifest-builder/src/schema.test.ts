@@ -45,7 +45,7 @@ describe('PortfolioYmlSchema — fixtures', () => {
 
 describe('PortfolioYmlSchema — edge cases', () => {
   const base = {
-    schema_version: 2,
+    schema_version: 3,
     uuid: '11111111-1111-4111-8111-111111111111',
     title: 'T',
     summary: 'Ten chars minimum summary.',
@@ -54,8 +54,8 @@ describe('PortfolioYmlSchema — edge cases', () => {
     started_at: '2024-01-01',
   } as const;
 
-  it('rejects schema_version other than 2', () => {
-    const result = PortfolioYmlSchema.safeParse({ ...base, schema_version: 1 });
+  it('rejects schema_version other than 3', () => {
+    const result = PortfolioYmlSchema.safeParse({ ...base, schema_version: 2 });
     expect(result.success).toBe(false);
   });
 
@@ -74,6 +74,50 @@ describe('PortfolioYmlSchema — edge cases', () => {
   it('accepts an optional role string', () => {
     const result = PortfolioYmlSchema.safeParse({ ...base, role: 'Lead engineer' });
     expect(result.success).toBe(true);
+  });
+
+  it('accepts a populated case_study block with all slots', () => {
+    const result = PortfolioYmlSchema.safeParse({
+      ...base,
+      case_study: {
+        background: { en: ['Para 1.', 'Para 2.'], es: ['Párrafo 1.', 'Párrafo 2.'] },
+        pull_quote: { en: 'Design for the room.', es: 'Diseña para la sala.' },
+        numbers: [
+          { value: '14ms', label: { en: 'Latency', es: 'Latencia' } },
+          { value: '28', label: { en: 'Consoles' } },
+        ],
+        approach: {
+          body: { en: 'Three commitments.' },
+          steps: [{ en: 'Lock the grid.' }, { en: 'Reserve color.' }],
+        },
+        walkthrough_caption: { en: 'Demo · 2:14' },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts a case_study with EN-only locale strings', () => {
+    const result = PortfolioYmlSchema.safeParse({
+      ...base,
+      case_study: { pull_quote: { en: 'Just English.' } },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a case_study localized string missing the required EN field', () => {
+    const result = PortfolioYmlSchema.safeParse({
+      ...base,
+      case_study: { pull_quote: { es: 'Solo español.' } },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects unknown keys inside case_study (strict mode)', () => {
+    const result = PortfolioYmlSchema.safeParse({
+      ...base,
+      case_study: { conclusion: { en: 'Wrap-up.' } },
+    });
+    expect(result.success).toBe(false);
   });
 
   it('rejects unknown status values', () => {

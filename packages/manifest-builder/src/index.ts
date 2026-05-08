@@ -1,5 +1,11 @@
 export { PortfolioYmlSchema, PortfolioStatusSchema } from './schema.js';
-export type { PortfolioYml, PortfolioStatus } from './schema.js';
+export type {
+  PortfolioYml,
+  PortfolioStatus,
+  CaseStudy,
+  LocalizedString,
+  LocalizedStringArray,
+} from './schema.js';
 export { buildManifest } from './build.js';
 export type { BuildResult } from './build.js';
 export {

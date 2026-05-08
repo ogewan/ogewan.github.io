@@ -1,4 +1,4 @@
-import type { PortfolioYml } from './schema.js';
+import type { CaseStudy, PortfolioYml } from './schema.js';
 
 // A single manifest entry: the validated .portfolio.yml fields plus GitHub-sourced
 // enrichment. The shell consumes this shape directly, so anything it needs at render
@@ -29,6 +29,7 @@ export interface ManifestEntry {
   hero?: string;
   screenshots: string[];
   docs_link: PortfolioYml['docs_link'];
+  case_study?: CaseStudy;
 }
 
 export interface ManifestWarning {
@@ -96,6 +97,7 @@ export function enrichEntry(yml: PortfolioYml, repo: RepoContext): ManifestEntry
     ...(hero !== undefined ? { hero } : {}),
     screenshots,
     docs_link: yml.docs_link,
+    ...(yml.case_study !== undefined ? { case_study: yml.case_study } : {}),
   };
 }
 

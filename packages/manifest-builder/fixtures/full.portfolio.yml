@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 3
 uuid: e8d3c4f5-1a2b-4c3d-9e8f-7a6b5c4d3e2f
 title: Full Project
 summary: A project entry with every field populated, used to exercise enrichment and URL resolution.

@@ -15,7 +15,7 @@ import { z } from 'zod';
 //   happens during enrichment, not here.
 // - .strict() rejects unknown keys so misspellings (`techs`, `catagory`) fail loudly.
 
-export const PORTFOLIO_YML_SCHEMA_VERSION = 2;
+export const PORTFOLIO_YML_SCHEMA_VERSION = 3;
 
 export const PortfolioStatusSchema = z.enum([
   'active',
@@ -30,6 +30,48 @@ export type PortfolioStatus = z.infer<typeof PortfolioStatusSchema>;
 const IsoDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'must be an ISO calendar date (YYYY-MM-DD)');
+
+// Per-field i18n shape used inside `case_study`. EN is the source-of-truth and
+// is required wherever the parent field is present; ES is optional and drops
+// to the EN string at render time when missing. Per-field locale dicts (Q2/A)
+// keep the YAML compact: structural data isn't repeated per locale.
+const LocalizedStringSchema = z
+  .object({ en: z.string().min(1), es: z.string().min(1).optional() })
+  .strict();
+
+const LocalizedStringArraySchema = z
+  .object({
+    en: z.array(z.string().min(1)).min(1),
+    es: z.array(z.string().min(1)).min(1).optional(),
+  })
+  .strict();
+
+// Optional, fixed-slot generic project page (Q1/A). The shell renders
+// background → pull_quote → numbers → approach → walkthrough_caption in that
+// order, skipping any slot that's absent. Use this when a project doesn't
+// warrant a full standalone github.io site; for projects that do, set
+// `pages_url` instead and the case_study is bypassed.
+const CaseStudySchema = z
+  .object({
+    background: LocalizedStringArraySchema.optional(),
+    pull_quote: LocalizedStringSchema.optional(),
+    numbers: z
+      .array(z.object({ value: z.string().min(1), label: LocalizedStringSchema }).strict())
+      .optional(),
+    approach: z
+      .object({
+        body: LocalizedStringSchema.optional(),
+        steps: z.array(LocalizedStringSchema).optional(),
+      })
+      .strict()
+      .optional(),
+    walkthrough_caption: LocalizedStringSchema.optional(),
+  })
+  .strict();
+
+export type CaseStudy = z.infer<typeof CaseStudySchema>;
+export type LocalizedString = z.infer<typeof LocalizedStringSchema>;
+export type LocalizedStringArray = z.infer<typeof LocalizedStringArraySchema>;
 
 export const PortfolioYmlSchema = z
   .object({
@@ -55,6 +97,7 @@ export const PortfolioYmlSchema = z
     hero: z.string().min(1).optional(),
     screenshots: z.array(z.string().min(1)).optional(),
     docs_link: z.string().url().optional(),
+    case_study: CaseStudySchema.optional(),
   })
   .strict();
 

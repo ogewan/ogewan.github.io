@@ -1,16 +1,39 @@
+import { type ReactNode } from 'react';
 import { useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import type { LocalizedString, LocalizedStringArray } from '@portfolio/manifest-builder';
 import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TransitionLink } from '../components/TransitionLink';
 import { manifest, findEntryBySlug } from '../data/manifest';
 import { NotFound } from './NotFound';
 
-// Project detail layout, mirroring the mockup project-detail.html grammar.
-// 880px reading column. Sections: 01 Background · pull quote · 02 By the
-// numbers · 03 Approach · 04 Walkthrough video · 05 Spec · 06 External · pager.
+// Project detail layout — generic case study for projects that don't have
+// their own standalone github.io site. When `pages_url` is set on the entry
+// the case_study is bypassed: the page becomes a thin spec + external view
+// (deep links still resolve, but the project's own site is the destination).
 //
-// Manifest data drives the head + actions + spec table; section bodies stay
-// placeholder until per-project MDX content lands later.
+// Sections, mirroring the mockup project-detail.html grammar:
+//   01 Background · pull quote · 02 By the numbers · 03 Approach ·
+//   04 Walkthrough · 05 Spec · 06 External · pager
+// Order numbers are computed at render time over the present set, so absent
+// case_study slots collapse the numbering. Spec + External always render.
+//
+// All case-study content (background paragraphs, pull-quote text, numbers,
+// approach prose + steps, walkthrough caption) lives in `.portfolio.yml`'s
+// `case_study` block, with per-field locale dicts ({ en, es? }).
+
+function pickString(field: LocalizedString | undefined, locale: string): string | undefined {
+  if (!field) return undefined;
+  return locale === 'es' && field.es !== undefined ? field.es : field.en;
+}
+
+function pickStringArray(
+  field: LocalizedStringArray | undefined,
+  locale: string,
+): readonly string[] | undefined {
+  if (!field) return undefined;
+  return locale === 'es' && field.es !== undefined ? field.es : field.en;
+}
 
 export function ProjectDetail() {
   const params = useParams<{ locale?: string; slug?: string }>();
@@ -25,6 +48,154 @@ export function ProjectDetail() {
   const idx = manifest.findIndex((e) => e.slug === slug);
   const prev = idx > 0 ? manifest[idx - 1] : null;
   const next = idx >= 0 && idx < manifest.length - 1 ? manifest[idx + 1] : null;
+
+  // pages_url projects bypass the case study entirely — those projects have
+  // their own site, this page is just a thin spec/external shim for SEO and
+  // deep-link recovery.
+  const isExternal = Boolean(entry.pages_url);
+  const cs = isExternal ? undefined : entry.case_study;
+
+  const background = cs ? pickStringArray(cs.background, locale) : undefined;
+  const pullQuote = cs ? pickString(cs.pull_quote, locale) : undefined;
+  const numbers = cs?.numbers;
+  const approachBody = cs?.approach ? pickString(cs.approach.body, locale) : undefined;
+  const approachSteps = cs?.approach?.steps;
+  const walkthroughCaption = cs ? pickString(cs.walkthrough_caption, locale) : undefined;
+
+  type SectionDescriptor = { title: string; render: () => ReactNode };
+  const sections: SectionDescriptor[] = [];
+
+  if (background && background.length > 0) {
+    sections.push({
+      title: t('sections.background.title'),
+      render: () => (
+        <>
+          {background.map((para, i) => (
+            <Text key={i} className={i > 0 ? 'mt-4' : undefined}>
+              {para}
+            </Text>
+          ))}
+        </>
+      ),
+    });
+  }
+
+  if (numbers && numbers.length > 0) {
+    sections.push({
+      title: t('sections.numbers.title'),
+      render: () => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {numbers.map((n) => (
+            <StatTile
+              key={n.value}
+              big={n.value}
+              small={pickString(n.label, locale) ?? n.label.en}
+            />
+          ))}
+        </div>
+      ),
+    });
+  }
+
+  if (approachBody || (approachSteps && approachSteps.length > 0)) {
+    sections.push({
+      title: t('sections.approach.title'),
+      render: () => (
+        <>
+          {approachBody ? <Text>{approachBody}</Text> : null}
+          {approachSteps && approachSteps.length > 0 ? (
+            <ol className="mt-6 grid grid-cols-[80px_1fr] gap-x-4 gap-y-4">
+              {approachSteps.map((step, i) => (
+                <ProcessStep
+                  key={i}
+                  num={String(i + 1).padStart(2, '0')}
+                  text={pickString(step, locale) ?? step.en}
+                />
+              ))}
+            </ol>
+          ) : null}
+        </>
+      ),
+    });
+  }
+
+  if (entry.demo_video) {
+    const demoUrl = entry.demo_video;
+    const caption = walkthroughCaption ?? t('sections.walkthrough.demoLabel');
+    sections.push({
+      title: t('sections.walkthrough.title'),
+      render: () => (
+        <a
+          href={demoUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="block aspect-[16/10] rounded-md border border-glass-hairline-inner relative overflow-hidden group"
+          style={{
+            background:
+              'linear-gradient(135deg, oklch(0.20 0.05 280 / 0.6), oklch(0.10 0.03 270 / 0.5))',
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 flex items-center justify-center text-cyan font-display text-h2"
+          >
+            ▶
+          </span>
+          <Text variant="micro" className="absolute bottom-4 left-4 text-fg-secondary">
+            {caption}
+          </Text>
+        </a>
+      ),
+    });
+  }
+
+  // Spec — always present.
+  sections.push({
+    title: t('sections.spec.title'),
+    render: () => (
+      <GlassPanel variant="inset" className="overflow-hidden">
+        <table className="w-full font-mono text-small">
+          <tbody>
+            <SpecRow label={t('sections.spec.labels.stack')} value={entry.tech.join(' · ')} />
+            <SpecRow label={t('sections.spec.labels.status')} value={entry.status} />
+            <SpecRow
+              label={t('sections.spec.labels.repo')}
+              value={entry.repo_url.replace('https://github.com/', '')}
+            />
+            <SpecRow label={t('sections.spec.labels.stars')} value={String(entry.stars)} />
+            <SpecRow
+              label={t('sections.spec.labels.lastPush')}
+              value={entry.pushed_at.split('T')[0] ?? '—'}
+            />
+            <SpecRow label={t('sections.spec.labels.started')} value={entry.started_at} />
+            {entry.ended_at ? (
+              <SpecRow label={t('sections.spec.labels.ended')} value={entry.ended_at} />
+            ) : null}
+            <SpecRow
+              label={t('sections.spec.labels.categories')}
+              value={entry.categories.join(' · ') || '—'}
+            />
+          </tbody>
+        </table>
+      </GlassPanel>
+    ),
+  });
+
+  // External — always present.
+  sections.push({
+    title: t('sections.external.title'),
+    render: () => (
+      <ul className="border-t border-dashed border-glass-hairline-inner">
+        <OutboundRow href={entry.repo_url} title={t('sections.external.source')} />
+        {entry.pages_url ? (
+          <OutboundRow href={entry.pages_url} title={t('sections.external.live')} />
+        ) : null}
+        {entry.docs_link ? (
+          <OutboundRow href={entry.docs_link} title={t('sections.external.docs')} />
+        ) : null}
+      </ul>
+    ),
+  });
 
   return (
     <Container width="reading" className="pb-24">
@@ -108,115 +279,16 @@ export function ProjectDetail() {
         ))}
       </ul>
 
-      {/* Lead shot placeholder */}
-      <div
-        aria-hidden="true"
-        className="mt-12 aspect-[16/10] rounded-md border border-glass-hairline-inner overflow-hidden relative"
-        style={{
-          background:
-            'linear-gradient(135deg, oklch(0.30 0.08 210 / 0.55), oklch(0.18 0.05 280 / 0.45))',
-        }}
-      >
-        <Text variant="label" className="absolute top-4 left-4 text-fg-secondary">
-          {t('leadShotPlaceholder')}
-        </Text>
-      </div>
-      <Text variant="small" className="mt-3">
-        {t('leadShotCaption')}
-      </Text>
+      {/* Optional pull quote — sits between Background and Numbers without
+          a section number; decorative only. */}
+      {pullQuote ? <PullQuote>{pullQuote}</PullQuote> : null}
 
       {/* Sections */}
-      <Section order={t('sections.background.order')} title={t('sections.background.title')}>
-        <Text>{t('sections.background.body1')}</Text>
-        <Text className="mt-4">{t('sections.background.body2')}</Text>
-      </Section>
-
-      <PullQuote>{t('sections.pullQuote')}</PullQuote>
-
-      <Section order={t('sections.numbers.order')} title={t('sections.numbers.title')}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatTile big="3" small={t('sections.numbers.stats.vehicles')} />
-          <StatTile big="28" small={t('sections.numbers.stats.consoles')} />
-          <StatTile big="14ms" small={t('sections.numbers.stats.latency')} />
-        </div>
-      </Section>
-
-      <Section order={t('sections.approach.order')} title={t('sections.approach.title')}>
-        <Text>{t('sections.approach.body')}</Text>
-        <ol className="mt-6 grid grid-cols-[80px_1fr] gap-x-4 gap-y-4">
-          <ProcessStep num="01" text={t('sections.approach.step1')} />
-          <ProcessStep num="02" text={t('sections.approach.step2')} />
-          <ProcessStep num="03" text={t('sections.approach.step3')} />
-          <ProcessStep num="04" text={t('sections.approach.step4')} />
-        </ol>
-      </Section>
-
-      <Section order={t('sections.walkthrough.order')} title={t('sections.walkthrough.title')}>
-        {entry.demo_video ? (
-          <a
-            href={entry.demo_video}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="block aspect-[16/10] rounded-md border border-glass-hairline-inner relative overflow-hidden group"
-            style={{
-              background:
-                'linear-gradient(135deg, oklch(0.20 0.05 280 / 0.6), oklch(0.10 0.03 270 / 0.5))',
-            }}
-          >
-            <span
-              aria-hidden="true"
-              className="absolute inset-0 flex items-center justify-center text-cyan font-display text-h2"
-            >
-              ▶
-            </span>
-            <Text variant="micro" className="absolute bottom-4 left-4 text-fg-secondary">
-              {t('sections.walkthrough.demoLabel')}
-            </Text>
-          </a>
-        ) : (
-          <Text variant="small">{t('sections.walkthrough.pending')}</Text>
-        )}
-      </Section>
-
-      <Section order={t('sections.spec.order')} title={t('sections.spec.title')}>
-        <GlassPanel variant="inset" className="overflow-hidden">
-          <table className="w-full font-mono text-small">
-            <tbody>
-              <SpecRow label={t('sections.spec.labels.stack')} value={entry.tech.join(' · ')} />
-              <SpecRow label={t('sections.spec.labels.status')} value={entry.status} />
-              <SpecRow
-                label={t('sections.spec.labels.repo')}
-                value={entry.repo_url.replace('https://github.com/', '')}
-              />
-              <SpecRow label={t('sections.spec.labels.stars')} value={String(entry.stars)} />
-              <SpecRow
-                label={t('sections.spec.labels.lastPush')}
-                value={entry.pushed_at.split('T')[0] ?? '—'}
-              />
-              <SpecRow label={t('sections.spec.labels.started')} value={entry.started_at} />
-              {entry.ended_at ? (
-                <SpecRow label={t('sections.spec.labels.ended')} value={entry.ended_at} />
-              ) : null}
-              <SpecRow
-                label={t('sections.spec.labels.categories')}
-                value={entry.categories.join(' · ') || '—'}
-              />
-            </tbody>
-          </table>
-        </GlassPanel>
-      </Section>
-
-      <Section order={t('sections.external.order')} title={t('sections.external.title')}>
-        <ul className="border-t border-dashed border-glass-hairline-inner">
-          <OutboundRow href={entry.repo_url} title={t('sections.external.source')} />
-          {entry.pages_url ? (
-            <OutboundRow href={entry.pages_url} title={t('sections.external.live')} />
-          ) : null}
-          {entry.docs_link ? (
-            <OutboundRow href={entry.docs_link} title={t('sections.external.docs')} />
-          ) : null}
-        </ul>
-      </Section>
+      {sections.map((s, i) => (
+        <Section key={s.title} order={String(i + 1).padStart(2, '0')} title={s.title}>
+          {s.render()}
+        </Section>
+      ))}
 
       {/* Pager */}
       {(prev || next) && (

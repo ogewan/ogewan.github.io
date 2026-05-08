@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 3
 uuid: 6f9d7e2c-3b4a-4c5d-8e1f-2a3b4c5d6e7f
 title: Minimal Project
 summary: A project entry with only the required fields populated.

@@ -1,41 +1,21 @@
 {
   "crumbBack": "Back to selected work",
-  "leadShotPlaceholder": "Shot 01 · primary console placeholder",
-  "leadShotCaption": "Lead shot · Atlas Console · station 02 control room.",
   "sections": {
     "background": {
-      "order": "01",
-      "title": "Background",
-      "body1": "I was debugging a coolant anomaly with the telemetrists when it hit me: the console was designed for the screen, not for the room. Four people reading the same graph had to coordinate by talking.",
-      "body2": "The brief: a flight director's readout grid, not a dashboard. P99 latency ≤ 16ms across 28 consoles in 2 ground stations."
+      "title": "Background"
     },
-    "pullQuote": "Design for the room, not the window.",
     "numbers": {
-      "order": "02",
-      "title": "By the numbers",
-      "stats": {
-        "vehicles": "Vehicles · Currently flying",
-        "consoles": "Consoles · 2 ground stations",
-        "latency": "P99 telemetry-to-paint latency"
-      }
+      "title": "By the numbers"
     },
     "approach": {
-      "order": "03",
-      "title": "Approach",
-      "body": "Three commitments before touching pixels: read the room, lock the grid, color reserved.",
-      "step1": "Lock the grid before lighting it.",
-      "step2": "Every cell is a question, not a datum.",
-      "step3": "Color is reserved for anomalies.",
-      "step4": "Animation tells stories, never decorates them."
+      "title": "Approach"
     },
     "walkthrough": {
-      "order": "04",
-      "title": "Walkthrough · 2:14",
-      "demoLabel": "Demo · 2:14 · ↗ YouTube",
+      "title": "Walkthrough",
+      "demoLabel": "Watch demo ↗",
       "pending": "Walkthrough video pending."
     },
     "spec": {
-      "order": "05",
       "title": "Spec",
       "labels": {
         "stack": "Stack",
@@ -49,7 +29,6 @@
       }
     },
     "external": {
-      "order": "06",
       "title": "External",
       "source": "Source on GitHub",
       "live": "Live site",

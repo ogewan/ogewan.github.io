@@ -7,8 +7,8 @@
 #
 # Schema source: packages/manifest-builder/src/schema.ts (Zod, .strict()).
 
-# Schema version — currently 2. Bumped only on breaking schema changes.
-schema_version: 2
+# Schema version — currently 3. Bumped only on breaking schema changes.
+schema_version: 3
 
 # Required UUID v4. Stable cross-reference identifier — config.json points at
 # manifest entries by uuid (e.g. for the timeline or current_focus selection),
@@ -81,3 +81,33 @@ screenshots:
 
 # Optional URL. Long-form writeup link surfaced as a "Writeup ↗" action.
 docs_link: https://atlas-console.example.com/docs/architecture
+
+# Optional. Generic project page rendered at /projects/<repo>. Use this when
+# a project doesn't have its own standalone github.io site; if `pages_url` is
+# set, the case_study is bypassed entirely (the card links to the live site
+# and /projects/<repo> shows a thin spec-only view). All slots are optional —
+# include only what fits the project. Per-field locale dicts: `es` is
+# optional and falls back to `en` at render time.
+#
+# case_study:
+#   background:
+#     en:
+#       - "Lead paragraph in English."
+#       - "Second paragraph."
+#     es:
+#       - "Lead paragraph en español."
+#   pull_quote:
+#     en: "Design for the room, not the window."
+#   numbers:
+#     - value: "14ms"
+#       label: { en: "P99 latency" }
+#     - value: "28"
+#       label: { en: "Consoles", es: "Consolas" }
+#   approach:
+#     body:
+#       en: "Three commitments before touching pixels."
+#     steps:
+#       - { en: "Lock the grid before lighting it." }
+#       - { en: "Every cell is a question, not a datum." }
+#   walkthrough_caption:
+#     en: "Demo · 2:14"

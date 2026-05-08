@@ -118,18 +118,21 @@ export function ProjectCard({ entry, locale, feature = false }: ProjectCardProps
         </ul>
 
         {/* Footer affordance — the one visual difference between external and
-            in-shell projects. Same card, different link grammar. */}
+            in-shell projects. Same card, different link grammar. External
+            projects route through /projects/:slug/redirect rather than the
+            external URL directly so the cross-document View Transition shim
+            in ProjectRedirect can run; the redirect page then jumps to the
+            live site. */}
         <div className="mt-auto pt-4 border-t border-dashed border-glass-hairline-inner">
           {externalHref ? (
-            <a
-              href={externalHref}
-              target="_blank"
-              rel="noreferrer noopener"
+            <TransitionLink
+              to={`${detailHref}/redirect`}
+              unstyled
               className="text-cyan font-mono text-small no-underline border-b border-[color:oklch(0.84_0.12_210/0.3)] hover:border-b-cyan inline-flex items-center gap-1"
             >
               Live · {new URL(externalHref).hostname.replace(/^www\./, '')}{' '}
               <span aria-hidden="true">↗</span>
-            </a>
+            </TransitionLink>
           ) : (
             <TransitionLink
               to={detailHref}
