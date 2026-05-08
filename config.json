@@ -51,5 +51,69 @@
       "listening": "Obsidian Soundfields — field recordings"
     }
   },
-  "timeline": []
+  "timeline": [
+    {
+      "id": "atlas-now",
+      "category": "work",
+      "start": "2024-09-01",
+      "role": "Lead engineer",
+      "org": "Atlas Industries",
+      "tags": ["react", "rust", "websockets"],
+      "current": true
+    },
+    {
+      "id": "tide",
+      "category": "side",
+      "start": "2024-04-01",
+      "tags": ["typescript", "indexeddb"]
+    },
+    {
+      "id": "aperture",
+      "category": "side",
+      "start": "2025-08-10",
+      "end": "2025-12-31",
+      "tags": ["r3f", "glsl"]
+    },
+    {
+      "id": "oklch-essay",
+      "category": "writing",
+      "start": "2024-11-01",
+      "end": "2024-11-30",
+      "tags": ["essay", "color"]
+    },
+    {
+      "id": "brightline",
+      "category": "work",
+      "start": "2021-03-01",
+      "end": "2024-08-31",
+      "role": "Senior engineer",
+      "org": "Brightline Aerospace",
+      "tags": ["react", "webgl", "aerospace"]
+    },
+    {
+      "id": "soundfields",
+      "category": "side",
+      "start": "2020-06-01",
+      "end": "2022-06-30",
+      "tags": ["detour", "indie"]
+    },
+    {
+      "id": "pentagram",
+      "category": "work",
+      "start": "2018-09-01",
+      "end": "2020-08-31",
+      "role": "Designer",
+      "org": "Pentagram",
+      "tags": ["design-systems", "identity"]
+    },
+    {
+      "id": "tec-research",
+      "category": "education",
+      "start": "2014-08-01",
+      "end": "2018-05-31",
+      "role": "Research assistant",
+      "org": "Tec de Monterrey",
+      "tags": ["cs", "hci", "graphics"]
+    }
+  ]
 }

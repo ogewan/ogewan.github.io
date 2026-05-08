@@ -10,6 +10,8 @@
     "./locales/*": "./locales/*"
   },
   "scripts": {
+    "generate:timeline": "node scripts/generate-timeline.mjs",
+    "prepare": "node scripts/generate-timeline.mjs",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

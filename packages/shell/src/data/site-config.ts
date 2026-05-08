@@ -29,23 +29,24 @@ export interface CurrentlyBlock {
   readonly listening: string;
 }
 
-export interface LocalizedString {
-  readonly en: string;
-  readonly es?: string;
-}
+export type TimelineCategory = 'work' | 'side' | 'education' | 'writing';
 
+// A timeline entry is either a bare UUID (full delegation to a manifest entry —
+// title/body sourced from the manifest, category defaulted to 'work', current
+// computed from config.current_focus) or an inline structural object whose
+// localised title/body strings live in `packages/content/locales/{en,es}/
+// timeline.json` keyed by `id`.
 export type TimelineEntry =
-  | string // UUID — resolves against a manifest entry at build/render time
+  | string // UUID, references a manifest entry
   | {
-      readonly kind: 'employment' | 'event' | 'project';
-      readonly title: LocalizedString;
+      readonly id: string; // stable key used to look up locale strings
+      readonly category: TimelineCategory;
+      readonly start: string; // YYYY-MM-DD
+      readonly end?: string; // YYYY-MM-DD, omitted = present
       readonly role?: string;
       readonly org?: string;
-      readonly start: string; // YYYY-MM
-      readonly end?: string; // omitted = present
-      readonly body?: LocalizedString;
-      readonly category?: string;
-      readonly projects?: readonly string[]; // nested UUID references
+      readonly tags?: readonly string[];
+      readonly current?: boolean;
     };
 
 export interface SiteConfig {

@@ -1,10 +1,46 @@
 import { resolve } from 'node:path';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { sitemapPlugin } from './vite-plugin-sitemap';
 import siteConfig from '../../config.json';
+
+const REPO_ROOT = resolve(__dirname, '../..');
+const TIMELINE_GENERATOR = resolve(REPO_ROOT, 'packages/content/scripts/generate-timeline.mjs');
+
+// Runs the timeline generator on every build start so the committed
+// `packages/content/src/generated/*` files reflect the current `config.json`
+// + locale files. In dev, watches the source files and re-runs on change so
+// edits show up without restarting Vite (the generated TS files are inside
+// the module graph and trigger normal HMR/invalidation).
+function timelineGeneratorPlugin(): Plugin {
+  const run = (): void => {
+    try {
+      execFileSync(process.execPath, [TIMELINE_GENERATOR], { stdio: 'inherit' });
+    } catch (err) {
+      console.error('[timeline-generator] failed:', err);
+    }
+  };
+  const isWatchTarget = (path: string): boolean =>
+    path === resolve(REPO_ROOT, 'config.json') ||
+    /[\\/]locales[\\/](en|es)[\\/]timeline\.json$/.test(path);
+  return {
+    name: 'portfolio:timeline-generator',
+    buildStart() {
+      run();
+    },
+    configureServer(server) {
+      server.watcher.add(resolve(REPO_ROOT, 'config.json'));
+      server.watcher.add(resolve(REPO_ROOT, 'packages/content/locales/en/timeline.json'));
+      server.watcher.add(resolve(REPO_ROOT, 'packages/content/locales/es/timeline.json'));
+      server.watcher.on('change', (path) => {
+        if (isWatchTarget(path)) run();
+      });
+    },
+  };
+}
 
 // humans.txt carries `<your-name>` / `<username>` tokens at rest in `public/`
 // so the source file matches the placeholder voice. This plugin replaces them
@@ -46,6 +82,7 @@ export default defineConfig(() => {
     plugins: [
       react(),
       tailwindcss(),
+      timelineGeneratorPlugin(),
       humansTxtTemplatePlugin(),
       sitemapPlugin({
         siteUrl,

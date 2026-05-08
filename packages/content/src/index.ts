@@ -6,5 +6,5 @@ export type {
   TimelineStrings,
   TimelineLocaleDict,
 } from './timeline-types.js';
-export { TIMELINE_NODES } from './timeline-data.js';
-export { TIMELINE_LOCALES } from './timeline-strings.js';
+export { TIMELINE_NODES } from './generated/timeline-data.js';
+export { TIMELINE_LOCALES } from './generated/timeline-strings.js';
