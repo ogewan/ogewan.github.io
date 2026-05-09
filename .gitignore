@@ -84,3 +84,8 @@ a11y-report/
 
 # git backup
 .git-backup/
+
+# Auto-generated from config.json by packages/content/scripts/generate-timeline.mjs.
+# Regenerated on every dev/build start (see vite.config.ts) and on `pnpm install`
+# via the content package's `prepare` script.
+packages/content/src/generated/

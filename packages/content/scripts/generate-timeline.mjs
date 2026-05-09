@@ -9,7 +9,9 @@
  *   - src/generated/timeline-data.ts    → TIMELINE_NODES
  *   - src/generated/timeline-strings.ts → TIMELINE_STRINGS  (single locale-as-leaf dict)
  *
- * Both are committed (small diffs, easy to inspect, no first-clone surprises).
+ * Both are gitignored — content lives in config.json (the source of truth).
+ * The package's `prepare` script runs the generator on `pnpm install`, and
+ * the shell's vite plugin runs it on every dev/build start.
  *
  * Re-run via `pnpm --filter @portfolio/content generate:timeline`. The shell's
  * vite.config.ts also runs the generator on every build start and watches

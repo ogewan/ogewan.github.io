@@ -7,3 +7,6 @@ coverage
 pnpm-lock.yaml
 *.min.js
 *.min.css
+
+# Auto-generated TS — emitted by packages/content/scripts/generate-timeline.mjs.
+packages/content/src/generated/
