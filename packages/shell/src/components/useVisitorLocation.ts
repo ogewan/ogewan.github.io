@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { findClosestCanonical } from '@portfolio/celestial';
 
 // Visitor location resolved without third-party services. Two-tier:
 //   1. navigator.geolocation (precise; requires user permission)
@@ -6,6 +7,13 @@ import { useEffect, useState } from 'react';
 // On both failures, surface the existing `failed` state and the rail falls
 // back to Auto mode. Result is cached per session so the geolocation prompt
 // only fires once.
+//
+// `confidentCity` distinguishes a tz-matched city name (true — we can say
+// "near London" honestly) from a fallback case where geolocation succeeded
+// but the visitor's tz isn't in our hand-curated table (false — we snap
+// lat/lng to the closest CANONICAL_CITIES entry so the rail and Earth focus
+// have a real target, but the contact-section "near {city}" line is hidden
+// because we don't actually know which city they're in).
 
 export interface VisitorLocation {
   readonly city: string;
@@ -13,9 +21,12 @@ export interface VisitorLocation {
   readonly country: string;
   readonly lat: number;
   readonly lng: number;
+  readonly confidentCity: boolean;
 }
 
-const STORAGE_KEY = 'portfolio:visitor-location';
+// Cache key bumped from v1 → v2 to invalidate previously-cached entries that
+// don't carry the `confidentCity` flag.
+const STORAGE_KEY = 'portfolio:visitor-location:v2';
 const GEO_TIMEOUT_MS = 5000;
 const GEO_MAX_AGE_MS = 600_000;
 
@@ -54,7 +65,9 @@ function writeCache(entry: CachedEntry): void {
 // the 9 canonical rail cities — the visitor pin is meant to be distinct from
 // the canonical pins, and lat/lng equality with 0.5° tolerance dedups onto
 // the canonical when the visitor is genuinely near one.
-const TZ_TO_LOCATION: Readonly<Record<string, VisitorLocation>> = {
+type TzEntry = Omit<VisitorLocation, 'confidentCity'>;
+
+const TZ_TO_LOCATION: Readonly<Record<string, TzEntry>> = {
   // UK + Ireland
   'Europe/London': {
     city: 'London',
@@ -176,7 +189,8 @@ function getTimezone(): string | null {
 function tryTimezone(): VisitorLocation | null {
   const tz = getTimezone();
   if (!tz) return null;
-  return TZ_TO_LOCATION[tz] ?? null;
+  const entry = TZ_TO_LOCATION[tz];
+  return entry ? { ...entry, confidentCity: true } : null;
 }
 
 function tryGeolocationApi(): Promise<VisitorLocation | null> {
@@ -184,18 +198,31 @@ function tryGeolocationApi(): Promise<VisitorLocation | null> {
   return new Promise((resolve) => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        // We have precise coordinates but no city name. Borrow the timezone
-        // mapping for a recognizable label so the contact line reads
-        // naturally ("near London"). If the timezone is unknown we fall back
-        // to a generic placeholder rather than failing — the precise
-        // coordinates are still useful for the map marker.
+        // We have precise coordinates from the browser. Use the timezone
+        // mapping for a confident city name when it matches; otherwise label
+        // the visitor pin with the closest CANONICAL_CITIES entry so the
+        // rail's "you-are-here" pin reads as a real place — but flag it as
+        // not-confident so the contact-section "near {city}" line is hidden.
+        // Precise lat/lng is preserved for the contact-section map pin;
+        // LocationRail / Earth focus snap to the closest canonical
+        // separately at the consumption site.
         const tzMatch = tryTimezone();
+        if (tzMatch) {
+          resolve({
+            ...tzMatch,
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+          return;
+        }
+        const closest = findClosestCanonical(pos.coords.latitude, pos.coords.longitude);
         resolve({
-          city: tzMatch?.city ?? 'Your location',
+          city: closest.label,
           region: null,
-          country: tzMatch?.country ?? '',
+          country: '',
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
+          confidentCity: false,
         });
       },
       () => resolve(null),

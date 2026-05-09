@@ -20,7 +20,12 @@ export {
 } from './scenes.js';
 export { ActiveSceneProvider, useActiveScene, useObserveActiveScene } from './useActiveScene.js';
 export { useViewTransitionState } from './useViewTransitionState.js';
-export { CANONICAL_CITIES, type CanonicalCity } from './cities.js';
+export {
+  CANONICAL_CITIES,
+  type CanonicalCity,
+  findClosestCanonical,
+  haversineKm,
+} from './cities.js';
 export {
   DEFAULT_EARTH_ROTATION_RATE,
   getEarthRotationRate,

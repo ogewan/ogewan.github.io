@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CANONICAL_CITIES, useCelestialFocus, type FocusTarget } from '@portfolio/celestial';
+import {
+  CANONICAL_CITIES,
+  findClosestCanonical,
+  useCelestialFocus,
+  type FocusTarget,
+} from '@portfolio/celestial';
 import { focusRingClassName } from '@portfolio/ui';
 import { useVisitorLocation } from './useVisitorLocation';
 
@@ -48,16 +53,35 @@ export function LocationRail() {
   const focus = useCelestialFocus();
   const { t } = useTranslation(['common']);
 
-  // Restore previous session selection if present.
+  // Restore previous session selection if present. Track separately whether
+  // the user has manually chosen anything yet — if not, we'll auto-promote
+  // the visitor's nearest canonical to selected once geolocation resolves.
   const [selectedKey, setSelectedKey] = useState<string>(() => {
     if (typeof sessionStorage === 'undefined') return 'auto';
     return sessionStorage.getItem(SESSION_KEY) ?? 'auto';
   });
+  const userChoseRef = useRef<boolean>(
+    typeof sessionStorage !== 'undefined' && sessionStorage.getItem(SESSION_KEY) !== null,
+  );
 
   useEffect(() => {
     if (typeof sessionStorage === 'undefined') return;
     sessionStorage.setItem(SESSION_KEY, selectedKey);
   }, [selectedKey]);
+
+  // One-shot auto-promotion: once visitor location resolves, if the user
+  // hasn't manually selected anything, set selection (and Earth focus) to
+  // the closest canonical city. Honors both the precise lat/lng of a tz
+  // match and the precise lat/lng of a non-confident geolocation result.
+  const autoPromotedRef = useRef(false);
+  useEffect(() => {
+    if (autoPromotedRef.current || userChoseRef.current) return;
+    if (visitor.state !== 'resolved') return;
+    const closest = findClosestCanonical(visitor.location.lat, visitor.location.lng);
+    autoPromotedRef.current = true;
+    setSelectedKey(closest.key);
+    focus.setFocus({ lat: closest.lat, lng: closest.lng, label: closest.label });
+  }, [visitor, focus]);
 
   // Build the rail node list each render — cheap, and visitor state can flip
   // while the user is on the page.
@@ -93,6 +117,7 @@ export function LocationRail() {
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const handleSelect = (node: RailNode) => {
+    userChoseRef.current = true;
     setSelectedKey(node.key);
     if (node.type === 'auto') {
       focus.setAuto();

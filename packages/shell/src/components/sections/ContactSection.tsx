@@ -76,7 +76,7 @@ export function ContactSection() {
             <dd className="text-fg-primary">{t('sections.ground.values.lang')}</dd>
           </dl>
         </GlassPanel>
-        {visitor.state === 'resolved' ? (
+        {visitor.state === 'resolved' && visitor.location.confidentCity ? (
           <Text variant="small" className="mt-4 text-fg-muted">
             {t('sections.ground.visitorLine', { city: visitor.location.city })}
           </Text>

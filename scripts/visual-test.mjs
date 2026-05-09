@@ -6,6 +6,7 @@
  *   pnpm test:visual --url=/en/about            # different route
  *   pnpm test:visual --quality=simple           # force quality mode via localStorage
  *   pnpm test:visual --screenshot=hero.png      # custom screenshot filename
+ *   pnpm test:visual --skip-overlay             # bypass loading overlay (see below)
  *
  * Loads the page in a headless Chromium, optionally injects a localStorage
  * key to force a CelestialQuality mode, waits for network idle + 2.5s settle,
@@ -31,6 +32,14 @@ const url = `http://localhost:5173${args.url ?? '/en/'}`;
 const quality = args.quality ?? null; // 'quality' | 'static' | 'simple' | null
 const screenshotName = args.screenshot ?? 'visual.png';
 const reducedMotion = args['reduced-motion'] === 'true' ? 'reduce' : 'no-preference';
+// The loading overlay sits at z-index max with a 2000ms minimum visible time
+// and a four-signal readiness gate (window.load + fonts + scene-ready +
+// react-ready). The default 2500ms wait after networkidle is enough on a warm
+// machine but not on cold loads, and the screenshot lands on the overlay
+// rather than the page. --skip-overlay sets the dev-only minMs flag to 0 and
+// waits for `body.loaded` (which the overlay-removal sequence stamps) before
+// taking the shot. Use this for any UI verification past the cold-load gate.
+const skipOverlay = args['skip-overlay'] === true || args['skip-overlay'] === 'true';
 
 const screenshotsDir = resolve(process.cwd(), '.screenshots');
 mkdirSync(screenshotsDir, { recursive: true });
@@ -47,13 +56,26 @@ if (quality) {
   }, quality);
 }
 
+if (skipOverlay) {
+  await ctx.addInitScript(() => {
+    window.localStorage.setItem('portfolio:loadingOverlayMinMs', '0');
+  });
+}
+
 const page = await ctx.newPage();
 const consoleMessages = [];
 page.on('console', (msg) => consoleMessages.push(`[${msg.type()}] ${msg.text()}`));
 page.on('pageerror', (err) => consoleMessages.push(`[pageerror] ${err.message}`));
 
 await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-await page.waitForTimeout(2500);
+if (skipOverlay) {
+  await page
+    .waitForFunction(() => document.body.classList.contains('loaded'), { timeout: 10000 })
+    .catch(() => {});
+  await page.waitForTimeout(800);
+} else {
+  await page.waitForTimeout(2500);
+}
 
 const probe = await page.evaluate(() => {
   const canvases = document.querySelectorAll('canvas');

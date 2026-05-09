@@ -27,10 +27,9 @@ started_at: 2026-04-24
 # pages_url intentionally omitted — this repo IS the portfolio site, so an
 # in-shell detail page is the right destination. The detail page links to
 # /colophon for the full architecture story.
-
-screenshots:
-  - docs/screenshots/hero.png
-  - docs/screenshots/projects-grid.png
-  - docs/screenshots/colophon.png
+#
+# Single hero image is sufficient — the entry is self-referential, the rest
+# of the SPA is the screenshot.
+hero: docs/screenshots/hero.png
 
 docs_link: https://github.com/username/portfolio#readme

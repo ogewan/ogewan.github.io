@@ -24,3 +24,37 @@ export const CANONICAL_CITIES: ReadonlyArray<CanonicalCity> = [
   { key: 'tokyo', label: 'Tokyo', lat: 35.69, lng: 139.69 },
   { key: 'sydney', label: 'Sydney', lat: -33.87, lng: 151.21 },
 ];
+
+// Great-circle distance between two lat/lng points using the haversine
+// formula. Used by findClosestCanonical to pick the nearest pin for visitor
+// resolution. Earth radius (km) only matters for absolute results — relative
+// comparisons would work with any constant.
+export function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const R = 6371;
+  const toRad = (deg: number): number => (deg * Math.PI) / 180;
+  const dLat = toRad(bLat - aLat);
+  const dLng = toRad(bLng - aLng);
+  const sa = Math.sin(dLat / 2);
+  const sb = Math.sin(dLng / 2);
+  const h = sa * sa + Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * sb * sb;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+// Closest canonical to an arbitrary lat/lng. Used by useVisitorLocation when
+// the timezone fallback fires (geolocation succeeded but the visitor's tz is
+// not in our hand-curated table) to snap to a known reference point, and by
+// LocationRail to auto-promote the nearest pin to the selected state on
+// first visit when no manual selection has been made.
+export function findClosestCanonical(lat: number, lng: number): CanonicalCity {
+  let best = CANONICAL_CITIES[0]!;
+  let bestDist = haversineKm(lat, lng, best.lat, best.lng);
+  for (let i = 1; i < CANONICAL_CITIES.length; i++) {
+    const c = CANONICAL_CITIES[i]!;
+    const d = haversineKm(lat, lng, c.lat, c.lng);
+    if (d < bestDist) {
+      best = c;
+      bestDist = d;
+    }
+  }
+  return best;
+}
