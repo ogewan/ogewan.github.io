@@ -1,0 +1,19 @@
+{
+  "eyebrow": {
+    "en": "03 / Selected work · 2021 — 2026",
+    "es": "03 / Trabajos seleccionados · 2021 — 2026"
+  },
+  "headline": { "en": "Things in orbit.", "es": "Cosas en órbita." },
+  "description": {
+    "en": "Selected work from the last five years. Filter by category; switch to list view for dense scanning.",
+    "es": "Trabajo seleccionado del último lustro. Filtra por categoría; alterna entre cuadrícula y lista para escanear más rápido."
+  },
+  "filterAll": { "en": "All", "es": "Todo" },
+  "viewLabel": { "en": "View", "es": "Vista" },
+  "viewGrid": { "en": "grid", "es": "cuadrícula" },
+  "viewList": { "en": "list", "es": "lista" },
+  "list": {
+    "live": { "en": "Live", "es": "En vivo" },
+    "read": { "en": "Read", "es": "Leer" }
+  }
+}

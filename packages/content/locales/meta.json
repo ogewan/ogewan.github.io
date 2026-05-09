@@ -1,0 +1,75 @@
+{
+  "siteName": { "en": "Portfolio", "es": "Portafolio" },
+  "siteTitle": {
+    "en": "Portfolio · console UX, ground systems, the room",
+    "es": "Portafolio · UX de consolas, sistemas en tierra, la sala"
+  },
+  "siteDescription": {
+    "en": "Polyglot portfolio of a frontend engineer working on consoles, ground systems, and instruments for people who can't look away from the work.",
+    "es": "Portafolio polígloto de una ingeniera frontend que trabaja en consolas, sistemas en tierra, e instrumentos para gente que no puede dejar de mirar el trabajo."
+  },
+  "pages": {
+    "home": {
+      "title": {
+        "en": "Portfolio · console UX, ground systems, the room",
+        "es": "Portafolio · UX de consolas, sistemas en tierra, la sala"
+      },
+      "description": {
+        "en": "Polyglot portfolio of a frontend engineer working on consoles, ground systems, and instruments.",
+        "es": "Portafolio polígloto de una ingeniera frontend que trabaja en consolas, sistemas en tierra, e instrumentos."
+      }
+    },
+    "about": {
+      "title": { "en": "About · Portfolio", "es": "Acerca · Portafolio" },
+      "description": {
+        "en": "Posture, trajectory, and how I work. Frontend engineer, eleven years across mission-critical interfaces and ground-station tooling.",
+        "es": "Postura, trayectoria, y cómo trabajo. Ingeniera frontend, once años en interfaces críticas y herramientas de estaciones."
+      }
+    },
+    "projects": {
+      "title": { "en": "Work · Portfolio", "es": "Proyectos · Portafolio" },
+      "description": {
+        "en": "Selected work from the last five years. Manifest-driven, filterable, dense list-view available.",
+        "es": "Trabajo seleccionado del último lustro. Driven por manifest, filtrable, vista de lista densa disponible."
+      }
+    },
+    "projectDetail": {
+      "title": { "en": "{{project}} · Portfolio", "es": "{{project}} · Portafolio" },
+      "description": { "en": "{{summary}}", "es": "{{summary}}" }
+    },
+    "projectRedirect": {
+      "title": {
+        "en": "{{project}} · leaving the portfolio",
+        "es": "{{project}} · saliendo del portafolio"
+      },
+      "description": {
+        "en": "{{project}} has its own site. Cross-document transition out of the portfolio shell.",
+        "es": "{{project}} tiene su propio sitio. Transición entre documentos fuera del shell del portafolio."
+      }
+    },
+    "contact": {
+      "title": { "en": "Contact · Portfolio", "es": "Contacto · Portafolio" },
+      "description": {
+        "en": "Briefs by email. Calls by Calendly. No form, no questionnaire — just write.",
+        "es": "Briefs por email. Llamadas por Calendly. Sin formulario, sin cuestionario — solo escribe."
+      }
+    },
+    "colophon": {
+      "title": {
+        "en": "Colophon · how this site was made",
+        "es": "Colofón · cómo se hizo este sitio"
+      },
+      "description": {
+        "en": "Stack, decisions, performance, changelog, credits, license. A small colophon for a small site.",
+        "es": "Stack, decisiones, performance, changelog, créditos, licencia. Un colofón pequeño para un sitio pequeño."
+      }
+    },
+    "notFound": {
+      "title": { "en": "Not Found · Portfolio", "es": "No encontrado · Portafolio" },
+      "description": {
+        "en": "That route isn't on the manifest.",
+        "es": "Esa ruta no está en el manifest."
+      }
+    }
+  }
+}

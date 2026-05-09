@@ -4,7 +4,10 @@ export type {
   TimelineCategory,
   TimelineNode,
   TimelineStrings,
-  TimelineLocaleDict,
+  TimelineChrome,
+  TimelineStringsDict,
+  Localized,
+  SupportedLocale,
 } from './timeline-types.js';
 export { TIMELINE_NODES } from './generated/timeline-data.js';
-export { TIMELINE_LOCALES } from './generated/timeline-strings.js';
+export { TIMELINE_STRINGS } from './generated/timeline-strings.js';

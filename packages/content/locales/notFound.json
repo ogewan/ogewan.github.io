@@ -1,0 +1,5 @@
+{
+  "title": { "en": "Not Found", "es": "No encontrado" },
+  "lead": { "en": "That route isn't on the manifest.", "es": "Esa ruta no está en el manifest." },
+  "back": { "en": "Back to home", "es": "Volver al inicio" }
+}

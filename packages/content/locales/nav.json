@@ -1,0 +1,37 @@
+{
+  "items": {
+    "home": { "en": "Home", "es": "Inicio" },
+    "about": { "en": "About", "es": "Acerca" },
+    "projects": { "en": "Work", "es": "Proyectos" },
+    "contact": { "en": "Contact", "es": "Contacto" },
+    "colophon": { "en": "Colophon", "es": "Colofón" }
+  },
+  "resume": { "en": "Résumé", "es": "Currículum" },
+  "ariaPrimary": { "en": "Primary", "es": "Principal" },
+  "ariaToggleMenu": { "en": "Toggle menu", "es": "Abrir menú" },
+  "ariaSwitchTo": { "en": "Switch to {{language}}", "es": "Cambiar a {{language}}" },
+  "languageEn": { "en": "English", "es": "Inglés" },
+  "languageEs": { "en": "Spanish", "es": "Español" },
+  "quality": {
+    "ariaLabel": { "en": "Backdrop quality", "es": "Calidad del fondo" },
+    "options": {
+      "quality": { "en": "Full", "es": "Completo" },
+      "static": { "en": "Still", "es": "Estático" },
+      "simple": { "en": "Lite", "es": "Ligero" }
+    },
+    "tooltips": {
+      "quality": {
+        "en": "Full · live 3D scenes with camera fly-through",
+        "es": "Completo · escenas 3D con vuelo de cámara"
+      },
+      "static": {
+        "en": "Still · captured snapshots, no motion",
+        "es": "Estático · capturas, sin movimiento"
+      },
+      "simple": {
+        "en": "Lite · simple gradients, lowest cost",
+        "es": "Ligero · degradados simples, mínimo costo"
+      }
+    }
+  }
+}

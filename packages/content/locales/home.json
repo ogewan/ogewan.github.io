@@ -1,0 +1,26 @@
+{
+  "eyebrow": { "en": "01 / Home", "es": "01 / Tierra" },
+  "headline": {
+    "en": "Built at the <em>shoreline</em> of software & space.",
+    "es": "Construido en la <em>orilla</em> del software y el espacio."
+  },
+  "lead": {
+    "en": "Consoles, ground systems, instruments for people who can't look away from the work. Below: selected work, a way of working, and a channel to open.",
+    "es": "Consolas, sistemas en tierra, herramientas para la gente que no puede dejar de mirar el trabajo. Aquí abajo: trabajos seleccionados, una forma de trabajar, y un canal para abrir."
+  },
+  "ctaWork": { "en": "View work", "es": "Ver trabajos" },
+  "ctaContact": { "en": "Book a call", "es": "Agendar una llamada" },
+  "currentlyAria": { "en": "Currently", "es": "Actualmente" },
+  "currently": {
+    "label": { "en": "Currently", "es": "Actualmente" }
+  },
+  "selected": {
+    "label": { "en": "Selected · {{year}}", "es": "Seleccionado · {{year}}" },
+    "value": { "en": "{{count}} things in orbit", "es": "{{count}} trabajos en órbita" },
+    "link": { "en": "see all →", "es": "ver todos →" }
+  },
+  "next": {
+    "label": { "en": "Next", "es": "Siguiente" },
+    "value": { "en": "About · 02", "es": "Acerca · 02" }
+  }
+}

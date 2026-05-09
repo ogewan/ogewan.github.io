@@ -5,6 +5,12 @@
 
 export type TimelineCategory = 'work' | 'side' | 'education' | 'writing';
 
+export type SupportedLocale = 'en' | 'es';
+
+// Locale-as-leaf wrapper — every translatable string is { en, es } so each
+// piece of copy lives next to its translations rather than in a parallel tree.
+export type Localized<T> = Readonly<Record<SupportedLocale, T>>;
+
 export interface TimelineNode {
   readonly id: string;
   readonly category: TimelineCategory;
@@ -14,8 +20,7 @@ export interface TimelineNode {
   // Sortable timestamp — ISO date string of the START of this milestone.
   // Used for chronological ordering; not displayed.
   readonly startedAt: string;
-  // i18n key per locale — the dictionary in ./timeline-strings.ts holds the
-  // actual title/role/org/body strings.
+  // i18n key — looks up the strings in TIMELINE_STRINGS.nodes.
   readonly i18nKey: string;
   // Tags shown as small mono pills below the title.
   readonly tags: readonly string[];
@@ -24,26 +29,28 @@ export interface TimelineNode {
 }
 
 export interface TimelineStrings {
-  readonly title: string;
-  readonly role?: string;
-  readonly org?: string;
-  readonly body: string;
+  readonly title: Localized<string>;
+  readonly role?: Localized<string>;
+  readonly org?: Localized<string>;
+  readonly body: Localized<string>;
 }
 
-export interface TimelineLocaleDict {
-  // i18nKey → strings in this locale.
+export interface TimelineChrome {
+  readonly heading: Localized<string>;
+  readonly subtitle: Localized<string>;
+  readonly filterAll: Localized<string>;
+  readonly filterWork: Localized<string>;
+  readonly filterSide: Localized<string>;
+  readonly filterEducation: Localized<string>;
+  readonly filterWriting: Localized<string>;
+  readonly active: Localized<string>;
+  readonly expand: Localized<string>;
+  readonly collapse: Localized<string>;
+}
+
+export interface TimelineStringsDict {
+  // i18nKey → localised strings.
   readonly nodes: Readonly<Record<string, TimelineStrings>>;
   // UI chrome strings.
-  readonly chrome: {
-    readonly heading: string;
-    readonly subtitle: string;
-    readonly filterAll: string;
-    readonly filterWork: string;
-    readonly filterSide: string;
-    readonly filterEducation: string;
-    readonly filterWriting: string;
-    readonly active: string;
-    readonly expand: string;
-    readonly collapse: string;
-  };
+  readonly chrome: TimelineChrome;
 }

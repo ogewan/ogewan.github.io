@@ -1,0 +1,15 @@
+{
+  "crumbBack": { "en": "Back to case study", "es": "Volver al caso" },
+  "eyebrow": { "en": "Leaving the portfolio", "es": "Saliendo del portafolio" },
+  "headlineSuffix": { "en": "lives at", "es": "vive en" },
+  "lead": {
+    "en": "This project has its own site. Opening it takes you outside the portfolio shell (cross-document transition).",
+    "es": "Este proyecto tiene su propio sitio. Abrirlo te lleva fuera del shell del portafolio (transición entre documentos)."
+  },
+  "openButton": { "en": "Open live site", "es": "Abrir sitio en vivo" },
+  "stayPrompt": {
+    "en": "Prefer to stay inside the shell?",
+    "es": "¿Prefieres quedarte en el shell?"
+  },
+  "stayLink": { "en": "Read the case study here", "es": "Lee el caso aquí" }
+}

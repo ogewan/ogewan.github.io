@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { TIMELINE_LOCALES, type TimelineNode } from '@portfolio/content';
+import { TIMELINE_STRINGS, type TimelineNode } from '@portfolio/content';
 import { TimelineState, type TimelineFilter } from './timeline-state.service.js';
 
 // Polyglot bridge note for the curious:
@@ -49,8 +49,38 @@ export class TimelineComponent implements OnInit, OnDestroy {
   readonly focusedIndex = signal<number>(0);
   readonly localeSignal = signal<'en' | 'es'>('en');
 
-  // Locale dictionary derived from current locale signal.
-  readonly dict = computed(() => TIMELINE_LOCALES[this.localeSignal()]);
+  // Locale-resolved view of TIMELINE_STRINGS — strings are stored as { en, es }
+  // leaves; this computed picks the active locale once so the template can
+  // bind to plain strings (no locale index in the template).
+  readonly dict = computed(() => {
+    const lang = this.localeSignal();
+    const src = TIMELINE_STRINGS;
+    const nodes: Record<string, { title: string; body: string; role?: string; org?: string }> = {};
+    for (const [id, s] of Object.entries(src.nodes)) {
+      nodes[id] = {
+        title: s.title[lang],
+        body: s.body[lang],
+        ...(s.role ? { role: s.role[lang] } : {}),
+        ...(s.org ? { org: s.org[lang] } : {}),
+      };
+    }
+    const c = src.chrome;
+    return {
+      nodes,
+      chrome: {
+        heading: c.heading[lang],
+        subtitle: c.subtitle[lang],
+        filterAll: c.filterAll[lang],
+        filterWork: c.filterWork[lang],
+        filterSide: c.filterSide[lang],
+        filterEducation: c.filterEducation[lang],
+        filterWriting: c.filterWriting[lang],
+        active: c.active[lang],
+        expand: c.expand[lang],
+        collapse: c.collapse[lang],
+      },
+    };
+  });
 
   // Filter pill metadata. Computed against the current locale so labels
   // re-resolve when `locale` changes — and also so Angular's strict template

@@ -1,0 +1,75 @@
+{
+  "crumbBack": { "en": "Back to home", "es": "Volver al inicio" },
+  "crumbBadge": { "en": "02 · /about · v0.7", "es": "02 · /about · v0.7" },
+  "eyebrow": { "en": "02 / About", "es": "02 / Acerca" },
+  "headline": {
+    "en": "I make instruments for people who can't look away from the <em>work.</em>",
+    "es": "Hago instrumentos para gente que no puede dejar de mirar el <em>trabajo.</em>"
+  },
+  "profile": {
+    "name": { "en": "Name", "es": "Nombre" },
+    "pronouns": { "en": "Pronouns", "es": "Pronombres" },
+    "languages": { "en": "Languages", "es": "Idiomas" },
+    "stack": { "en": "Stack", "es": "Stack" },
+    "email": { "en": "Email", "es": "Email" }
+  },
+  "sections": {
+    "posture": {
+      "order": { "en": "01", "es": "01" },
+      "title": { "en": "Posture", "es": "Postura" },
+      "body": {
+        "en": "I work where code meets the physical room — consoles, ground systems, instruments for the team in the room. The interface should disappear into the work.",
+        "es": "Trabajo donde el código se encuentra con el espacio físico — consolas, sistemas en tierra, herramientas para la sala. La interfaz debería desaparecer en el trabajo."
+      },
+      "quote": {
+        "en": "The interface should disappear into the work.",
+        "es": "La interfaz debería desaparecer en el trabajo."
+      }
+    },
+    "trajectory": {
+      "order": { "en": "02", "es": "02" },
+      "title": { "en": "Trajectory · 2014 → present", "es": "Trayectoria · 2014 → presente" },
+      "body": {
+        "en": "Interactive timeline — Angular Element loaded on demand. Filter by category, expand any node for the long version.",
+        "es": "Línea de tiempo interactiva — Angular Element cargado bajo demanda. Filtra por categoría, expande cualquier nodo para la versión larga."
+      }
+    },
+    "work": {
+      "order": { "en": "03", "es": "03" },
+      "title": { "en": "What I work on / how I work", "es": "En qué trabajo / cómo trabajo" },
+      "subhead1": { "en": "What I work on.", "es": "En qué trabajo." },
+      "body1": {
+        "en": "Consoles for ground systems. Real-time visualization. Design systems that survive five years of iteration. Performance audits. R3F and GLSL work when the image has to carry meaning.",
+        "es": "Consolas para sistemas en tierra. Visualización en tiempo real. Sistemas de diseño que sobreviven a 5 años de iteración. Auditorías de rendimiento. Trabajo de R3F y GLSL cuando la imagen tiene que cargar significado."
+      },
+      "subhead2": { "en": "How I work.", "es": "Cómo trabajo." },
+      "body2": {
+        "en": "Embedded with the team, not at arm's length. Specs before pixels. Read the room before writing the code. Color reserved, animation quiet. Real dates on real commits.",
+        "es": "Embedded en el equipo, no a distancia. Specs antes de pixels. Lee la sala antes de escribir el código. El color es reservado, los movimientos son tranquilos. Fechas reales en commits reales."
+      }
+    },
+    "currently": {
+      "order": { "en": "04", "es": "04" },
+      "title": { "en": "Currently · Nov 2025", "es": "Actualmente · Nov 2025" },
+      "reading": { "en": "Reading", "es": "Leyendo" },
+      "building": { "en": "Building", "es": "Construyendo" },
+      "listening": { "en": "Listening", "es": "Escuchando" }
+    },
+    "speaking": {
+      "order": { "en": "05", "es": "05" },
+      "title": { "en": "Speaking & writing", "es": "Charlas y escritura" }
+    },
+    "shelf": {
+      "order": { "en": "06", "es": "06" },
+      "title": { "en": "What I keep on the shelf", "es": "Lo que tengo en el estante" }
+    }
+  },
+  "cta": {
+    "label": { "en": "CTA", "es": "CTA" },
+    "headline": {
+      "en": "Available for a console-shaped problem in Q3 2026.",
+      "es": "Disponible para un problema con forma de consola en Q3 2026."
+    },
+    "button": { "en": "Send a brief", "es": "Enviar un brief" }
+  }
+}

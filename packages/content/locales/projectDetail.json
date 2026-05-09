@@ -1,0 +1,42 @@
+{
+  "crumbBack": { "en": "Back to selected work", "es": "Volver a trabajos" },
+  "sections": {
+    "background": {
+      "title": { "en": "Background", "es": "Antecedentes" }
+    },
+    "numbers": {
+      "title": { "en": "By the numbers", "es": "Por los números" }
+    },
+    "approach": {
+      "title": { "en": "Approach", "es": "Enfoque" }
+    },
+    "walkthrough": {
+      "title": { "en": "Walkthrough", "es": "Recorrido" },
+      "demoLabel": { "en": "Watch demo ↗", "es": "Ver demo ↗" },
+      "pending": { "en": "Walkthrough video pending.", "es": "Video pendiente." }
+    },
+    "spec": {
+      "title": { "en": "Spec", "es": "Spec" },
+      "labels": {
+        "stack": { "en": "Stack", "es": "Stack" },
+        "status": { "en": "Status", "es": "Estado" },
+        "repo": { "en": "Repo", "es": "Repo" },
+        "stars": { "en": "Stars", "es": "Stars" },
+        "lastPush": { "en": "Last push", "es": "Último push" },
+        "started": { "en": "Started", "es": "Inicio" },
+        "ended": { "en": "Ended", "es": "Fin" },
+        "categories": { "en": "Categories", "es": "Categorías" }
+      }
+    },
+    "external": {
+      "title": { "en": "External", "es": "Externos" },
+      "source": { "en": "Source on GitHub", "es": "Código fuente" },
+      "live": { "en": "Live site", "es": "Sitio en vivo" },
+      "docs": { "en": "Documentation", "es": "Documentación" }
+    }
+  },
+  "pager": {
+    "prev": { "en": "← Previous", "es": "← Anterior" },
+    "next": { "en": "Next →", "es": "Siguiente →" }
+  }
+}

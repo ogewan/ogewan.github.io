@@ -23,9 +23,7 @@ function timelineGeneratorPlugin(): Plugin {
       console.error('[timeline-generator] failed:', err);
     }
   };
-  const isWatchTarget = (path: string): boolean =>
-    path === resolve(REPO_ROOT, 'config.json') ||
-    /[\\/]locales[\\/](en|es)[\\/]timeline\.json$/.test(path);
+  const isWatchTarget = (path: string): boolean => path === resolve(REPO_ROOT, 'config.json');
   return {
     name: 'portfolio:timeline-generator',
     buildStart() {
@@ -33,8 +31,6 @@ function timelineGeneratorPlugin(): Plugin {
     },
     configureServer(server) {
       server.watcher.add(resolve(REPO_ROOT, 'config.json'));
-      server.watcher.add(resolve(REPO_ROOT, 'packages/content/locales/en/timeline.json'));
-      server.watcher.add(resolve(REPO_ROOT, 'packages/content/locales/es/timeline.json'));
       server.watcher.on('change', (path) => {
         if (isWatchTarget(path)) run();
       });

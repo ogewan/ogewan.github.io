@@ -1,0 +1,120 @@
+{
+  "crumbBack": { "en": "Back to home", "es": "Volver al inicio" },
+  "eyebrow": {
+    "en": "05 / Colophon · how this site was made",
+    "es": "05 / Colofón · cómo se hizo este sitio"
+  },
+  "headline": { "en": "About this <em>site.</em>", "es": "Acerca de este <em>sitio.</em>" },
+  "lead": {
+    "en": "A small colophon for a small site. Stack, decisions, performance, changelog, credits, license.",
+    "es": "Un colofón pequeño para un sitio pequeño. Stack, decisiones, performance, changelog, créditos, licencia."
+  },
+  "sections": {
+    "stack": {
+      "order": { "en": "01", "es": "01" },
+      "title": { "en": "Stack", "es": "Stack" },
+      "subtitle": {
+        "en": "What's running, roughly.",
+        "es": "Lo que está corriendo, aproximadamente."
+      },
+      "labels": {
+        "framework": { "en": "Framework", "es": "Framework" },
+        "threeD": { "en": "3D", "es": "3D" },
+        "polyglot": { "en": "Polyglot", "es": "Polyglot" },
+        "style": { "en": "Style", "es": "Estilo" },
+        "i18n": { "en": "i18n", "es": "i18n" },
+        "hosting": { "en": "Hosting", "es": "Hosting" },
+        "privacy": { "en": "Privacy", "es": "Privacidad" }
+      },
+      "notes": {
+        "threeD": { "en": "phase 9 · placeholders today", "es": "fase 9 · placeholders hoy" },
+        "polyglot": { "en": "timeline · phase 5", "es": "timeline · fase 5" },
+        "i18n": { "en": "wired in phase 6", "es": "conectado en la fase 6" },
+        "privacy": { "en": "no analytics · no cookies", "es": "sin analytics · sin cookies" }
+      }
+    },
+    "build": {
+      "order": { "en": "02", "es": "02" },
+      "title": { "en": "Build notes", "es": "Notas de build" },
+      "subtitle": { "en": "How the pages fit together.", "es": "Cómo encajan las páginas." }
+    },
+    "perf": {
+      "order": { "en": "03", "es": "03" },
+      "title": { "en": "Perf & access", "es": "Perf y accesibilidad" },
+      "subtitle": { "en": "Receipts over claims.", "es": "Recibos sobre afirmaciones." },
+      "cwvHeading": { "en": "Core Web Vitals · target", "es": "Core Web Vitals · objetivo" },
+      "wcagHeading": { "en": "WCAG 2.2 AA", "es": "WCAG 2.2 AA" },
+      "wcag": {
+        "keyboard": { "en": "✓ all interactive", "es": "✓ todo interactivo" },
+        "focus": { "en": "✓ visible on glass", "es": "✓ visible sobre cristal" },
+        "motion": { "en": "✓ full branch", "es": "✓ branch completo" },
+        "contrast": { "en": "AA min, mostly AAA", "es": "AA mínimo, mayormente AAA" },
+        "screenReader": { "en": "✓ live route announce", "es": "✓ anuncio de ruta en vivo" }
+      }
+    },
+    "changelog": {
+      "order": { "en": "04", "es": "04" },
+      "title": { "en": "Changelog", "es": "Changelog" },
+      "subtitle": { "en": "Versions, terse.", "es": "Versiones, terso." },
+      "headers": {
+        "ver": { "en": "VER", "es": "VER" },
+        "date": { "en": "DATE", "es": "FECHA" },
+        "note": { "en": "NOTE", "es": "NOTA" }
+      },
+      "entries": {
+        "v06": {
+          "en": "Launch hardening: meta tags, sitemap, self-hosted webfonts, view-transition CSS, screenshot prefetch",
+          "es": "Hardening de lanzamiento: meta tags, sitemap, fuentes auto-hospedadas, CSS de view transitions, prefetch de screenshots"
+        },
+        "v05": {
+          "en": "GitHub Actions build-and-deploy, real manifest with fixture fallback, .portfolio.yml template",
+          "es": "GitHub Actions build-and-deploy, manifest real con fallback a fixture, plantilla .portfolio.yml"
+        },
+        "v04i18n": {
+          "en": "i18next, MapLibre, Turnstile/Calendly, scroll-route nav, hero idle preload",
+          "es": "i18next, MapLibre, Turnstile/Calendly, navegación por scroll, preload en hero"
+        },
+        "v04": {
+          "en": "Real shell pages, location rail, projects from manifest, View Transitions",
+          "es": "Páginas reales, riel de ubicación, proyectos desde manifest, View Transitions"
+        },
+        "v03": {
+          "en": "Persistent celestial backdrop (placeholders), focus API",
+          "es": "Backdrop celestial persistente (placeholders), focus API"
+        },
+        "v02": {
+          "en": "Design tokens, primitives, /_dev/tokens showcase",
+          "es": "Design tokens, primitives, /_dev/tokens showcase"
+        },
+        "v01": {
+          "en": "Manifest builder + Zod schema + vitest suite",
+          "es": "Manifest builder + Zod schema + suite de vitest"
+        },
+        "v00": { "en": "Initial monorepo scaffold", "es": "Scaffold inicial del monorepo" }
+      }
+    },
+    "credits": {
+      "order": { "en": "05", "es": "05" },
+      "title": { "en": "Credits & influences", "es": "Créditos e influencias" },
+      "subtitle": { "en": "People & references.", "es": "Personas y referencias." },
+      "groups": {
+        "influences": { "en": "Influences", "es": "Influencias" },
+        "openSource": { "en": "Open source", "es": "Open source" },
+        "imagery": { "en": "Imagery", "es": "Imaginería" },
+        "typefaces": { "en": "Typefaces", "es": "Tipografías" }
+      }
+    },
+    "license": {
+      "order": { "en": "06", "es": "06" },
+      "title": { "en": "License & source", "es": "Licencia y fuente" },
+      "subtitle": {
+        "en": "Use the code, not the case studies.",
+        "es": "Usa el código, no los casos."
+      },
+      "body": {
+        "en": "MIT. Code is free — case studies are mine. If you use them, credit me and make your own.",
+        "es": "MIT. El código es libre — los casos de estudio son míos. Si los usas, dame crédito y haz el tuyo."
+      }
+    }
+  }
+}

@@ -8,7 +8,8 @@ import configRaw from '../../../../config.json';
 // Owner + site fields are required; the about.* sections are optional — when
 // a field is absent the corresponding About-page section does not render and
 // the remaining sections renumber. `current_focus` (UUID) and the timeline
-// reference manifest entries by their `uuid` field.
+// reference manifest entries by their `uuid` field. Timeline node copy and
+// chrome strings live inline in the locale-as-leaf shape ({ en, es }).
 
 export interface SpeakingEntry {
   readonly year: string;
@@ -31,23 +32,39 @@ export interface CurrentlyBlock {
 
 export type TimelineCategory = 'work' | 'side' | 'education' | 'writing';
 
+export type Localized<T> = Readonly<Record<'en' | 'es', T>>;
+
 // A timeline entry is either a bare UUID (full delegation to a manifest entry —
 // title/body sourced from the manifest, category defaulted to 'work', current
-// computed from config.current_focus) or an inline structural object whose
-// localised title/body strings live in `packages/content/locales/{en,es}/
-// timeline.json` keyed by `id`.
+// computed from config.current_focus) or an inline structural object that
+// carries its own locale-as-leaf title/body.
 export type TimelineEntry =
   | string // UUID, references a manifest entry
   | {
-      readonly id: string; // stable key used to look up locale strings
+      readonly id: string;
       readonly category: TimelineCategory;
       readonly start: string; // YYYY-MM-DD
       readonly end?: string; // YYYY-MM-DD, omitted = present
-      readonly role?: string;
-      readonly org?: string;
+      readonly role?: Localized<string>;
+      readonly org?: Localized<string>;
       readonly tags?: readonly string[];
       readonly current?: boolean;
+      readonly title?: Localized<string>;
+      readonly body?: Localized<string>;
     };
+
+export interface TimelineChromeConfig {
+  readonly heading: Localized<string>;
+  readonly subtitle: Localized<string>;
+  readonly filterAll: Localized<string>;
+  readonly filterWork: Localized<string>;
+  readonly filterSide: Localized<string>;
+  readonly filterEducation: Localized<string>;
+  readonly filterWriting: Localized<string>;
+  readonly active: Localized<string>;
+  readonly expand: Localized<string>;
+  readonly collapse: Localized<string>;
+}
 
 export interface SiteConfig {
   readonly schema_version: 1;
@@ -74,6 +91,7 @@ export interface SiteConfig {
     readonly currently?: CurrentlyBlock;
   };
   readonly timeline?: readonly TimelineEntry[];
+  readonly timelineChrome?: TimelineChromeConfig;
 }
 
 export const siteConfig: SiteConfig = configRaw as SiteConfig;

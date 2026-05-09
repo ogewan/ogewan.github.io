@@ -1,119 +1,184 @@
 {
   "schema_version": 1,
   "owner": {
-    "name": "<your-name>",
-    "email": "hello@example.com",
-    "pronouns": "they / them",
-    "languages": ["English", "Español"],
-    "stack": ["React", "R3F", "TypeScript", "Rust", "GLSL"],
-    "github": "username",
+    "name": "Seun Ogedengbe",
+    "email": "seun40@gmail.com",
+    "pronouns": "he / him",
+    "languages": ["English"],
+    "stack": [
+      "TypeScript",
+      "JavaScript",
+      "React",
+      "R3F",
+      "Node.js",
+      "Python",
+      "WebGL",
+      "GLSL",
+      "HTML5/CSS3"
+    ],
+    "github": "ogewan",
     "availability": ""
   },
   "site": {
-    "url": "https://username.github.io",
-    "source_repo": "username/portfolio"
+    "url": "https://ogewan.github.io",
+    "source_repo": "ogewan/portfolio"
   },
   "selected": {},
   "about": {
-    "speaking": [
-      {
-        "year": "2025",
-        "kind": "talk",
-        "title": "Reading the room: console UX for high-trust settings",
-        "href": "https://example.com/talk-1"
-      },
-      {
-        "year": "2024",
-        "kind": "essay",
-        "title": "Why your design system needs a calendar, not a roadmap",
-        "href": "https://example.com/essay-1"
-      },
-      {
-        "year": "2023",
-        "kind": "slides",
-        "title": "OKLCH for engineers",
-        "href": "https://example.com/slides-1"
-      }
-    ],
+    "speaking": [],
     "shelf": [
-      { "num": "01", "title": "Ways of Seeing", "author": "John Berger · 1972" },
-      { "num": "02", "title": "The Design of Everyday Things", "author": "Don Norman · 1988" },
+      { "num": "01", "title": "House of Leaves", "author": "Mark Z. Danielewski · 2000" },
+      {
+        "num": "02",
+        "title": "Fundamentals of Software Architecture: A Modern Engineering Approach",
+        "author": "Mark Richards, Neal Ford · 2025"
+      },
       {
         "num": "03",
-        "title": "The Visual Display of Quantitative Information",
-        "author": "Edward Tufte · 1983"
+        "title": "Software Architecture: The Hard Parts",
+        "author": "Mark Richards, Neal Ford · 2021"
       },
-      { "num": "04", "title": "Image and Brain", "author": "Stephen Kosslyn · 1994" }
+      { "num": "04", "title": "Getting Things Done", "author": "David Allen · 2001" }
     ],
     "currently": {
-      "reading": "The Mushroom at the End of the World — Anna Tsing",
-      "building": "Atlas Console v3.2 — telemetry rewrite",
-      "listening": "Obsidian Soundfields — field recordings"
+      "reading": "The Dark Forest by Cixin Liu",
+      "building": "Bomberman AI - a generalized emulator ML platform for training agents on N64 games.",
+      "listening": "Obsidian Soundfields, Athena V"
     }
+  },
+  "timelineChrome": {
+    "heading": { "en": "Trajectory", "es": "Trayectoria" },
+    "subtitle": {
+      "en": "2014 → present · expand any node for the long version",
+      "es": "2014 → presente · expande cualquier nodo para la versión larga"
+    },
+    "filterAll": { "en": "All", "es": "Todo" },
+    "filterWork": { "en": "Work", "es": "Trabajo" },
+    "filterSide": { "en": "Side projects", "es": "Proyectos paralelos" },
+    "filterEducation": { "en": "Education", "es": "Educación" },
+    "filterWriting": { "en": "Writing", "es": "Escritura" },
+    "active": { "en": "Active", "es": "Activo" },
+    "expand": { "en": "Expand", "es": "Expandir" },
+    "collapse": { "en": "Collapse", "es": "Colapsar" }
   },
   "timeline": [
     {
-      "id": "atlas-now",
+      "id": "LeanData",
       "category": "work",
       "start": "2024-09-01",
-      "role": "Lead engineer",
-      "org": "Atlas Industries",
+      "role": { "en": "Lead engineer", "es": "Ingeniero líder" },
+      "org": { "en": "Atlas Industries", "es": "Atlas Industries" },
       "tags": ["react", "rust", "websockets"],
-      "current": true
+      "current": true,
+      "title": {
+        "en": "Lead frontend · Atlas Console",
+        "es": "Frontend principal · Atlas Console"
+      },
+      "body": {
+        "en": "Telemetry-to-paint P99 14ms across 28 consoles in two ground stations. Three vehicles currently flying. The brief: a flight director's readout grid, not a dashboard.",
+        "es": "Latencia telemetría-a-pixel P99 de 14ms en 28 consolas, dos estaciones terrestres. Tres vehículos volando ahora. El brief: una grilla de readouts para directores de vuelo, no un dashboard."
+      }
     },
     {
       "id": "tide",
       "category": "side",
       "start": "2024-04-01",
-      "tags": ["typescript", "indexeddb"]
+      "tags": ["typescript", "indexeddb"],
+      "title": {
+        "en": "Tide — slow-reading RSS client",
+        "es": "Tide — lector de RSS de lectura lenta"
+      },
+      "body": {
+        "en": "Side project. RSS for people who would rather read fewer things, more attentively. No infinite scroll, no engagement metrics — a tide table of what arrived and when.",
+        "es": "Proyecto secundario. RSS para gente que prefiere leer menos, con más atención. Sin scroll infinito, sin métricas de engagement — una tabla de mareas de lo que llegó y cuándo."
+      }
     },
     {
       "id": "aperture",
       "category": "side",
       "start": "2025-08-10",
       "end": "2025-12-31",
-      "tags": ["r3f", "glsl"]
+      "tags": ["r3f", "glsl"],
+      "title": {
+        "en": "Aperture — film-grain shader playground",
+        "es": "Aperture — playground de shader de grano"
+      },
+      "body": {
+        "en": "A configurable film-grain pipeline for R3F. Open-sourced after I got tired of shipping the same shader copy-pasted into three different projects.",
+        "es": "Pipeline configurable de grano de película para R3F. Open source después de cansarme de copiar el mismo shader en tres proyectos."
+      }
     },
     {
       "id": "oklch-essay",
       "category": "writing",
       "start": "2024-11-01",
       "end": "2024-11-30",
-      "tags": ["essay", "color"]
+      "tags": ["essay", "color"],
+      "title": { "en": "OKLCH for engineers", "es": "OKLCH para ingenieros" },
+      "body": {
+        "en": "Essay on perceptual color spaces written for the shop floor: how oklch lets you build a real color system instead of guessing at hex values.",
+        "es": "Ensayo sobre espacios de color perceptuales escrito para el taller: cómo oklch te permite construir un sistema de color real, no adivinar valores hex."
+      }
     },
     {
       "id": "brightline",
       "category": "work",
       "start": "2021-03-01",
       "end": "2024-08-31",
-      "role": "Senior engineer",
-      "org": "Brightline Aerospace",
-      "tags": ["react", "webgl", "aerospace"]
+      "role": { "en": "Senior engineer", "es": "Ingeniero senior" },
+      "org": { "en": "Brightline Aerospace", "es": "Brightline Aerospace" },
+      "tags": ["react", "webgl", "aerospace"],
+      "title": {
+        "en": "Senior engineer · Brightline Aerospace",
+        "es": "Ingeniero senior · Brightline Aerospace"
+      },
+      "body": {
+        "en": "Built the ground-systems frontend stack from scratch. Three large console projects, one design system that survived all of them.",
+        "es": "Construí el stack de frontend para sistemas en tierra desde cero. Tres proyectos grandes de consola, un sistema de diseño que sobrevivió a todos."
+      }
     },
     {
       "id": "soundfields",
       "category": "side",
       "start": "2020-06-01",
       "end": "2022-06-30",
-      "tags": ["detour", "indie"]
+      "tags": ["detour", "indie"],
+      "title": { "en": "Soundfields — the indie detour", "es": "Soundfields — el desvío indie" },
+      "body": {
+        "en": "A two-year side project that paid the bills while I figured out what I actually wanted to do. Shipped 12 EPs and a generative ambient web app.",
+        "es": "Proyecto secundario de dos años que pagó las cuentas mientras descubría qué quería hacer realmente. Saqué 12 EPs y una app web de ambient generativo."
+      }
     },
     {
       "id": "pentagram",
       "category": "work",
       "start": "2018-09-01",
       "end": "2020-08-31",
-      "role": "Designer",
-      "org": "Pentagram",
-      "tags": ["design-systems", "identity"]
+      "role": { "en": "Designer", "es": "Diseñador" },
+      "org": { "en": "Pentagram", "es": "Pentagram" },
+      "tags": ["design-systems", "identity"],
+      "title": { "en": "Designer · Pentagram", "es": "Diseñador · Pentagram" },
+      "body": {
+        "en": "Identity and design-system work for technical clients. Where I learned that the best brand systems read like specs, not mood boards.",
+        "es": "Trabajo de identidad y sistemas de diseño para clientes técnicos. Donde aprendí que los mejores sistemas de marca leen como specs, no como mood boards."
+      }
     },
     {
       "id": "tec-research",
       "category": "education",
       "start": "2014-08-01",
       "end": "2018-05-31",
-      "role": "Research assistant",
-      "org": "Tec de Monterrey",
-      "tags": ["cs", "hci", "graphics"]
+      "role": { "en": "Research assistant", "es": "Asistente de investigación" },
+      "org": { "en": "Tec de Monterrey", "es": "Tec de Monterrey" },
+      "tags": ["cs", "hci", "graphics"],
+      "title": {
+        "en": "Tec de Monterrey · research lab",
+        "es": "Tec de Monterrey · laboratorio de investigación"
+      },
+      "body": {
+        "en": "CS undergrad with an HCI/graphics focus. Spent the last year building tools for the lab to render their own datasets.",
+        "es": "Licenciatura en CS con enfoque en HCI/gráficos. Pasé el último año construyendo herramientas para que el lab renderizara sus propios datasets."
+      }
     }
   ]
 }

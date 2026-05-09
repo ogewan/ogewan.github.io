@@ -1,0 +1,27 @@
+{
+  "readCaseStudy": { "en": "Read the case study", "es": "Leer el caso" },
+  "loading": { "en": "Loading", "es": "Cargando" },
+  "footer": {
+    "signature": { "en": "SIG · PORTFOLIO", "es": "SIG · PORTAFOLIO" },
+    "builtWith": { "en": "BUILT WITH", "es": "HECHO CON" },
+    "stack": { "en": "REACT · R3F · ANGULAR · TAILWIND", "es": "REACT · R3F · ANGULAR · TAILWIND" }
+  },
+  "rail": {
+    "you": { "en": "YOU", "es": "TÚ" },
+    "auto": { "en": "Auto", "es": "Auto" },
+    "noGeo": { "en": "NO GEO · AUTO", "es": "SIN GEO · AUTO" },
+    "ariaList": { "en": "Location rail", "es": "Riel de ubicación" },
+    "ariaAuto": { "en": "Auto rotation", "es": "Rotación automática" },
+    "ariaFocus": { "en": "Focus on {{label}}", "es": "Enfocar {{label}}" },
+    "youLabel": { "en": "YOU · {{city}}", "es": "TÚ · {{city}}" }
+  },
+  "external": {
+    "live": { "en": "Live", "es": "En vivo" },
+    "watch": { "en": "Watch", "es": "Ver" },
+    "github": { "en": "GitHub", "es": "GitHub" },
+    "writeup": { "en": "Writeup", "es": "Artículo" },
+    "openSite": { "en": "Open live site", "es": "Abrir sitio en vivo" },
+    "viewSource": { "en": "View source", "es": "Ver código" },
+    "readMit": { "en": "Read MIT", "es": "Leer MIT" }
+  }
+}
