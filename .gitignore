@@ -60,6 +60,7 @@ AGENTS.md
 CLAUDE.md
 CURRENT.md
 LAUNCH.md
+GH_ACTIONS_SETUP.md
 
 # Local debugging screenshots from Playwright/Puppeteer runs. Useful for
 # verifying behavior without a real browser; never committed.
