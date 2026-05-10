@@ -1,1 +1,10 @@
+#!/usr/bin/env sh
+# Add nvm-managed node bin to PATH when the commit is launched from a GUI
+# (VS Code, GitHub Desktop) that doesn't load shell rc files. Git Bash already
+# has it; this is a no-op there.
+if ! command -v pnpm >/dev/null 2>&1; then
+  for dir in "$HOME"/.nvm/versions/node/*/bin; do
+    [ -x "$dir/pnpm" ] && PATH="$dir:$PATH" && export PATH && break
+  done
+fi
 pnpm lint-staged

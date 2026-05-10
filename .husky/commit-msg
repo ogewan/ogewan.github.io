@@ -1,1 +1,8 @@
+#!/usr/bin/env sh
+# See pre-commit for the rationale on this PATH shim.
+if ! command -v pnpm >/dev/null 2>&1; then
+  for dir in "$HOME"/.nvm/versions/node/*/bin; do
+    [ -x "$dir/pnpm" ] && PATH="$dir:$PATH" && export PATH && break
+  done
+fi
 pnpm commitlint --edit "$1"
