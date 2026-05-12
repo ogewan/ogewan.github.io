@@ -31,23 +31,25 @@
         >
           <span class="dot" aria-hidden="true"></span>
           <span class="when">{{ node.when }}</span>
-          <span class="title">{{ dict().nodes[node.i18nKey].title }}</span>
+          @if (dict().nodes[node.i18nKey]; as s) {
+            <span class="title">{{ s.title }}</span>
+          }
           @if (node.current) {
             <span class="active-tag">{{ dict().chrome.active }}</span>
           }
         </button>
 
-        @if (expandedId() === node.id) {
+        @if (expandedId() === node.id && dict().nodes[node.i18nKey]; as s) {
           <div [id]="'panel-' + node.id" class="panel" role="region">
-            @if (dict().nodes[node.i18nKey].role) {
+            @if (s.role) {
               <p class="role">
-                <span class="role-name">{{ dict().nodes[node.i18nKey].role }}</span>
-                @if (dict().nodes[node.i18nKey].org) {
-                  <span class="org"> · {{ dict().nodes[node.i18nKey].org }}</span>
+                <span class="role-name">{{ s.role }}</span>
+                @if (s.org) {
+                  <span class="org"> · {{ s.org }}</span>
                 }
               </p>
             }
-            <p class="body">{{ dict().nodes[node.i18nKey].body }}</p>
+            <p class="body">{{ s.body }}</p>
             <ul class="tags" role="list">
               @for (tag of node.tags; track tag) {
                 <li class="tag">{{ tag }}</li>

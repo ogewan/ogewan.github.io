@@ -1,9 +1,8 @@
 /* TEAM */
-Designer · Engineer: <your-name>
-Pronouns: they / them
-Site: <username>.github.io
-Mastodon: <handle>@<instance>
-Location: Mountain View, CA · approximate
+Designer · Engineer: Seun Ogedengbe
+Pronouns: he / him
+Site: ogewan.github.io
+Location: Richmond, TX · approximate
 
 /* THANKS */
 The open-source authors of React, React Three Fiber, Angular, MapLibre,

@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { TIMELINE_STRINGS, type TimelineNode } from '@portfolio/content';
+import type { TimelineNode, TimelineStringsDict } from '@portfolio/content';
 import { TimelineState, type TimelineFilter } from './timeline-state.service.js';
 
 // Polyglot bridge note for the curious:
@@ -48,13 +48,33 @@ export class TimelineComponent implements OnInit, OnDestroy {
   readonly expandedId = signal<string | null>(null);
   readonly focusedIndex = signal<number>(0);
   readonly localeSignal = signal<'en' | 'es'>('en');
+  readonly stringsSignal = signal<TimelineStringsDict | null>(null);
 
-  // Locale-resolved view of TIMELINE_STRINGS — strings are stored as { en, es }
-  // leaves; this computed picks the active locale once so the template can
-  // bind to plain strings (no locale index in the template).
+  // Locale-resolved view of the strings dict (set by the React shell via the
+  // `strings` property input) — strings are stored as { en, es } leaves; this
+  // computed picks the active locale once so the template binds to plain
+  // strings (no locale index in the template). Until the shell sets `strings`,
+  // returns an empty-but-shaped dict so the template never dereferences null.
   readonly dict = computed(() => {
     const lang = this.localeSignal();
-    const src = TIMELINE_STRINGS;
+    const src = this.stringsSignal();
+    if (!src) {
+      return {
+        nodes: {} as Record<string, { title: string; body: string; role?: string; org?: string }>,
+        chrome: {
+          heading: '',
+          subtitle: '',
+          filterAll: '',
+          filterWork: '',
+          filterSide: '',
+          filterEducation: '',
+          filterWriting: '',
+          active: '',
+          expand: '',
+          collapse: '',
+        },
+      };
+    }
     const nodes: Record<string, { title: string; body: string; role?: string; org?: string }> = {};
     for (const [id, s] of Object.entries(src.nodes)) {
       nodes[id] = {
@@ -124,6 +144,20 @@ export class TimelineComponent implements OnInit, OnDestroy {
   }
   get data(): readonly TimelineNode[] {
     return this._data;
+  }
+
+  // `strings` is a DOM property (object, can't ride an HTML attribute) set
+  // imperatively by the React shell — same bridge pattern as `data`. Keeping
+  // the copy out of this bundle means config.json edits don't need an ng
+  // rebuild.
+  private _strings: TimelineStringsDict | null = null;
+  @Input()
+  set strings(value: TimelineStringsDict | null) {
+    this._strings = value;
+    this.stringsSignal.set(value);
+  }
+  get strings(): TimelineStringsDict | null {
+    return this._strings;
   }
 
   ngOnInit(): void {

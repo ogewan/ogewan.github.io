@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { TIMELINE_NODES, type TimelineNode } from '@portfolio/content';
+import {
+  TIMELINE_NODES,
+  TIMELINE_STRINGS,
+  type TimelineNode,
+  type TimelineStringsDict,
+} from '@portfolio/content';
 
 // React → Angular custom element bridge.
 //
@@ -101,11 +106,20 @@ export function TimelineWrapper({ locale, nodes }: TimelineWrapperProps) {
     };
   }, []);
 
-  // Set the `data` property imperatively after the element is defined.
-  // Property writes are required for non-string inputs across the bridge.
+  // Set the `strings` + `data` properties imperatively after the element is
+  // defined. Property writes are required for non-string inputs across the
+  // bridge. Strings first so the template never renders a node before its copy
+  // is present. `TIMELINE_STRINGS` is module-static — it comes from the
+  // generated module that the Vite plugin regenerates on config.json change —
+  // so the Angular bundle no longer needs rebuilding when timeline copy changes.
   useEffect(() => {
     if (state !== 'ready' || !ref.current) return;
-    (ref.current as unknown as { data: readonly TimelineNode[] }).data = nodes ?? TIMELINE_NODES;
+    const el = ref.current as unknown as {
+      strings: TimelineStringsDict;
+      data: readonly TimelineNode[];
+    };
+    el.strings = TIMELINE_STRINGS;
+    el.data = nodes ?? TIMELINE_NODES;
   }, [state, nodes]);
 
   if (state === 'error') {
