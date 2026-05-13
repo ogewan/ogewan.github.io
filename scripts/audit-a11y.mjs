@@ -32,11 +32,6 @@ function contrastRatio(l1, l2) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-function parseRgb(cssColor) {
-  const m = cssColor.match(/\d+/g);
-  return m ? [Number(m[0]), Number(m[1]), Number(m[2])] : null;
-}
-
 // ── CLI args ──────────────────────────────────────────────────────────────────
 
 const args = Object.fromEntries(

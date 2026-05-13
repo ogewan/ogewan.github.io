@@ -30,7 +30,7 @@
       "title": { "en": "Work · Portfolio", "es": "Proyectos · Portafolio" },
       "description": {
         "en": "Selected work from the last five years. Manifest-driven, filterable, dense list-view available.",
-        "es": "Trabajo seleccionado del último lustro. Driven por manifest, filtrable, vista de lista densa disponible."
+        "es": "Trabajo seleccionado de los últimos cinco años. Generado desde el manifest, filtrable, con vista de lista densa."
       }
     },
     "projectDetail": {

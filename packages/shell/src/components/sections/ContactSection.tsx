@@ -177,16 +177,13 @@ function ChannelRow({
         <a
           href={href}
           {...(external ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
-          className="text-fg-primary hover:text-cyan no-underline [text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]"
+          className="text-fg-primary hover:text-cyan no-underline"
         >
           {title}
         </a>
         <Text variant="small">{subtitle}</Text>
       </div>
-      <span
-        aria-hidden="true"
-        className="font-mono text-fg-muted [text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]"
-      >
+      <span aria-hidden="true" className="font-mono text-fg-muted">
         {glyph}
       </span>
     </li>

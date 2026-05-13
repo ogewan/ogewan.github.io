@@ -19,13 +19,15 @@ export interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
 //   h2      — Space Grotesk 400, clamp(30,3.4vw,48),  LH 1.05, TR -0.02
 //   h3      — Space Grotesk 500, 28,                 LH 1.15, TR -0.015
 //   h4      — Inter Tight 600,   22,                 LH 1.3,  TR -0.005
+// Canvas text-shadow is applied universally via `body { text-shadow }` in
+// theme.css (inherited property), and GlassPanel suppresses it for its
+// descendants via `[&_*]:![text-shadow:none]`. Per-variant overrides intentionally absent.
 const VARIANT_CLASS: Record<HeadingVariant, string> = {
-  display:
-    'font-display font-light text-display leading-[0.92] tracking-[-0.04em] text-balance [text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]',
-  h1: 'font-display font-normal text-h1 leading-none tracking-[-0.03em] text-balance [text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]',
-  h2: 'font-display font-normal text-h2 leading-[1.05] tracking-[-0.02em] text-balance [text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]',
-  h3: 'font-display font-medium text-h3 leading-[1.15] tracking-[-0.015em] [text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]',
-  h4: 'font-sans font-semibold text-h4 leading-[1.3] tracking-[-0.005em] [text-shadow:0_1px_4px_rgba(0,0,0,1),0_2px_16px_rgba(0,0,0,0.95),0_0_40px_rgba(0,0,0,0.8)]',
+  display: 'font-display font-light text-display leading-[0.92] tracking-[-0.04em] text-balance',
+  h1: 'font-display font-normal text-h1 leading-none tracking-[-0.03em] text-balance',
+  h2: 'font-display font-normal text-h2 leading-[1.05] tracking-[-0.02em] text-balance',
+  h3: 'font-display font-medium text-h3 leading-[1.15] tracking-[-0.015em]',
+  h4: 'font-sans font-semibold text-h4 leading-[1.3] tracking-[-0.005em]',
 };
 
 const TAG_BY_LEVEL: Record<HeadingLevel, 'h1' | 'h2' | 'h3' | 'h4'> = {

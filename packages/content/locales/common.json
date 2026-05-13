@@ -2,7 +2,7 @@
   "readCaseStudy": { "en": "Read the case study", "es": "Leer el caso" },
   "loading": { "en": "Loading", "es": "Cargando" },
   "footer": {
-    "signature": { "en": "SIG · PORTFOLIO", "es": "SIG · PORTAFOLIO" },
+    "signature": { "en": "SEUN OGEDENGBE", "es": "SEUN OGEDENGBE" },
     "builtWith": { "en": "BUILT WITH", "es": "HECHO CON" },
     "stack": { "en": "REACT · R3F · ANGULAR · TAILWIND", "es": "REACT · R3F · ANGULAR · TAILWIND" }
   },
