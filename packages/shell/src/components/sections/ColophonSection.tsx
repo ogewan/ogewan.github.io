@@ -141,6 +141,9 @@ export function ColophonSection() {
               </tr>
             </thead>
             <tbody>
+              <ChangeRow ver="1.0" date="2026-05-13" note={t('sections.changelog.entries.v09')} />
+              <ChangeRow ver="0.9" date="2026-05-08" note={t('sections.changelog.entries.v08')} />
+              <ChangeRow ver="0.8" date="2026-05-06" note={t('sections.changelog.entries.v07')} />
               <ChangeRow ver="0.7" date="2026-04-26" note={t('sections.changelog.entries.v06')} />
               <ChangeRow ver="0.6" date="2026-04-26" note={t('sections.changelog.entries.v05')} />
               <ChangeRow

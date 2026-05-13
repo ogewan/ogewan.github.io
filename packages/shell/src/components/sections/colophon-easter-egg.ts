@@ -17,7 +17,7 @@ const padInside = (s: string): string =>
 const BOX: readonly string[] = [
   '┌' + '─'.repeat(WIDTH) + '┐',
   '│ ' + padInside('$ seun-ogedengbe.portfolio') + '│',
-  '│ ' + padInside('> /colophon · v0.7') + '│',
+  '│ ' + padInside('> /colophon · v1.0') + '│',
   //'│ ' + padInside('> if you\'re reading this, hi.') + '│',
   '└' + '─'.repeat(WIDTH) + '┘',
 ];

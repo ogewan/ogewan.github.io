@@ -62,6 +62,18 @@
         "note": { "en": "NOTE", "es": "NOTA" }
       },
       "entries": {
+        "v09": {
+          "en": "Owner-voice copy pass: dropped aerospace framing, repositioned full-stack/platform, real résumé-grounded timeline, two co-authored Nature nodes, universal text-shadow, console easter-egg extracted",
+          "es": "Pase de copy en voz del propietario: se quitó el encuadre aeroespacial, reposicionado a full-stack / plataforma, timeline anclado al currículum, dos nodos Nature como coautor, text-shadow universal, easter-egg de consola extraído"
+        },
+        "v08": {
+          "en": "Data-driven architecture (α–ζ): config-driven identity, hero + about-currently from manifest, .portfolio.yml schema v2+v3 with case_study, generated timeline, visitor-location closest-canonical fallback, --skip-overlay visual-test flag",
+          "es": "Arquitectura data-driven (α–ζ): identidad desde config, hero + about-currently desde manifest, esquema .portfolio.yml v2+v3 con case_study, timeline generado, fallback visitor-location al canónico más cercano, flag --skip-overlay para test:visual"
+        },
+        "v07": {
+          "en": "R3F live scenes: NASA Earth/Moon/cloud textures, initial loading overlay (four-signal readiness gate), mobile nav progressive collapse, hero image on project cards, per-route programmatic favicon, full a11y audit",
+          "es": "R3F en vivo: texturas NASA de Tierra/Luna/nubes, overlay de carga inicial (gate de cuatro señales de readiness), nav móvil colapsable progresivo, imagen hero en project cards, favicon programático por ruta, auditoría a11y completa"
+        },
         "v06": {
           "en": "Launch hardening: meta tags, sitemap, self-hosted webfonts, view-transition CSS, screenshot prefetch",
           "es": "Hardening de lanzamiento: meta tags, sitemap, fuentes auto-hospedadas, CSS de view transitions, prefetch de screenshots"

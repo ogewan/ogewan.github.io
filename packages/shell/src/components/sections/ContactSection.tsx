@@ -20,6 +20,26 @@ export function ContactSection() {
   const { t } = useTranslation(['contact']);
   const visitor = useVisitorLocation();
 
+  // Schedule + Map are entirely hidden (heading + glass body) when the env keys
+  // that power them are not configured at build time. Schedule needs both
+  // Calendly + Turnstile; Map needs MapTiler. The previously-shown "missing
+  // key" placeholder cards are dropped — users without keys see no section
+  // at all, and the Calendly channel row in the Direct list is suppressed too
+  // so its `#schedule` anchor doesn't land on nothing.
+  const scheduleEnabled =
+    Boolean(import.meta.env.VITE_TURNSTILE_SITE_KEY) && Boolean(import.meta.env.VITE_CALENDLY_URL);
+  const mapEnabled = Boolean(import.meta.env.VITE_MAPTILER_KEY);
+
+  // Renumber section orders over the visible set so hiding Schedule/Map
+  // doesn't leave gaps in the displayed 01..N ladder. Direct is always 01;
+  // Where I am follows whichever of Schedule is visible; Map (if visible)
+  // is last. The order strings in contact.json are now informational only.
+  const ord = (n: number): string => String(n).padStart(2, '0');
+  const directOrder = ord(1);
+  const scheduleOrder = scheduleEnabled ? ord(2) : null;
+  const groundOrder = ord(scheduleEnabled ? 3 : 2);
+  const mapOrder = mapEnabled ? ord(scheduleEnabled ? 4 : 3) : null;
+
   return (
     <Container width="reading" className="pb-24">
       <Text variant="label" className="mb-3 inline-flex items-center gap-2">
@@ -37,7 +57,7 @@ export function ContactSection() {
         {t('lead')}
       </Text>
 
-      <Section order={t('sections.direct.order')} title={t('sections.direct.title')}>
+      <Section order={directOrder} title={t('sections.direct.title')}>
         <ul className="border-y border-glass-hairline-inner">
           <ChannelRow
             label={t('sections.direct.channels.email.label')}
@@ -46,21 +66,25 @@ export function ContactSection() {
             href={`mailto:${siteConfig.owner.email}`}
             glyph="↗"
           />
-          <ChannelRow
-            label={t('sections.direct.channels.calendly.label')}
-            title={t('sections.direct.channels.calendly.title')}
-            subtitle={t('sections.direct.channels.calendly.subtitle')}
-            href="#schedule"
-            glyph="↓"
-          />
+          {scheduleEnabled ? (
+            <ChannelRow
+              label={t('sections.direct.channels.calendly.label')}
+              title={t('sections.direct.channels.calendly.title')}
+              subtitle={t('sections.direct.channels.calendly.subtitle')}
+              href="#schedule"
+              glyph="↓"
+            />
+          ) : null}
         </ul>
       </Section>
 
-      <Section order={t('sections.schedule.order')} title={t('sections.schedule.title')}>
-        <SchedulePanel />
-      </Section>
+      {scheduleOrder ? (
+        <Section order={scheduleOrder} title={t('sections.schedule.title')}>
+          <SchedulePanel />
+        </Section>
+      ) : null}
 
-      <Section order={t('sections.ground.order')} title={t('sections.ground.title')}>
+      <Section order={groundOrder} title={t('sections.ground.title')}>
         <GlassPanel variant="inset" className="p-5">
           <dl className="grid grid-cols-[120px_1fr] gap-y-2 font-mono text-small">
             <dt className="text-fg-muted">{t('sections.ground.labels.city')}</dt>
@@ -83,22 +107,24 @@ export function ContactSection() {
         ) : null}
       </Section>
 
-      <Section order={t('sections.map.order')} title={t('sections.map.title')}>
-        <Suspense
-          fallback={
-            <GlassPanel
-              variant="inset"
-              className="p-6 min-h-[280px] flex items-center justify-center"
-            >
-              <Text variant="small" className="text-fg-muted">
-                {t('sections.map.loading')}
-              </Text>
-            </GlassPanel>
-          }
-        >
-          <ContactMap />
-        </Suspense>
-      </Section>
+      {mapOrder ? (
+        <Section order={mapOrder} title={t('sections.map.title')}>
+          <Suspense
+            fallback={
+              <GlassPanel
+                variant="inset"
+                className="p-6 min-h-[280px] flex items-center justify-center"
+              >
+                <Text variant="small" className="text-fg-muted">
+                  {t('sections.map.loading')}
+                </Text>
+              </GlassPanel>
+            }
+          >
+            <ContactMap />
+          </Suspense>
+        </Section>
+      ) : null}
 
       <Text variant="small" className="mt-12 text-fg-muted">
         {t('note')}
