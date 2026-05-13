@@ -5,8 +5,8 @@
     "es": "Seun Ogedengbe · Ingeniero web full-stack / de plataforma"
   },
   "siteDescription": {
-    "en": "Portfolio of Oluwaseun Ogedengbe — senior full-stack web / platform engineer. 10+ years across SaaS products, research tooling, and enterprise systems. Platform architecture, AppSec, observability.",
-    "es": "Portafolio de Oluwaseun Ogedengbe — ingeniero web full-stack / de plataforma senior. Más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales. Arquitectura de plataforma, AppSec, observabilidad."
+    "en": "Portfolio of Oluwaseun Ogedengbe, senior full-stack web / platform engineer. 10+ years across SaaS products, research tooling, and enterprise systems. Platform architecture, AppSec, observability.",
+    "es": "Portafolio de Oluwaseun Ogedengbe, ingeniero web full-stack / de plataforma senior. Más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales. Arquitectura de plataforma, AppSec, observabilidad."
   },
   "pages": {
     "home": {
@@ -15,15 +15,15 @@
         "es": "Seun Ogedengbe · Ingeniero web full-stack / de plataforma"
       },
       "description": {
-        "en": "Portfolio of Oluwaseun Ogedengbe — senior full-stack web / platform engineer. 10+ years across SaaS products, research tooling, and enterprise systems.",
-        "es": "Portafolio de Oluwaseun Ogedengbe — ingeniero web full-stack / de plataforma senior. Más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales."
+        "en": "Portfolio of Oluwaseun Ogedengbe, senior full-stack web / platform engineer. 10+ years across SaaS products, research tooling, and enterprise systems.",
+        "es": "Portafolio de Oluwaseun Ogedengbe, ingeniero web full-stack / de plataforma senior. Más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales."
       }
     },
     "about": {
       "title": { "en": "About · Portfolio", "es": "Acerca · Portafolio" },
       "description": {
-        "en": "Posture, trajectory, and how I work. Senior full-stack web / platform engineer — 10+ years across SaaS products, research tooling, and enterprise systems.",
-        "es": "Postura, trayectoria, y cómo trabajo. Ingeniero web full-stack / de plataforma senior — más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales."
+        "en": "Posture, trajectory, and how I work. Senior full-stack web / platform engineer with 10+ years across SaaS products, research tooling, and enterprise systems.",
+        "es": "Postura, trayectoria, y cómo trabajo. Ingeniero web full-stack / de plataforma senior con más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales."
       }
     },
     "projects": {
@@ -50,8 +50,8 @@
     "contact": {
       "title": { "en": "Contact · Portfolio", "es": "Contacto · Portafolio" },
       "description": {
-        "en": "Email for anything substantive. Calls by Calendly. No contact form, no questionnaire — just write.",
-        "es": "Email para cualquier cosa de fondo. Llamadas por Calendly. Sin formulario, sin cuestionario — solo escribe."
+        "en": "Email for anything substantive. Calls by Calendly.",
+        "es": "Email para cualquier cosa de fondo. Llamadas por Calendly."
       }
     },
     "colophon": {

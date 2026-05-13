@@ -49,12 +49,16 @@
                 }
               </p>
             }
-            <p class="body">{{ s.body }}</p>
-            <ul class="tags" role="list">
-              @for (tag of node.tags; track tag) {
-                <li class="tag">{{ tag }}</li>
-              }
-            </ul>
+            @if (s.body) {
+              <p class="body">{{ s.body }}</p>
+            }
+            @if (node.tags.length > 0) {
+              <ul class="tags" role="list">
+                @for (tag of node.tags; track tag) {
+                  <li class="tag">{{ tag }}</li>
+                }
+              </ul>
+            }
           </div>
         }
       </li>

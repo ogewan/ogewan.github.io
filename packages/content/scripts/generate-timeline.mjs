@@ -90,8 +90,11 @@ for (const entry of timelineSrc) {
       tags: entry.tags ?? [],
       current: entry.current ?? false,
     });
-    if (!entry.title || !entry.body) {
-      warnings.push(`timeline node "${id}" missing title/body in config.json — using id as fallback`);
+    // Title is required (it's what the row shows). Body is optional —
+    // education nodes carry only role/org/title; the ng template's @if guard
+    // suppresses the empty paragraph and tag list.
+    if (!entry.title) {
+      warnings.push(`timeline node "${id}" missing title in config.json — using id as fallback`);
     }
     nodeStrings[id] = {
       title: entry.title ?? dup(id),

@@ -18,8 +18,8 @@
       "order": { "en": "01", "es": "01" },
       "title": { "en": "Posture", "es": "Postura" },
       "body": {
-        "en": "Software, not 'just UI.' Performance, reliability, accessibility, and security are part of how the thing ships — front end or back. I like product with real workflows, where good engineering is something people feel immediately.",
-        "es": "Software, no 'solo UI.' El rendimiento, la fiabilidad, la accesibilidad y la seguridad son parte de cómo se entrega — en el frontend o en el backend. Me gustan los productos con flujos de trabajo reales, donde la buena ingeniería se nota de inmediato."
+        "en": "Software, not 'just UI.' Performance, reliability, accessibility, and security are part of how the thing ships, front end or back. I like product with real workflows, where good engineering is something people feel immediately.",
+        "es": "Software, no 'solo UI.' El rendimiento, la fiabilidad, la accesibilidad y la seguridad son parte de cómo se entrega, en el frontend o en el backend. Me gustan los productos con flujos de trabajo reales, donde la buena ingeniería se nota de inmediato."
       },
       "quote": {
         "en": "Not 'just UI.'",
@@ -30,8 +30,8 @@
       "order": { "en": "02", "es": "02" },
       "title": { "en": "Trajectory", "es": "Trayectoria" },
       "body": {
-        "en": "Interactive timeline — Angular Element loaded on demand. Filter by category, expand any node for the long version.",
-        "es": "Línea de tiempo interactiva — Angular Element cargado bajo demanda. Filtra por categoría, expande cualquier nodo para la versión larga."
+        "en": "Interactive timeline. Angular Element loaded on demand. Filter by category, expand any node for the long version.",
+        "es": "Línea de tiempo interactiva. Angular Element cargado bajo demanda. Filtra por categoría, expande cualquier nodo para la versión larga."
       }
     },
     "work": {
@@ -39,13 +39,13 @@
       "title": { "en": "What I work on / how I work", "es": "En qué trabajo / cómo trabajo" },
       "subhead1": { "en": "What I work on.", "es": "En qué trabajo." },
       "body1": {
-        "en": "Full-stack web for SaaS products, internal tools, and research platforms — the UI that carries real workflows, the Node services behind it, and the platform layers that hold a suite together. Design systems and shared component libraries that survive years of iteration. Observability and AppSec when 'works on my machine' isn't the bar. WebGL / R3F when the visualization is the product.",
-        "es": "Web full-stack para productos SaaS, herramientas internas y plataformas de investigación — la UI que carga flujos de trabajo reales, los servicios en Node detrás, y las capas de plataforma que mantienen cohesionada una suite. Sistemas de diseño y librerías de componentes compartidos que sobreviven años de iteración. Observabilidad y AppSec cuando 'funciona en mi máquina' no es el estándar. WebGL / R3F cuando la visualización es el producto."
+        "en": "Full-stack web for SaaS products, internal tools, and research platforms: the UI that carries real workflows, the Node services behind it, and the platform layers that hold a suite together. Design systems and shared component libraries that survive years of iteration. Observability and AppSec when 'works on my machine' isn't the bar. WebGL / R3F when the visualization is the product.",
+        "es": "Web full-stack para productos SaaS, herramientas internas y plataformas de investigación: la UI que carga flujos de trabajo reales, los servicios en Node detrás, y las capas de plataforma que mantienen cohesionada una suite. Sistemas de diseño y librerías de componentes compartidos que sobreviven años de iteración. Observabilidad y AppSec cuando 'funciona en mi máquina' no es el estándar. WebGL / R3F cuando la visualización es el producto."
       },
       "subhead2": { "en": "How I work.", "es": "Cómo trabajo." },
       "body2": {
-        "en": "Top-line first, then the detail. Align with design and backend early — the data contract decides how much churn comes later. Ship the smallest version that still feels complete, de-risk the scary parts up front, keep it reviewable. Simplify, standardize, measure — complexity creep is normal; you manage it on purpose. Real dates on real commits.",
-        "es": "Lo importante primero, luego el detalle. Alinearse con diseño y backend temprano — el contrato de datos decide cuánta fricción viene después. Entregar la versión más pequeña que aún se sienta completa, mitigar las partes difíciles desde el principio, mantenerlo revisable. Simplificar, estandarizar, medir — el crecimiento de la complejidad es normal; se gestiona a propósito. Fechas reales en commits reales."
+        "en": "Top-line first, then the detail. Align with design and backend early, since the data contract decides how much churn comes later. Ship the smallest version that still feels complete, de-risk the scary parts up front, keep it reviewable. Simplify, standardize, measure. Complexity creep is normal; you manage it on purpose. Real dates on real commits.",
+        "es": "Lo importante primero, luego el detalle. Alinearse con diseño y backend temprano, ya que el contrato de datos decide cuánta fricción viene después. Entregar la versión más pequeña que aún se sienta completa, mitigar las partes difíciles desde el principio, mantenerlo revisable. Simplificar, estandarizar, medir. El crecimiento de la complejidad es normal; se gestiona a propósito. Fechas reales en commits reales."
       }
     },
     "currently": {

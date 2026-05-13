@@ -6,8 +6,8 @@
     "es": "Dos formas de entrar. <em>Elige una.</em>"
   },
   "lead": {
-    "en": "Email for anything substantive. Calendly for a call. No contact form, no questionnaire — just write.",
-    "es": "Email para cualquier cosa de fondo. Calendly para una llamada. Sin formulario, sin cuestionario — solo escribe."
+    "en": "Email for anything substantive. Calendly for a call.",
+    "es": "Email para cualquier cosa de fondo. Calendly para una llamada."
   },
   "sections": {
     "direct": {
@@ -71,8 +71,8 @@
         "lang": { "en": "EN", "es": "EN" }
       },
       "visitorLine": {
-        "en": "Looks like you're near {{city}} — the distance shown is approximate.",
-        "es": "Parece que estás cerca de {{city}} — la distancia mostrada es aproximada."
+        "en": "Looks like you're near {{city}}.",
+        "es": "Parece que estás cerca de {{city}}."
       }
     },
     "map": {

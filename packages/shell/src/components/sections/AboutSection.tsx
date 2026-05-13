@@ -42,6 +42,10 @@ export function AboutSection() {
     body2: get('sections.work.body2'),
   };
   const currentlyTitle = get('sections.currently.title');
+  // Append a locale-formatted "Mon YYYY" stamp so the heading never goes stale.
+  const currentlyDated = currentlyTitle
+    ? `${currentlyTitle} · ${new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' }).format(new Date())}`
+    : '';
   const speakingTitle = get('sections.speaking.title');
   const shelfTitle = get('sections.shelf.title');
 
@@ -102,7 +106,7 @@ export function AboutSection() {
     const c = about.currently;
     const buildingValue = c.building ?? currentFocusEntry?.title;
     sections.push({
-      title: currentlyTitle,
+      title: currentlyDated,
       render: () => (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <CurrentlyCard label={get('sections.currently.reading')} value={c.reading} />

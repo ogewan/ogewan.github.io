@@ -241,3 +241,17 @@ html {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Universal canvas text-shadow.
+   text-shadow is an inherited property, so applying it on body propagates to
+   every descendant including text inside the Angular custom element (the
+   shadow tree inherits from its host). The per-component [text-shadow:...]
+   utilities on Heading/Text variants and ad-hoc spots in the shell remain in
+   place; they restate the same stack. GlassPanel suppresses for its descendants
+   via [&_*]:![text-shadow:none] (no change). */
+body {
+  text-shadow:
+    0 1px 4px rgba(0, 0, 0, 1),
+    0 2px 16px rgba(0, 0, 0, 0.95),
+    0 0 40px rgba(0, 0, 0, 0.8);
+}

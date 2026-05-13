@@ -112,8 +112,8 @@
         "es": "Usa el código, no los casos."
       },
       "body": {
-        "en": "MIT. Code is free — case studies are mine. If you use them, credit me and make your own.",
-        "es": "MIT. El código es libre — los casos de estudio son míos. Si los usas, dame crédito y haz el tuyo."
+        "en": "MIT. Code is free. Case studies are mine. If you use them, credit me and make your own.",
+        "es": "MIT. El código es libre. Los casos de estudio son míos. Si los usas, dame crédito y haz el tuyo."
       }
     }
   }
