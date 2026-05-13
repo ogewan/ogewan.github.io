@@ -27,9 +27,9 @@
         "privacy": { "en": "Privacy", "es": "Privacidad" }
       },
       "notes": {
-        "threeD": { "en": "phase 9 · placeholders today", "es": "fase 9 · placeholders hoy" },
-        "polyglot": { "en": "timeline · phase 5", "es": "timeline · fase 5" },
-        "i18n": { "en": "wired in phase 6", "es": "conectado en la fase 6" },
+        "threeD": { "en": "live R3F / Three.js", "es": "R3F / Three.js en vivo" },
+        "polyglot": { "en": "Angular custom element", "es": "Angular custom element" },
+        "i18n": { "en": "react-i18next · EN / ES", "es": "react-i18next · EN / ES" },
         "privacy": { "en": "no analytics · no cookies", "es": "sin analytics · sin cookies" }
       }
     },

@@ -1,29 +1,29 @@
 {
   "siteName": { "en": "Portfolio", "es": "Portafolio" },
   "siteTitle": {
-    "en": "Portfolio · console UX, ground systems, the room",
-    "es": "Portafolio · UX de consolas, sistemas en tierra, la sala"
+    "en": "Seun Ogedengbe · Full-Stack Web / Platform Engineer",
+    "es": "Seun Ogedengbe · Ingeniero web full-stack / de plataforma"
   },
   "siteDescription": {
-    "en": "Polyglot portfolio of a frontend engineer working on consoles, ground systems, and instruments for people who can't look away from the work.",
-    "es": "Portafolio polígloto de una ingeniera frontend que trabaja en consolas, sistemas en tierra, e instrumentos para gente que no puede dejar de mirar el trabajo."
+    "en": "Portfolio of Oluwaseun Ogedengbe — senior full-stack web / platform engineer. 10+ years across SaaS products, research tooling, and enterprise systems. Platform architecture, AppSec, observability.",
+    "es": "Portafolio de Oluwaseun Ogedengbe — ingeniero web full-stack / de plataforma senior. Más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales. Arquitectura de plataforma, AppSec, observabilidad."
   },
   "pages": {
     "home": {
       "title": {
-        "en": "Portfolio · console UX, ground systems, the room",
-        "es": "Portafolio · UX de consolas, sistemas en tierra, la sala"
+        "en": "Seun Ogedengbe · Full-Stack Web / Platform Engineer",
+        "es": "Seun Ogedengbe · Ingeniero web full-stack / de plataforma"
       },
       "description": {
-        "en": "Polyglot portfolio of a frontend engineer working on consoles, ground systems, and instruments.",
-        "es": "Portafolio polígloto de una ingeniera frontend que trabaja en consolas, sistemas en tierra, e instrumentos."
+        "en": "Portfolio of Oluwaseun Ogedengbe — senior full-stack web / platform engineer. 10+ years across SaaS products, research tooling, and enterprise systems.",
+        "es": "Portafolio de Oluwaseun Ogedengbe — ingeniero web full-stack / de plataforma senior. Más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales."
       }
     },
     "about": {
       "title": { "en": "About · Portfolio", "es": "Acerca · Portafolio" },
       "description": {
-        "en": "Posture, trajectory, and how I work. Frontend engineer, eleven years across mission-critical interfaces and ground-station tooling.",
-        "es": "Postura, trayectoria, y cómo trabajo. Ingeniera frontend, once años en interfaces críticas y herramientas de estaciones."
+        "en": "Posture, trajectory, and how I work. Senior full-stack web / platform engineer — 10+ years across SaaS products, research tooling, and enterprise systems.",
+        "es": "Postura, trayectoria, y cómo trabajo. Ingeniero web full-stack / de plataforma senior — más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales."
       }
     },
     "projects": {
@@ -50,8 +50,8 @@
     "contact": {
       "title": { "en": "Contact · Portfolio", "es": "Contacto · Portafolio" },
       "description": {
-        "en": "Briefs by email. Calls by Calendly. No form, no questionnaire — just write.",
-        "es": "Briefs por email. Llamadas por Calendly. Sin formulario, sin cuestionario — solo escribe."
+        "en": "Email for anything substantive. Calls by Calendly. No contact form, no questionnaire — just write.",
+        "es": "Email para cualquier cosa de fondo. Llamadas por Calendly. Sin formulario, sin cuestionario — solo escribe."
       }
     },
     "colophon": {

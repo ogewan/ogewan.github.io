@@ -9,6 +9,7 @@
       "TypeScript",
       "JavaScript",
       "React",
+      "Angular",
       "R3F",
       "Node.js",
       "Python",
@@ -49,14 +50,14 @@
   "timelineChrome": {
     "heading": { "en": "Trajectory", "es": "Trayectoria" },
     "subtitle": {
-      "en": "2014 → present · expand any node for the long version",
-      "es": "2014 → presente · expande cualquier nodo para la versión larga"
+      "en": "expand any node for the long version",
+      "es": "expande cualquier nodo para la versión larga"
     },
     "filterAll": { "en": "All", "es": "Todo" },
     "filterWork": { "en": "Work", "es": "Trabajo" },
     "filterSide": { "en": "Side projects", "es": "Proyectos paralelos" },
     "filterEducation": { "en": "Education", "es": "Educación" },
-    "filterWriting": { "en": "Writing", "es": "Escritura" },
+    "filterWriting": { "en": "Credited", "es": "Acreditado" },
     "active": { "en": "Active", "es": "Activo" },
     "expand": { "en": "Expand", "es": "Expandir" },
     "collapse": { "en": "Collapse", "es": "Colapsar" }
@@ -75,8 +76,38 @@
         "es": "Arquitecto principal · BookIt"
       },
       "body": {
-        "en": "Principal frontend architect and developer for LeanData's enterprise scheduling platform built in Angular 16-18; owned core application design through multiple releases and future revisions. BookIt is a Salesforce-native scheduling solution that serves as the backbone for LeanData's revenue operations suite, supporting complex scheduling needs for 1,000+ customers including Zoom, Twilio, and Asana.",
-        "es": "Arquitecto principal y desarrollador frontend para la plataforma de programación empresarial de LeanData construida en Angular 16-18; responsable del diseño de la aplicación principal a través de múltiples versiones y revisiones futuras. BookIt es una solución de programación nativa de Salesforce que sirve como columna vertebral para la suite de operaciones de ingresos de LeanData, apoyando necesidades de programación complejas para más de 1,000 clientes, incluidos Zoom, Twilio y Asana."
+        "en": "Principal frontend architect for BookIt — LeanData's Salesforce-native enterprise scheduling suite, the booking backbone for 1,000+ customers including Zoom, Twilio, and Asana. Owned the core application design across multiple Angular 16–18 releases: a shared design system and component library, microservice-style platform layers, a monorepo workflow, i18n, accessibility. Led the audit-required AppSec work (XSS, SAST, DAST) and stood up frontend observability with New Relic — time-to-diagnosis down ~40%. BookIt for Forms, Handoff, and Links were built on top of that foundation.",
+        "es": "Arquitecto frontend principal de BookIt — la suite de programación empresarial de LeanData, nativa de Salesforce, la base de reservas para más de 1000 clientes, incluidos Zoom, Twilio y Asana. Responsable del diseño central de la aplicación a lo largo de varias versiones en Angular 16–18: un sistema de diseño y librería de componentes compartidos, capas de plataforma estilo microservicios, un flujo de monorepo, i18n y accesibilidad. Lideré el trabajo de AppSec requerido por auditoría (XSS, SAST, DAST) y monté la observabilidad de frontend con New Relic — tiempo de diagnóstico reducido ~40%. BookIt for Forms, Handoff y Links se construyeron sobre esa base."
+      }
+    },
+    {
+      "id": "nature-2025",
+      "category": "writing",
+      "start": "2025-04",
+      "end": "2025-04",
+      "tags": ["nature", "connectome"],
+      "title": {
+        "en": "Co-author · Nature — mouse visual-cortex connectome",
+        "es": "Coautor · Nature — conectoma de la corteza visual del ratón"
+      },
+      "body": {
+        "en": "Co-author on \"Functional connectomics spanning multiple areas of mouse visual cortex\" (Nature, 2025) — the MICrONS project — on the same basis: the connectome viewer and tooling I built and maintained at Princeton. doi: 10.1038/s41586-025-08790-w",
+        "es": "Coautor en \"Functional connectomics spanning multiple areas of mouse visual cortex\" (Nature, 2025) — el proyecto MICrONS — sobre la misma base: el visor de conectomas y las herramientas que construí y mantuve en Princeton. doi: 10.1038/s41586-025-08790-w"
+      }
+    },
+    {
+      "id": "nature-2024",
+      "category": "writing",
+      "start": "2024-10",
+      "end": "2024-10",
+      "tags": ["nature", "connectome"],
+      "title": {
+        "en": "Co-author · Nature — adult fly-brain connectome",
+        "es": "Coautor · Nature — conectoma del cerebro de la mosca"
+      },
+      "body": {
+        "en": "Credited as a co-author on \"Neuronal wiring diagram of an adult brain\" (Nature, 2024) — the FlyWire whole-brain Drosophila connectome — not as a writer, but as the engineer whose tooling the work ran on: Neuroglancer contributions and the proofreading-attribution service at the Seung Lab. doi: 10.1038/s41586-024-07558-y",
+        "es": "Acreditado como coautor en \"Neuronal wiring diagram of an adult brain\" (Nature, 2024) — el conectoma de cerebro completo de Drosophila de FlyWire — no como redactor, sino como el ingeniero sobre cuyo software corrió el trabajo: contribuciones a Neuroglancer y el servicio de atribución de revisión del Seung Lab. doi: 10.1038/s41586-024-07558-y"
       }
     },
     {
@@ -105,8 +136,8 @@
         "es": "Programador de investigación · Laboratorio Seung"
       },
       "body": {
-        "en": "Research programmer at Seung Lab, Princeton University, primary contributor to software tools for the Connectome Project including Neuroglancer and Flywire.",
-        "es": "Programador de investigación en el Laboratorio Seung, Universidad de Princeton, contribuyente principal a las herramientas de software para el Proyecto Connectome, incluyendo Neuroglancer y Flywire."
+        "en": "Research programmer in Princeton's Seung Lab on the Connectome project. Core contributor to Neuroglancer — the 3D WebGL volumetric viewer (TypeScript) used by scientists and public proofreaders — adding bug reporting, segment highlighting, and shared state. Extended the annotation tooling (proofreading turnaround up ~40%), built NG-Extend (a Vue layer adding community features like chat), and ProofreadingProgress, a Vue + Flask service that aggregates neuron changelogs for publication attribution.",
+        "es": "Programador de investigación en el Seung Lab de Princeton, en el proyecto Connectome. Contribuyente principal de Neuroglancer — el visor volumétrico 3D en WebGL (TypeScript) usado por científicos y revisores públicos — añadiendo reporte de errores, resaltado de segmentos y estado compartido. Amplié las herramientas de anotación (tiempo de revisión mejorado ~40%), construí NG-Extend (una capa en Vue que añade funciones comunitarias como chat) y ProofreadingProgress, un servicio en Vue + Flask que agrega los historiales de cambios de neuronas para la atribución en publicaciones."
       }
     },
     {
@@ -122,14 +153,9 @@
         "en": "Southern New Hampshire University",
         "es": "Universidad del Sur de New Hampshire"
       },
-      "tags": ["it", "software design and architecture", "networking", "stakeholder management"],
       "title": {
         "en": "Master of Science · Information Technology",
         "es": "Maestría · Tecnología de la Información"
-      },
-      "body": {
-        "en": "Graduated with a M.S. in Information Technology, completing coursework in software design and architecture, networking, and stakeholder management. My education provided a strong foundation in IT principles and practical skills that I have applied throughout my career.",
-        "es": "Graduado con una maestría en Tecnología de la Información, completando cursos en diseño y arquitectura de software, redes y gestión de partes interesadas. Mi educación me proporcionó una base sólida en principios de TI y habilidades prácticas que he aplicado a lo largo de mi carrera."
       }
     },
     {
@@ -155,8 +181,8 @@
         "es": "Desarrollador de software de sistemas · La Compañía Reynolds y Reynolds"
       },
       "body": {
-        "en": "Systems software developer at The Reynolds and Reynolds Company, contributing to various enterprise software solutions and maintaining critical systems.",
-        "es": "Desarrollador de software de sistemas en La Compañía Reynolds y Reynolds, contribuyendo a diversas soluciones de software empresarial y manteniendo sistemas críticos."
+        "en": "Systems software developer at Reynolds and Reynolds — web-app features and production fixes for dealerships across the US, Canada, and the UK. Modernized legacy Adobe ColdFusion apps onto a Node.js backend (ES5), built end-to-end test automation and CI (Selenium + Jenkins, then Jest + Puppeteer in Docker), and wrote the web-dev onboarding curriculum (HTML/CSS/JS/Node) that cut new-hire ramp-up ~2 weeks.",
+        "es": "Desarrollador de software de sistemas en Reynolds and Reynolds — funciones de aplicaciones web y correcciones en producción para concesionarios en EE. UU., Canadá y Reino Unido. Modernicé aplicaciones heredadas en Adobe ColdFusion a un backend en Node.js (ES5), construí automatización de pruebas end-to-end y CI (Selenium + Jenkins, luego Jest + Puppeteer en Docker), y escribí el plan de incorporación de desarrollo web (HTML/CSS/JS/Node) que redujo ~2 semanas la puesta al día de los nuevos."
       }
     },
     {
@@ -164,16 +190,11 @@
       "category": "education",
       "start": "2011-09",
       "end": "2015-12",
-      "role": { "en": "B.S. Computer Science", "es": "Licenciatura en Ciencias de la Computación" },
-      "org": { "en": "University of Chicago", "es": "Universidad de Chicago" },
-      "tags": ["cs", "software engineering", "algorithms", "data structures"],
+      "role": { "en": "B.A. Computer Science", "es": "Licenciatura en Ciencias de la Computación" },
+      "org": { "en": "The University of Chicago", "es": "Universidad de Chicago" },
       "title": {
-        "en": "Bachelor of Science · Computer Science",
+        "en": "Bachelor of Arts · Computer Science",
         "es": "Licenciatura · Ciencias de la Computación"
-      },
-      "body": {
-        "en": "Graduated with a B.S. in Computer Science, completing coursework in software engineering, algorithms, data structures, and more. My education provided a strong foundation in computer science principles and practical skills that I have applied throughout my career.",
-        "es": "Graduado con una licenciatura en Ciencias de la Computación, completando cursos en ingeniería de software, algoritmos, estructuras de datos y más. Mi educación me proporcionó una base sólida en principios de ciencias de la computación y habilidades prácticas que he aplicado a lo largo de mi carrera."
       }
     }
   ]

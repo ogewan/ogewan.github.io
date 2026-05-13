@@ -1,13 +1,13 @@
 {
   "crumbBack": { "en": "Back to home", "es": "Volver al inicio" },
-  "eyebrow": { "en": "04 / Contact · open channel", "es": "04 / Contacto · canal abierto" },
+  "eyebrow": { "en": "04 / Contact", "es": "04 / Contacto" },
   "headline": {
-    "en": "Open channel. <em>Two ways in.</em>",
-    "es": "Canal abierto. <em>Dos formas de entrar.</em>"
+    "en": "Two ways in. <em>Pick one.</em>",
+    "es": "Dos formas de entrar. <em>Elige una.</em>"
   },
   "lead": {
-    "en": "Briefs by email. Calls by Calendly. No form, no questionnaire — just write.",
-    "es": "Briefs por email. Llamadas por Calendly. Sin formulario, sin cuestionario — solo escribe."
+    "en": "Email for anything substantive. Calendly for a call. No contact form, no questionnaire — just write.",
+    "es": "Email para cualquier cosa de fondo. Calendly para una llamada. Sin formulario, sin cuestionario — solo escribe."
   },
   "sections": {
     "direct": {
@@ -17,16 +17,16 @@
         "email": {
           "label": { "en": "Email", "es": "Email" },
           "subtitle": {
-            "en": "Best for briefs · 48h reply window",
-            "es": "Mejor para briefs · respuesta en 48h"
+            "en": "Best for anything detailed · ~48h reply",
+            "es": "Mejor para cualquier cosa detallada · respuesta ~48h"
           }
         },
         "calendly": {
           "label": { "en": "Calendly", "es": "Calendly" },
           "title": { "en": "Book 30-min intro", "es": "Reservar 30 min" },
           "subtitle": {
-            "en": "Tue/Thu · 14:00–17:00 PT · video",
-            "es": "Mar/Jue · 14:00–17:00 PT · video"
+            "en": "Mon–Fri · 12:00–17:00 CT · video",
+            "es": "Lun–Vie · 12:00–17:00 CT · video"
           }
         }
       }
@@ -56,7 +56,7 @@
     },
     "ground": {
       "order": { "en": "03", "es": "03" },
-      "title": { "en": "Ground station", "es": "Estación terrestre" },
+      "title": { "en": "Where I am", "es": "Dónde estoy" },
       "labels": {
         "city": { "en": "CITY", "es": "CIUDAD" },
         "tz": { "en": "TZ", "es": "TZ" },
@@ -64,23 +64,23 @@
         "lang": { "en": "LANG", "es": "IDIOMA" }
       },
       "values": {
-        "cityPrimary": { "en": "Mountain View, CA", "es": "Mountain View, CA" },
-        "cityNote": { "en": "south bay · approximate", "es": "south bay · aproximado" },
-        "tz": { "en": "UTC-8 · America/Los_Angeles", "es": "UTC-8 · America/Los_Angeles" },
-        "hours": { "en": "09:00–18:00 PT · Mon–Thu", "es": "09:00–18:00 PT · Lun–Jue" },
-        "lang": { "en": "EN · ES", "es": "EN · ES" }
+        "cityPrimary": { "en": "Richmond, TX", "es": "Richmond, TX" },
+        "cityNote": { "en": "greater Houston · approximate", "es": "área de Houston · aproximado" },
+        "tz": { "en": "UTC-6 · America/Chicago", "es": "UTC-6 · America/Chicago" },
+        "hours": { "en": "12:00–17:00 CT · Mon–Fri", "es": "12:00–17:00 CT · Lun–Vie" },
+        "lang": { "en": "EN", "es": "EN" }
       },
       "visitorLine": {
-        "en": "You appear to be near {{city}} — distance to ground station is approximate.",
-        "es": "Pareces estar cerca de {{city}} — la distancia a la estación es aproximada."
+        "en": "Looks like you're near {{city}} — the distance shown is approximate.",
+        "es": "Parece que estás cerca de {{city}} — la distancia mostrada es aproximada."
       }
     },
     "map": {
       "order": { "en": "04", "es": "04" },
-      "title": { "en": "Trajectory", "es": "Trayectoria" },
+      "title": { "en": "On the map", "es": "En el mapa" },
       "ariaMap": {
-        "en": "World map showing ground station and visitor location",
-        "es": "Mapa mundial mostrando la estación terrestre y la ubicación del visitante"
+        "en": "World map showing my location and yours",
+        "es": "Mapa mundial mostrando mi ubicación y la tuya"
       },
       "missingKey": {
         "en": "Map disabled. Set VITE_MAPTILER_KEY to enable.",
@@ -88,7 +88,7 @@
       },
       "loading": { "en": "Loading map…", "es": "Cargando mapa…" },
       "youMarker": { "en": "You", "es": "Tú" },
-      "stationMarker": { "en": "Ground station", "es": "Estación" },
+      "stationMarker": { "en": "Me", "es": "Yo" },
       "zoomIn": { "en": "Zoom in", "es": "Acercar" },
       "zoomOut": { "en": "Zoom out", "es": "Alejar" }
     }

@@ -1,12 +1,12 @@
 {
-  "eyebrow": { "en": "01 / Home", "es": "01 / Tierra" },
+  "eyebrow": { "en": "01 / Home", "es": "01 / Inicio" },
   "headline": {
-    "en": "Built at the <em>shoreline</em> of software & space.",
-    "es": "Construido en la <em>orilla</em> del software y el espacio."
+    "en": "Full-stack web. <em>End to end.</em>",
+    "es": "Web full-stack. <em>De principio a fin.</em>"
   },
   "lead": {
-    "en": "Consoles, ground systems, instruments for people who can't look away from the work. Below: selected work, a way of working, and a channel to open.",
-    "es": "Consolas, sistemas en tierra, herramientas para la gente que no puede dejar de mirar el trabajo. Aquí abajo: trabajos seleccionados, una forma de trabajar, y un canal para abrir."
+    "en": "Senior full-stack web engineer — React on the front, Node behind it, platform architecture around both. 10+ years across SaaS products, research tooling, and enterprise systems. Below: selected work, how I work, and a way to reach me.",
+    "es": "Ingeniero web full-stack senior — React al frente, Node detrás, arquitectura de plataforma alrededor de ambos. Más de 10 años en productos SaaS, herramientas de investigación y sistemas empresariales. Aquí abajo: trabajos seleccionados, cómo trabajo, y una forma de contactarme."
   },
   "ctaWork": { "en": "View work", "es": "Ver trabajos" },
   "ctaContact": { "en": "Book a call", "es": "Agendar una llamada" },
@@ -16,7 +16,7 @@
   },
   "selected": {
     "label": { "en": "Selected · {{year}}", "es": "Seleccionado · {{year}}" },
-    "value": { "en": "{{count}} things in orbit", "es": "{{count}} trabajos en órbita" },
+    "value": { "en": "{{count}} selected projects", "es": "{{count}} proyectos seleccionados" },
     "link": { "en": "see all →", "es": "ver todos →" }
   },
   "next": {
