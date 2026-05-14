@@ -1,10 +1,10 @@
 # portfolio
 
-A polyglot single-page application portfolio deployed to `<username>.github.io`.
+Senior full-stack web / platform engineer's portfolio, deployed to `<username>.github.io`.
 
-React 19 + React Three Fiber shell, Angular Elements for one showcase component, MapLibre GL for geospatial, `react-i18next` for English/Spanish, Cloudflare Turnstile gating Calendly, Tailwind v4 for styling. Content is driven by `.portfolio.yml` files in public repos, scanned by a Node CLI on each GitHub Actions run.
+A polyglot single-page app that doubles as its own architecture demo. React 19 owns the shell; Angular 19 ships one custom element (the `/about` timeline) lazy-loaded via Angular Elements; React Three Fiber renders five live Earth/Moon/Projects/Contact/Colophon scenes against a persistent backdrop. MapLibre GL for the optional contact map, Cloudflare Turnstile gating the optional Calendly embed, `react-i18next` for English/Spanish, Tailwind v4 for styling. Project content is driven by `.portfolio.yml` files in public repos, scanned by a Node CLI on each GitHub Actions run.
 
-> This is a portfolio piece about itself. The architecture is the subject matter.
+> A portfolio piece about itself. The architecture is the subject matter.
 
 ## Prerequisites
 
@@ -24,14 +24,14 @@ The shell dev server starts at `http://localhost:5173` and redirects `/` to `/<l
 
 ## Environment variables
 
-All vars are read at build time by Vite. Missing values degrade gracefully — the affected feature renders a hint card instead of breaking.
+All vars are read at build time by Vite. Missing values degrade gracefully: the affected `/contact` section is hidden entirely (heading + body), and the page renumbers around it. Nothing else breaks.
 
-| Variable                  | Used by                          | Notes                                                                |
-| ------------------------- | -------------------------------- | -------------------------------------------------------------------- |
-| `VITE_BASE_URL`           | Vite                             | Optional. Default `/`. Override for non-root deployment.             |
-| `VITE_MAPTILER_KEY`       | `/contact` MapLibre map          | MapTiler free-tier key. Map renders blank hint without it.           |
-| `VITE_TURNSTILE_SITE_KEY` | `/contact` Calendly gate         | Cloudflare Turnstile site key. Schedule panel shows hint without it. |
-| `VITE_CALENDLY_URL`       | `/contact` Calendly inline embed | Full Calendly URL (`https://calendly.com/<your-handle>/<event>`).    |
+| Variable                  | Used by                          | Notes                                                                      |
+| ------------------------- | -------------------------------- | -------------------------------------------------------------------------- |
+| `VITE_BASE_URL`           | Vite                             | Optional. Default `/`. Override for non-root deployment.                   |
+| `VITE_MAPTILER_KEY`       | `/contact` MapLibre map          | MapTiler free-tier key. Map section is hidden when unset.                  |
+| `VITE_TURNSTILE_SITE_KEY` | `/contact` Calendly gate         | Cloudflare Turnstile site key. Required to show the Schedule section.      |
+| `VITE_CALENDLY_URL`       | `/contact` Calendly inline embed | Full Calendly URL. Required (with Turnstile) to show the Schedule section. |
 
 In production, set these as repository secrets (the GH Actions workflow injects them into the build).
 
@@ -103,7 +103,7 @@ portfolio/
 
 ## Status
 
-Phase 7 — GitHub Actions + Pages deploy. Subsequent phases: launch hardening (Phase 8), real R3F celestial scenes (Phase 9).
+v1.0, launch-ready. Phases through 10 are closed: real R3F scenes (Phase 9), data-driven architecture pass / generated timeline (Phase 9.6 α–ζ), visitor-location closest-canonical fallback + `--skip-overlay` visual-test flag (Phase 10), owner-voice copy pass and universal canvas text-shadow (post-10). Outstanding before first deploy: set GitHub Pages source to "GitHub Actions" in repo settings, and (optionally) the three contact-feature secrets above.
 
 ## License
 
