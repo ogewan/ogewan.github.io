@@ -1,0 +1,36 @@
+[
+  {
+    "slug": "ogewan.github.io",
+    "repo_name": "ogewan.github.io",
+    "repo_url": "https://github.com/ogewan/ogewan.github.io",
+    "default_branch": "main",
+    "description": null,
+    "primary_language": "TypeScript",
+    "stars": 0,
+    "pushed_at": "2026-05-15T22:32:22Z",
+    "schema_version": 3,
+    "uuid": "a4f7c2e1-8b3d-4a91-b6e5-2c9f8d4e1a7b",
+    "title": "Portfolio SPA",
+    "summary": "Polyglot React + R3F + Angular Elements portfolio at username.github.io. Persistent celestial scene (Earth → black hole) keyed to routes, YAML-driven repo detection, English/Spanish i18n, dark Frutiger Aero aesthetic.",
+    "tech": [
+      "react",
+      "r3f",
+      "three",
+      "angular",
+      "typescript",
+      "vite",
+      "tailwind",
+      "maplibre",
+      "pnpm",
+      "github-actions"
+    ],
+    "categories": ["web", "portfolio", "showcase"],
+    "status": "wip",
+    "featured": true,
+    "order": 1,
+    "started_at": "2026-04-24",
+    "hero": "https://raw.githubusercontent.com/ogewan/ogewan.github.io/main/docs/screenshots/hero.png",
+    "screenshots": [],
+    "docs_link": "https://github.com/username/portfolio#readme"
+  }
+]
