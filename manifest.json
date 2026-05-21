@@ -8,7 +8,7 @@
     "description": null,
     "primary_language": "TypeScript",
     "stars": 0,
-    "pushed_at": "2026-05-21T09:02:36Z",
+    "pushed_at": "2026-05-21T17:22:48Z",
     "schema_version": 3,
     "uuid": "a4f7c2e1-8b3d-4a91-b6e5-2c9f8d4e1a7b",
     "title": "Portfolio SPA",
@@ -33,6 +33,190 @@
     "hero": "https://raw.githubusercontent.com/ogewan/ogewan.github.io/main/docs/screenshots/hero.png",
     "media": [],
     "docs_link": "https://github.com/username/portfolio#readme"
+  },
+  {
+    "slug": "oneil",
+    "repo_name": "oneil",
+    "repo_url": "https://github.com/ogewan/oneil",
+    "private": true,
+    "default_branch": "main",
+    "description": null,
+    "primary_language": "TypeScript",
+    "stars": 0,
+    "pushed_at": "2026-05-21T09:57:56Z",
+    "schema_version": 3,
+    "uuid": "c30e0e74-7ae4-4cbd-a353-f9014708a6e4",
+    "title": "Project O'Neil",
+    "summary": "A hybrid 4X and life-simulation game set in the near future of human space habitation — O'Neill cylinders and orbital settlements — built on a framework-agnostic simulation core with two independent frontend MVPs.",
+    "tech": [
+      "electron",
+      "typescript",
+      "react",
+      "three",
+      "@react-three/fiber",
+      "zustand",
+      "vite",
+      "electron-vite"
+    ],
+    "categories": ["game", "simulation", "desktop-app"],
+    "status": "active",
+    "featured": true,
+    "order": 1,
+    "started_at": "2026-02-27",
+    "hero": "https://raw.githubusercontent.com/ogewan/oneil/main/hero.mp4",
+    "media": [],
+    "case_study": {
+      "background": {
+        "en": [
+          "Project O'Neil is a hybrid 4X and life-simulation game set in the near future of human space habitation. It asks what daily life looks like inside an O'Neill cylinder — and lets the player move between running a settlement and inhabiting a single life within it.",
+          "The design holds two scales at once: a macro layer of organizations, star systems and orbital geometry, and a micro layer of individual characters. Both draw from one consistent world state, so a change at either scale stays causally traceable through the simulation rather than scripted."
+        ]
+      },
+      "pull_quote": {
+        "en": "Every visible game state must be causally traceable to simulation inputs — never injected as scripted content."
+      },
+      "numbers": [
+        {
+          "value": "2",
+          "label": {
+            "en": "Independent frontend MVPs built on one shared simulation"
+          }
+        }
+      ],
+      "approach": {
+        "body": {
+          "en": "The simulation is built as a framework-agnostic core, then validated by building two independent frontend MVPs against it. The 3D client uses React Three Fiber to render the star system and habitats as a declarative scene graph — orbital bodies, post-processing effects and selection overlays expressed as React components — with a separate React GUI layer composited on top of the canvas. The second MVP renders the same simulation as a text-based interface with no UI framework at all. Both consume the simulation identically; if either could not, the core was not genuinely decoupled."
+        },
+        "steps": [
+          {
+            "en": "Model the world as a single shared state spanning macro (organizations, star system) and micro (individual characters) layers."
+          },
+          {
+            "en": "Drive it with a tick-based simulation covering orbital motion, social, political, and economic systems."
+          },
+          {
+            "en": "Generate and retire characters on demand within a fixed budget rather than simulating an entire population."
+          },
+          {
+            "en": "Build a 3D client with React Three Fiber — the star system, orbital bodies and habitats render as a composable scene graph, with Drei helpers and a post-processing pipeline for visual effects, and selection and state overlays expressed as components. It runs as its own React root on a transparent canvas, with an independent React GUI layer composited above for panels and controls."
+          },
+          {
+            "en": "Build a second, framework-free text UI against the same core to prove it stays framework-agnostic."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "slug": "twine-deck",
+    "repo_name": "twine-deck",
+    "repo_url": "https://github.com/ogewan/twine-deck",
+    "private": true,
+    "default_branch": "main",
+    "description": null,
+    "primary_language": "TypeScript",
+    "stars": 0,
+    "pushed_at": "2026-05-21T10:02:42Z",
+    "schema_version": 3,
+    "uuid": "c9d9a44d-51e6-48c0-b15b-f4d644957e56",
+    "title": "Twine Deck",
+    "summary": "A desktop launcher and enhancement shell for Twine interactive fiction — wraps the self-contained HTML files Twine produces inside an Electron app that adds a managed library, a modern save system, variable inspection, and optional mod injection.",
+    "tech": ["electron", "react", "typescript", "vite", "better-sqlite3", "tailwindcss", "zustand"],
+    "categories": ["desktop-app", "developer-tools", "interactive-fiction"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-04-21",
+    "media": [],
+    "case_study": {
+      "background": {
+        "en": [
+          "Twine produces self-contained HTML files for interactive fiction, but offers nothing around them — no managed library, no save handling beyond the story format's own, no way to inspect or edit a running story's state. Twine Deck is a desktop shell that wraps those HTML files inside an Electron application, adding a managed library, a modern save system, variable inspection, and optional mod injection, all without changing how the story itself runs.",
+          "The desktop app gives each story a managed library with cover art, tags, and playtime tracking; unlimited named profiles and saves with no slot numbers; a draggable in-game panel for save, load, and profile switching; a live typed editor for the running story's variables; reusable cheat presets; and scoped mod and userscript injection. A companion Node and MongoDB server is planned for a community catalog, accounts, and folder-based sync."
+        ]
+      },
+      "pull_quote": {
+        "en": "The codebase is written to be read."
+      },
+      "approach": {
+        "body": {
+          "en": "Electron splits JavaScript into three contexts — a main process that owns the SQLite database and filesystem, renderer processes that run the React UI, and preload scripts that form a narrow bridge between them. All persistence flows through the main process over typed IPC channels; the renderer never touches the database directly."
+        },
+        "steps": [
+          {
+            "en": "Each Twine story runs inside its own WebContentsView — a sandboxed browser tab — with a dedicated preload script injected beforehand."
+          },
+          {
+            "en": "The preload hooks into the story format's save API and exposes a narrow, validated bridge back to the main process; the story cannot call anything the bridge does not explicitly expose."
+          },
+          {
+            "en": "The floating control panel for saves, profiles, and variables lives in the main window's renderer above the story view, so the story's own code cannot hide or interfere with it."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "slug": "youtubeman",
+    "repo_name": "youtubeman",
+    "repo_url": "https://github.com/ogewan/youtubeman",
+    "private": true,
+    "default_branch": "master",
+    "description": null,
+    "primary_language": "JavaScript",
+    "stars": 0,
+    "pushed_at": "2026-05-21T10:02:34Z",
+    "schema_version": 3,
+    "uuid": "2da69ec2-0674-4e53-b32c-31479c76b18e",
+    "title": "YouTube Tabs Manager",
+    "summary": "Chrome MV3 side-panel extension that tracks open YouTube tabs, reports live playback analytics, and manages a library of watched videos with sort/filter, tags, and Google Drive sync.",
+    "tech": [
+      "chrome-extension",
+      "manifest-v3",
+      "javascript",
+      "service-worker",
+      "youtube-data-api",
+      "google-drive-api",
+      "oauth2"
+    ],
+    "categories": ["browser-extension", "productivity"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-02-04",
+    "media": [],
+    "case_study": {
+      "background": {
+        "en": [
+          "A Chrome MV3 side-panel extension for people who keep too many YouTube tabs open. It tracks every open YouTube tab, scrapes best-effort metadata, and listens to the HTML5 video element to report live playback progress — building toward one goal: at most one playback tab open at a time.",
+          "The architecture treats the background service worker as the single source of truth. It owns an in-memory store of tabs and videos, persists the library across worker restarts, and broadcasts read-only snapshots to the side panel ~every 750ms. Content scripts run in two worlds — a MAIN-world bridge reads YouTube's internal ytInitialPlayerResponse, while an ISOLATED-world script hooks the video element and relays progress.",
+          "Two cross-cutting features layer on top. Playlist-based auto-tagging registers playlists (manually, via OAuth-discovered owned playlists, or by scraping on navigation including Watch Later) and contributes each playlist's name as a dynamically-computed tag. Cross-browser sync round-trips the library, analytics, tags, and playlists through Google Drive's hidden appDataFolder, so multiple browsers signed into the same Google account share one logical library."
+        ]
+      },
+      "pull_quote": {
+        "en": "One playback tab, one library — synced across every browser you sign into."
+      },
+      "approach": {
+        "body": {
+          "en": "State flows in one direction — content script to service worker to side panel — which keeps the UI a pure read-only replica and avoids race conditions across Chrome's process boundaries. Sync uses a hybrid transport: tiny values ride Chrome's native storage.sync, heavy data goes through Drive, and per-device state stays local. Deletions propagate via per-id tombstones with a 30-day TTL so a removal on one browser doesn't get resurrected by a stale copy on another."
+        },
+        "steps": [
+          {
+            "en": "MAIN-world bridge reads YouTube's internal player data and posts metadata to the ISOLATED content script."
+          },
+          {
+            "en": "ISOLATED script tracks the video element and forwards progress to the service worker."
+          },
+          {
+            "en": "Service worker maintains the canonical store, persists the library, and broadcasts snapshots."
+          },
+          {
+            "en": "Side panel renders each snapshot as a read-only replica with sort, filter, and tagging."
+          },
+          {
+            "en": "Sync manager pushes structural changes to Google Drive and merges remote state on a 5-minute tick."
+          }
+        ]
+      }
+    }
   },
   {
     "slug": "superchrome",
@@ -131,6 +315,27 @@
         ]
       }
     }
+  },
+  {
+    "slug": "thursday-drill",
+    "repo_name": "thursday-drill",
+    "repo_url": "https://github.com/ogewan/thursday-drill",
+    "private": true,
+    "default_branch": "master",
+    "description": null,
+    "primary_language": "TypeScript",
+    "stars": 0,
+    "pushed_at": "2026-05-21T06:38:03Z",
+    "schema_version": 3,
+    "uuid": "d67345a9-e3b1-4bc2-98a3-3c4343adb02a",
+    "title": "Thursday Drill",
+    "summary": "Proctored interview-prep platform — a multi-curriculum drill workspace that pairs with a Notion study hub. Timed drills graded by real test suites, run through a unified proctor CLI.",
+    "tech": ["typescript", "react", "sqlite", "express", "jest", "vite"],
+    "categories": ["cli", "education"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-04-15",
+    "media": []
   },
   {
     "slug": "comix-ngn",
