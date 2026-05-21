@@ -8,7 +8,7 @@
     "description": null,
     "primary_language": "TypeScript",
     "stars": 0,
-    "pushed_at": "2026-05-21T09:02:04Z",
+    "pushed_at": "2026-05-21T09:02:36Z",
     "schema_version": 3,
     "uuid": "a4f7c2e1-8b3d-4a91-b6e5-2c9f8d4e1a7b",
     "title": "Portfolio SPA",
@@ -33,6 +33,104 @@
     "hero": "https://raw.githubusercontent.com/ogewan/ogewan.github.io/main/docs/screenshots/hero.png",
     "media": [],
     "docs_link": "https://github.com/username/portfolio#readme"
+  },
+  {
+    "slug": "superchrome",
+    "repo_name": "superchrome",
+    "repo_url": "https://github.com/ogewan/superchrome",
+    "private": false,
+    "default_branch": "master",
+    "description": "A multi chrome extension to fix things that bother me.",
+    "primary_language": "JavaScript",
+    "stars": 0,
+    "pushed_at": "2026-05-21T09:54:47Z",
+    "schema_version": 3,
+    "uuid": "7c3e9a21-5b4d-4f8a-9c1e-2d6f0a3b8e74",
+    "title": "SuperChrome",
+    "summary": "A Chrome extension (Manifest V3) for tab and browser management — tab grouping, a URL manager, and memory/process insight.",
+    "tech": ["javascript", "chrome-extension", "manifest-v3"],
+    "categories": ["browser-extension"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-01-23",
+    "media": []
+  },
+  {
+    "slug": "polyocr",
+    "repo_name": "polyocr",
+    "repo_url": "https://github.com/ogewan/polyocr",
+    "private": false,
+    "default_branch": "main",
+    "description": null,
+    "primary_language": "TypeScript",
+    "stars": 0,
+    "pushed_at": "2026-05-21T09:54:24Z",
+    "schema_version": 3,
+    "uuid": "50e3132b-9ca3-4a4e-bd84-981f74669e12",
+    "title": "PolyOCR",
+    "summary": "Multilingual OCR, machine translation, image inpainting, and region matching — shipped as a headless npm package plus a thin Electron desktop UI that consumes it.",
+    "tech": [
+      "typescript",
+      "tesseract.js",
+      "paddleocr",
+      "opencv.js",
+      "ollama",
+      "electron",
+      "react",
+      "vite"
+    ],
+    "categories": ["library", "desktop-app", "cli"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-04-24",
+    "media": [],
+    "case_study": {
+      "background": {
+        "en": [
+          "PolyOCR is a multilingual OCR pipeline that reads text from images, detects its language, translates it, and — for use cases like manga — inpaints the original text and renders the translation back in place.",
+          "It ships as two artifacts that share one pipeline — a headless npm package that does all the real work, and a thin Electron desktop app that is purely a UI consumer of it. The package runs unchanged in a browser extension, a Node CLI, a CI image pipeline, or a server-side render service."
+        ]
+      },
+      "pull_quote": {
+        "en": "Everything that does real work lives in the headless package; the desktop app is just a UI consumer of it."
+      },
+      "numbers": [
+        {
+          "value": "23",
+          "label": {
+            "en": "Languages translated via the default Ollama backend"
+          }
+        },
+        {
+          "value": "2",
+          "label": {
+            "en": "Pluggable OCR engines — Tesseract.js and PaddleOCR"
+          }
+        }
+      ],
+      "approach": {
+        "body": {
+          "en": "Every pluggable subsystem sits behind a formal TypeScript interface — OcrAdapter, TranslationAdapter, RegionDetector — so a hosted OCR service, a different translation backend, or a custom region matcher can be swapped in without forking the package. The two-process Electron split keeps the OCR pipeline out of the main-process lifecycle, leaving it testable and embeddable."
+        },
+        "steps": [
+          {
+            "en": "Detect text regions with OpenCV.js contour analysis, with an Ollama vision LLM fallback."
+          },
+          {
+            "en": "OCR each region with Tesseract.js by default, or PaddleOCR for CJK and complex layouts."
+          },
+          {
+            "en": "Detect the source language with the franc statistical detector, falling back to an Ollama vision LLM for short or mixed text."
+          },
+          {
+            "en": "Translate via Ollama by default, or optional DeepL and LibreTranslate adapters."
+          },
+          {
+            "en": "Inpaint the original text and render the translation back into place."
+          }
+        ]
+      }
+    }
   },
   {
     "slug": "comix-ngn",
