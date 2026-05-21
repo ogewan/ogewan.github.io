@@ -1,40 +1,5 @@
 [
   {
-    "slug": "ogewan.github.io",
-    "repo_name": "ogewan.github.io",
-    "repo_url": "https://github.com/ogewan/ogewan.github.io",
-    "private": false,
-    "default_branch": "main",
-    "description": null,
-    "primary_language": "TypeScript",
-    "stars": 0,
-    "pushed_at": "2026-05-21T17:22:48Z",
-    "schema_version": 3,
-    "uuid": "a4f7c2e1-8b3d-4a91-b6e5-2c9f8d4e1a7b",
-    "title": "Portfolio SPA",
-    "summary": "Polyglot React + R3F + Angular Elements portfolio at username.github.io. Persistent celestial scene (Earth → black hole) keyed to routes, YAML-driven repo detection, English/Spanish i18n, dark Frutiger Aero aesthetic.",
-    "tech": [
-      "react",
-      "r3f",
-      "three",
-      "angular",
-      "typescript",
-      "vite",
-      "tailwind",
-      "maplibre",
-      "pnpm",
-      "github-actions"
-    ],
-    "categories": ["web", "portfolio", "showcase"],
-    "status": "wip",
-    "featured": true,
-    "order": 1,
-    "started_at": "2026-04-24",
-    "hero": "https://raw.githubusercontent.com/ogewan/ogewan.github.io/main/docs/screenshots/hero.png",
-    "media": [],
-    "docs_link": "https://github.com/username/portfolio#readme"
-  },
-  {
     "slug": "oneil",
     "repo_name": "oneil",
     "repo_url": "https://github.com/ogewan/oneil",
@@ -43,7 +8,7 @@
     "description": null,
     "primary_language": "TypeScript",
     "stars": 0,
-    "pushed_at": "2026-05-21T09:57:56Z",
+    "pushed_at": "2026-05-21T18:18:54Z",
     "schema_version": 3,
     "uuid": "c30e0e74-7ae4-4cbd-a353-f9014708a6e4",
     "title": "Project O'Neil",
@@ -63,7 +28,7 @@
     "featured": true,
     "order": 1,
     "started_at": "2026-02-27",
-    "hero": "https://raw.githubusercontent.com/ogewan/oneil/main/hero.mp4",
+    "hero": "https://i.imgur.com/8vYxiZ8.mp4",
     "media": [],
     "case_study": {
       "background": {
@@ -102,6 +67,113 @@
           },
           {
             "en": "Build a second, framework-free text UI against the same core to prove it stays framework-agnostic."
+          }
+        ]
+      }
+    }
+  },
+  {
+    "slug": "ogewan.github.io",
+    "repo_name": "ogewan.github.io",
+    "repo_url": "https://github.com/ogewan/ogewan.github.io",
+    "private": false,
+    "default_branch": "main",
+    "description": null,
+    "primary_language": "TypeScript",
+    "stars": 0,
+    "pushed_at": "2026-05-21T19:44:42Z",
+    "schema_version": 3,
+    "uuid": "a4f7c2e1-8b3d-4a91-b6e5-2c9f8d4e1a7b",
+    "title": "Portfolio SPA",
+    "summary": "Polyglot React + R3F + Angular Elements portfolio at username.github.io. Persistent celestial scene (Earth → black hole) keyed to routes, YAML-driven repo detection, English/Spanish i18n, dark Frutiger Aero aesthetic.",
+    "tech": [
+      "react",
+      "r3f",
+      "three",
+      "angular",
+      "typescript",
+      "vite",
+      "tailwind",
+      "maplibre",
+      "pnpm",
+      "github-actions"
+    ],
+    "categories": ["web", "portfolio", "showcase"],
+    "status": "wip",
+    "featured": false,
+    "started_at": "2026-04-24",
+    "hero": "https://raw.githubusercontent.com/ogewan/ogewan.github.io/main/docs/screenshots/hero.png",
+    "media": [],
+    "docs_link": "https://github.com/username/portfolio#readme"
+  },
+  {
+    "slug": "bomberman.ai",
+    "repo_name": "bomberman.ai",
+    "repo_url": "https://github.com/ogewan/bomberman.ai",
+    "private": false,
+    "default_branch": "master",
+    "description": null,
+    "primary_language": "TypeScript",
+    "stars": 0,
+    "pushed_at": "2026-05-21T19:27:34Z",
+    "schema_version": 3,
+    "uuid": "d7eb986d-b152-4688-a737-ae19ec1b4437",
+    "title": "Bomberman AI",
+    "summary": "ML platform for training agents to play games. Started as an ML project with a custom Bomberman-style game as its training environment, then pivoted into a general platform that trains agents on emulated N64 games behind one unified GameEnvironment interface.",
+    "tech": ["typescript", "react", "react-three-fiber", "three", "zustand", "vite", "electron"],
+    "categories": ["machine-learning", "game", "desktop-app"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-03-30",
+    "hero": "https://raw.githubusercontent.com/ogewan/bomberman.ai/master/.portfolio/hero.png",
+    "media": [],
+    "case_study": {
+      "background": {
+        "en": [
+          "Bomberman AI started as a machine-learning project. The Bomberman 64-inspired 3D game was built alongside it as the training environment — a custom, deterministic, tick-authoritative simulation where every state change flows through a discrete 8-step pipeline, making any game state fully reproducible and replayable for an agent to learn from.",
+          "The project then pivoted from a single-game ML experiment into the Emulator ML Platform — a more general, TypeScript-first platform for training agents on emulated N64 games. The custom Bomberman engine became one environment among emulator-backed targets like N64Wasm.",
+          "Every backend implements one unified GameEnvironment interface. Agents, experiment sessions, and the platform UI interact only through that interface — never with engine or emulator internals — so training code is written once and runs against any game."
+        ]
+      },
+      "pull_quote": {
+        "en": "A single GameEnvironment interface lets one agent train across a custom engine and emulated N64 games."
+      },
+      "numbers": [
+        {
+          "value": "8",
+          "label": {
+            "en": "Step deterministic tick pipeline"
+          }
+        },
+        {
+          "value": "3",
+          "label": {
+            "en": "Elevation levels in the surface-based 3D world"
+          }
+        },
+        {
+          "value": "50",
+          "label": {
+            "en": "Automated tests across all packages"
+          }
+        }
+      ],
+      "approach": {
+        "body": {
+          "en": "The architecture enforces strict separation of concerns. All simulation runs in Web Workers — even the active visible game — so the renderer stays at 60fps and one code path serves live play, headless evaluation, and replay. The React GUI and React Three Fiber renderer consume derived read models, never authoritative state."
+        },
+        "steps": [
+          {
+            "en": "Run all simulation in workers behind a tick-authoritative pipeline; the main thread is presentation-only."
+          },
+          {
+            "en": "Route every actor action through an intent system shared by players, bots, and ML models."
+          },
+          {
+            "en": "Wrap each game backend behind the unified GameEnvironment interface."
+          },
+          {
+            "en": "Host environments server-side and connect training clients over WebSocket via RemoteGameEnvironment."
           }
         ]
       }
