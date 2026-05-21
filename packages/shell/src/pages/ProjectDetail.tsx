@@ -237,7 +237,7 @@ export function ProjectDetail() {
         style={{ viewTransitionName: `card-${entry.slug}` }}
       >
         {entry.title}.{' '}
-        <em className="not-italic text-fg-secondary">{entry.summary.split('.')[0]}.</em>
+        {/*<em className="not-italic text-fg-secondary">{entry.summary.split('.')[0]}.</em>*/}
       </Heading>
       <Text variant="lead" className="mt-6 max-w-[640px]">
         {entry.summary}
