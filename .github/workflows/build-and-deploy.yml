@@ -69,7 +69,10 @@ jobs:
 
       - name: Refresh manifest
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # MANIFEST_PAT carries `repo` scope so the GraphQL query can see private
+          # repos owned by the user. The default `secrets.GITHUB_TOKEN` is scoped
+          # to this repo only and would silently drop private showcase entries.
+          GITHUB_TOKEN: ${{ secrets.MANIFEST_PAT }}
           # GITHUB_USERNAME is the login the manifest-builder scans repos for.
           # Set it as a repository variable (Settings → Variables) so it can
           # differ from the workflow runner's owner.

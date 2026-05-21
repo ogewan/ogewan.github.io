@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Route, Routes } from 'react-router';
 import {
   ActiveSceneProvider,
@@ -38,25 +37,7 @@ const DEV_ROUTES = import.meta.env.PROD ? null : (
 // Same gate: bridge that registers React-context setters into window.portfolio.
 const DEV_BRIDGE = import.meta.env.PROD ? null : <DevConsoleBridge />;
 
-// GH Pages serves the same site for any unknown URL via 404.html. The 404 page
-// stashes the original pathname in sessionStorage and bounces to /; on mount
-// we replay that pathname into history so the SPA router picks up the deep
-// link without flashing the home page first.
-function useGitHubPagesRedirectReplay() {
-  useEffect(() => {
-    if (typeof sessionStorage === 'undefined') return;
-    const stashed = sessionStorage.getItem('portfolio:redirect');
-    if (!stashed) return;
-    sessionStorage.removeItem('portfolio:redirect');
-    const current = window.location.pathname + window.location.search + window.location.hash;
-    if (stashed !== current) {
-      window.history.replaceState(null, '', stashed);
-    }
-  }, []);
-}
-
 export function App() {
-  useGitHubPagesRedirectReplay();
   return (
     <CelestialQualityProvider>
       <CelestialFocusProvider>
