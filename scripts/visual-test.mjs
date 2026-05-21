@@ -20,6 +20,7 @@
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { detectPortfolioPort } from './_dev-port.mjs';
 
 const args = Object.fromEntries(
   process.argv.slice(2).map((a) => {
@@ -28,7 +29,12 @@ const args = Object.fromEntries(
   }),
 );
 
-const url = `http://localhost:5173${args.url ?? '/en/'}`;
+// Resolve the dev-server port at run time. Vite auto-bumps 5173 → 5174 → …
+// when another project is squatting on 5173, so we identify portfolio's
+// server by its served <title> rather than trusting a fixed port.
+const port = await detectPortfolioPort();
+const url = `http://localhost:${port}${args.url ?? '/en/'}`;
+console.log(`Targeting portfolio dev server at http://localhost:${port}`);
 const quality = args.quality ?? null; // 'quality' | 'static' | 'simple' | null
 const screenshotName = args.screenshot ?? 'visual.png';
 const reducedMotion = args['reduced-motion'] === 'true' ? 'reduce' : 'no-preference';
@@ -40,6 +46,13 @@ const reducedMotion = args['reduced-motion'] === 'true' ? 'reduce' : 'no-prefere
 // waits for `body.loaded` (which the overlay-removal sequence stamps) before
 // taking the shot. Use this for any UI verification past the cold-load gate.
 const skipOverlay = args['skip-overlay'] === true || args['skip-overlay'] === 'true';
+// Capture the full document height instead of the 1280×720 viewport. Useful
+// for verifying content far below the fold (changelog, deep sections).
+const fullPage = args['full-page'] === true || args['full-page'] === 'true';
+// CSS selector to scroll into view before screenshotting. Useful when the
+// content of interest is below the fold and a hash fragment won't reliably
+// settle in time.
+const scrollTo = typeof args['scroll-to'] === 'string' ? args['scroll-to'] : null;
 
 const screenshotsDir = resolve(process.cwd(), '.screenshots');
 mkdirSync(screenshotsDir, { recursive: true });
@@ -103,8 +116,16 @@ if (consoleMessages.length) {
   for (const m of consoleMessages.slice(0, 30)) console.log('  ', m);
 }
 
+if (scrollTo) {
+  await page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if (el) el.scrollIntoView({ behavior: 'instant', block: 'start' });
+  }, scrollTo);
+  await page.waitForTimeout(400);
+}
+
 const screenshotPath = resolve(screenshotsDir, screenshotName);
-await page.screenshot({ path: screenshotPath, fullPage: false });
+await page.screenshot({ path: screenshotPath, fullPage });
 console.log(`Screenshot saved: ${screenshotPath}`);
 
 await browser.close();

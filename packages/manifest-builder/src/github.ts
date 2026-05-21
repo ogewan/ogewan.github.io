@@ -1,9 +1,14 @@
 import { graphql } from '@octokit/graphql';
 import type { RepoContext } from './manifest.js';
 
-// One-shot GraphQL query: list the user's non-archived public repos with the
-// metadata we need + the raw .portfolio.yml text if present. Using the `HEAD`
-// expression pins to each repo's default branch without a separate lookup.
+// One-shot GraphQL query: list the user's non-archived repos (public + private)
+// with the metadata we need + the raw .portfolio.yml text if present. Using the
+// `HEAD` expression pins to each repo's default branch without a separate lookup.
+//
+// Private repos require the token to carry the `repo` scope (public_repo alone
+// returns only public repos). Inclusion is still gated by the presence of a
+// valid .portfolio.yml downstream — the query just no longer pre-filters by
+// visibility.
 //
 // The GraphQL API caps page size at 100; pagination walks cursors until exhausted.
 const REPOS_QUERY = /* GraphQL */ `
@@ -13,13 +18,13 @@ const REPOS_QUERY = /* GraphQL */ `
         first: 100
         after: $cursor
         isArchived: false
-        privacy: PUBLIC
         orderBy: { field: PUSHED_AT, direction: DESC }
       ) {
         nodes {
           name
           description
           url
+          isPrivate
           stargazerCount
           pushedAt
           defaultBranchRef {
@@ -47,6 +52,7 @@ interface GqlRepoNode {
   name: string;
   description: string | null;
   url: string;
+  isPrivate: boolean;
   stargazerCount: number;
   pushedAt: string;
   defaultBranchRef: { name: string } | null;
@@ -96,6 +102,7 @@ export async function fetchReposWithPortfolioYml(
         context: {
           owner: login,
           name: node.name,
+          private: node.isPrivate,
           url: node.url,
           default_branch: node.defaultBranchRef.name,
           description: node.description,

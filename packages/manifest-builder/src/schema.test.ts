@@ -29,7 +29,7 @@ describe('PortfolioYmlSchema — fixtures', () => {
     if (result.success) {
       expect(result.data.featured).toBe(true);
       expect(result.data.order).toBe(1);
-      expect(result.data.screenshots).toHaveLength(3);
+      expect(result.data.media).toHaveLength(3);
     }
   });
 

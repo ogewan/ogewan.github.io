@@ -7,6 +7,7 @@ export interface ManifestEntry {
   slug: string;
   repo_name: string;
   repo_url: string;
+  private: boolean;
   default_branch: string;
   description: string | null;
   primary_language: string | null;
@@ -27,7 +28,7 @@ export interface ManifestEntry {
   pages_url: PortfolioYml['pages_url'];
   demo_video: PortfolioYml['demo_video'];
   hero?: string;
-  screenshots: string[];
+  media: string[];
   docs_link: PortfolioYml['docs_link'];
   case_study?: CaseStudy;
 }
@@ -41,6 +42,7 @@ export interface ManifestWarning {
 export interface RepoContext {
   owner: string;
   name: string;
+  private: boolean;
   url: string;
   default_branch: string;
   description: string | null;
@@ -67,7 +69,7 @@ export function enrichEntry(yml: PortfolioYml, repo: RepoContext): ManifestEntry
   const hero = yml.hero
     ? resolveScreenshotUrl(yml.hero, repo.owner, repo.name, repo.default_branch)
     : undefined;
-  const screenshots = (yml.screenshots ?? []).map((path) =>
+  const media = (yml.media ?? []).map((path) =>
     resolveScreenshotUrl(path, repo.owner, repo.name, repo.default_branch),
   );
 
@@ -75,6 +77,7 @@ export function enrichEntry(yml: PortfolioYml, repo: RepoContext): ManifestEntry
     slug: repo.name,
     repo_name: repo.name,
     repo_url: repo.url,
+    private: repo.private,
     default_branch: repo.default_branch,
     description: repo.description,
     primary_language: repo.primary_language,
@@ -95,7 +98,7 @@ export function enrichEntry(yml: PortfolioYml, repo: RepoContext): ManifestEntry
     pages_url: yml.pages_url,
     demo_video: yml.demo_video,
     ...(hero !== undefined ? { hero } : {}),
-    screenshots,
+    media,
     docs_link: yml.docs_link,
     ...(yml.case_study !== undefined ? { case_study: yml.case_study } : {}),
   };

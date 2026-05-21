@@ -11,6 +11,7 @@ import {
 const repo: RepoContext = {
   owner: 'octocat',
   name: 'hello-world',
+  private: false,
   url: 'https://github.com/octocat/hello-world',
   default_branch: 'main',
   description: 'demo repo',
@@ -29,7 +30,7 @@ const yml: PortfolioYml = {
   status: 'active',
   featured: false,
   started_at: '2024-01-01',
-  screenshots: ['assets/shot.png', '/leading-slash.png', 'https://cdn.example/hosted.png'],
+  media: ['assets/shot.png', '/leading-slash.png', 'https://cdn.example/hosted.png'],
 };
 
 describe('resolveScreenshotUrl', () => {
@@ -52,23 +53,23 @@ describe('resolveScreenshotUrl', () => {
 });
 
 describe('enrichEntry', () => {
-  it('merges YAML and repo context and resolves screenshots', () => {
+  it('merges YAML and repo context and resolves media', () => {
     const entry = enrichEntry(yml, repo);
     expect(entry.slug).toBe('hello-world');
     expect(entry.repo_url).toBe('https://github.com/octocat/hello-world');
     expect(entry.stars).toBe(42);
-    expect(entry.screenshots).toEqual([
+    expect(entry.media).toEqual([
       'https://raw.githubusercontent.com/octocat/hello-world/main/assets/shot.png',
       'https://raw.githubusercontent.com/octocat/hello-world/main/leading-slash.png',
       'https://cdn.example/hosted.png',
     ]);
   });
 
-  it('handles missing screenshots as empty array', () => {
-    const { screenshots: _screenshots, ...rest } = yml;
-    void _screenshots;
+  it('handles missing media as empty array', () => {
+    const { media: _media, ...rest } = yml;
+    void _media;
     const entry = enrichEntry(rest as PortfolioYml, repo);
-    expect(entry.screenshots).toEqual([]);
+    expect(entry.media).toEqual([]);
   });
 });
 

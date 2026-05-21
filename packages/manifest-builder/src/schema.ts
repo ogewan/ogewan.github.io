@@ -11,8 +11,10 @@ import { z } from 'zod';
 //   added without touching this schema; the shell can surface frequency to detect typos.
 // - Dates are ISO calendar dates (YYYY-MM-DD), not timestamps — day-level precision.
 // - URL fields use z.string().url() — relative paths are rejected.
-// - screenshots are repo-relative paths; resolution to raw.githubusercontent.com
-//   happens during enrichment, not here.
+// - `hero` and `media` entries may be repo-relative paths OR absolute http(s)
+//   URLs, and may point at images or videos. Type sniffing by file extension
+//   and resolution to raw.githubusercontent.com happen during enrichment /
+//   render, not here.
 // - .strict() rejects unknown keys so misspellings (`techs`, `catagory`) fail loudly.
 
 export const PORTFOLIO_YML_SCHEMA_VERSION = 3;
@@ -94,8 +96,14 @@ export const PortfolioYmlSchema = z
     ended_at: IsoDateSchema.optional(),
     pages_url: z.string().url().optional(),
     demo_video: z.string().url().optional(),
+    // Card hero. Accepts an image (png/jpg/gif/webp) or a video (mp4/webm).
+    // Type is inferred at render time from the file extension; absolute
+    // http(s) URLs pass through, repo-relative paths resolve to
+    // raw.githubusercontent.com on the default branch.
     hero: z.string().min(1).optional(),
-    screenshots: z.array(z.string().min(1)).optional(),
+    // Project gallery. Mix of images and videos, in display order. Same
+    // extension-sniffing + URL resolution as `hero`.
+    media: z.array(z.string().min(1)).optional(),
     docs_link: z.string().url().optional(),
     case_study: CaseStudySchema.optional(),
   })

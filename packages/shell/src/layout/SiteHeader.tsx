@@ -199,7 +199,7 @@ export function SiteHeader() {
       >
         <SectionLink to="home" className={`pointer-events-auto ${focusRingClassName} no-underline`}>
           <span className="text-fg-muted">SYS</span>{' '}
-          <span className="text-fg-primary">portfolio-1.0</span>
+          <span className="text-fg-primary">portfolio-1.1</span>
         </SectionLink>
       </Text>
     </header>

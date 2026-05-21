@@ -13,6 +13,7 @@ const readFixture = (name: string): string => readFileSync(resolve(FIXTURES, nam
 const baseContext = (name: string, pushed_at: string): RepoContext => ({
   owner: 'octocat',
   name,
+  private: false,
   url: `https://github.com/octocat/${name}`,
   default_branch: 'main',
   description: null,
@@ -82,7 +83,7 @@ describe('buildManifest', () => {
     expect(warnings[0]?.reason).toMatch(/yaml parse failed|schema validation failed/);
   });
 
-  it('resolves screenshots to raw.githubusercontent.com URLs', () => {
+  it('resolves media to raw.githubusercontent.com URLs', () => {
     const repos: FetchedRepo[] = [
       {
         context: baseContext('full-project', '2024-06-01T00:00:00Z'),
@@ -91,10 +92,10 @@ describe('buildManifest', () => {
     ];
     const { manifest } = buildManifest(repos);
     const entry = manifest[0];
-    expect(entry?.screenshots[0]).toBe(
+    expect(entry?.media[0]).toBe(
       'https://raw.githubusercontent.com/octocat/full-project/main/assets/shot-01.png',
     );
     // Absolute URLs pass through untouched.
-    expect(entry?.screenshots[2]).toBe('https://example.com/external.png');
+    expect(entry?.media[2]).toBe('https://example.com/external.png');
   });
 });

@@ -1,9 +1,22 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ManifestEntry } from '@portfolio/manifest-builder';
 import { GlassPanel, Heading, Text } from '@portfolio/ui';
 import { TransitionLink } from './TransitionLink';
 import { useExternalPrefetch } from './useExternalPrefetch';
+
+// Extension-sniffing for `hero` (and `media[]`). The schema lets the same
+// field hold either an image or a video; render code branches by suffix.
+const VIDEO_RE = /\.(mp4|webm|mov)(\?|$)/i;
+function isVideoSrc(src: string): boolean {
+  return VIDEO_RE.test(src);
+}
+function videoMime(src: string): string {
+  const m = src.toLowerCase().match(/\.(mp4|webm|mov)/);
+  if (m?.[1] === 'webm') return 'video/webm';
+  if (m?.[1] === 'mov') return 'video/quicktime';
+  return 'video/mp4';
+}
 
 // Per-project hue rotation through the cyan→amber→violet space — six muted
 // variants matching the mockup direction. Slug-derived so the same project
@@ -44,6 +57,21 @@ export function ProjectCard({ entry, locale, feature = false }: ProjectCardProps
   const detailHref = `/${locale}/projects/${entry.slug}`;
   const externalHref = entry.pages_url;
 
+  // OS-level reduced-motion preference. Used to suppress hero video autoplay;
+  // the still-image / gradient branches are unaffected. Read once at mount
+  // and listen for changes so the toggle in DevTools takes effect live.
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReducedMotion(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  const heroIsVideo = entry.hero ? isVideoSrc(entry.hero) : false;
+
   return (
     <GlassPanel
       ref={(el) => {
@@ -64,7 +92,22 @@ export function ProjectCard({ entry, locale, feature = false }: ProjectCardProps
         }
         style={{ background: `linear-gradient(135deg, ${hueA}, ${hueB})` }}
       >
-        {entry.hero ? (
+        {entry.hero && heroIsVideo ? (
+          <video
+            src={entry.hero}
+            autoPlay={!reducedMotion}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLVideoElement).style.display = 'none';
+            }}
+          >
+            <source src={entry.hero} type={videoMime(entry.hero)} />
+          </video>
+        ) : entry.hero ? (
           <img
             src={entry.hero}
             alt=""

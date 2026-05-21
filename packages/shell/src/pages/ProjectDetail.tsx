@@ -119,7 +119,13 @@ export function ProjectDetail() {
     });
   }
 
-  if (entry.demo_video) {
+  // Private repos hide all outbound affordances: action buttons, the External
+  // section, the demo-video tile, and the clickable repo cell in the spec
+  // table (replaced with the literal string "Private"). Public repos render
+  // unchanged.
+  const hideExternal = entry.private;
+
+  if (entry.demo_video && !hideExternal) {
     const demoUrl = entry.demo_video;
     const caption = walkthroughCaption ?? t('sections.walkthrough.demoLabel');
     sections.push({
@@ -160,9 +166,11 @@ export function ProjectDetail() {
             <SpecRow label={t('sections.spec.labels.status')} value={entry.status} />
             <SpecRow
               label={t('sections.spec.labels.repo')}
-              value={entry.repo_url.replace('https://github.com/', '')}
+              value={entry.private ? 'Private' : entry.repo_url.replace('https://github.com/', '')}
             />
-            <SpecRow label={t('sections.spec.labels.stars')} value={String(entry.stars)} />
+            {entry.stars > 0 ? (
+              <SpecRow label={t('sections.spec.labels.stars')} value={String(entry.stars)} />
+            ) : null}
             <SpecRow
               label={t('sections.spec.labels.lastPush')}
               value={entry.pushed_at.split('T')[0] ?? '—'}
@@ -181,21 +189,24 @@ export function ProjectDetail() {
     ),
   });
 
-  // External — always present.
-  sections.push({
-    title: t('sections.external.title'),
-    render: () => (
-      <ul className="border-t border-dashed border-glass-hairline-inner">
-        <OutboundRow href={entry.repo_url} title={t('sections.external.source')} />
-        {entry.pages_url ? (
-          <OutboundRow href={entry.pages_url} title={t('sections.external.live')} />
-        ) : null}
-        {entry.docs_link ? (
-          <OutboundRow href={entry.docs_link} title={t('sections.external.docs')} />
-        ) : null}
-      </ul>
-    ),
-  });
+  // External — present for public repos; private repos suppress all outbound
+  // links so the section is omitted entirely.
+  if (!hideExternal) {
+    sections.push({
+      title: t('sections.external.title'),
+      render: () => (
+        <ul className="border-t border-dashed border-glass-hairline-inner">
+          <OutboundRow href={entry.repo_url} title={t('sections.external.source')} />
+          {entry.pages_url ? (
+            <OutboundRow href={entry.pages_url} title={t('sections.external.live')} />
+          ) : null}
+          {entry.docs_link ? (
+            <OutboundRow href={entry.docs_link} title={t('sections.external.docs')} />
+          ) : null}
+        </ul>
+      ),
+    });
+  }
 
   return (
     <Container width="reading" className="pb-24">
@@ -232,37 +243,40 @@ export function ProjectDetail() {
         {entry.summary}
       </Text>
 
-      {/* Actions row */}
-      <div className="mt-8 flex flex-wrap gap-3">
-        {entry.pages_url ? (
+      {/* Actions row — suppressed entirely for private repos so no outbound
+          affordances leak. */}
+      {!hideExternal ? (
+        <div className="mt-8 flex flex-wrap gap-3">
+          {entry.pages_url ? (
+            <a
+              href={entry.pages_url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm border border-[color:oklch(0.84_0.12_210/0.4)] bg-glass-panel text-cyan font-mono text-small uppercase tracking-[0.14em]"
+            >
+              {t('common:external.live')} <span aria-hidden="true">↗</span>
+            </a>
+          ) : null}
           <a
-            href={entry.pages_url}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm border border-[color:oklch(0.84_0.12_210/0.4)] bg-glass-panel text-cyan font-mono text-small uppercase tracking-[0.14em]"
-          >
-            {t('common:external.live')} <span aria-hidden="true">↗</span>
-          </a>
-        ) : null}
-        <a
-          href={entry.repo_url}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm border border-glass-hairline-inner bg-glass-panel text-fg-primary hover:text-cyan font-mono text-small uppercase tracking-[0.14em]"
-        >
-          {t('common:external.github')} <span aria-hidden="true">↗</span>
-        </a>
-        {entry.docs_link ? (
-          <a
-            href={entry.docs_link}
+            href={entry.repo_url}
             target="_blank"
             rel="noreferrer noopener"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm border border-glass-hairline-inner bg-glass-panel text-fg-primary hover:text-cyan font-mono text-small uppercase tracking-[0.14em]"
           >
-            {t('common:external.writeup')} <span aria-hidden="true">↗</span>
+            {t('common:external.github')} <span aria-hidden="true">↗</span>
           </a>
-        ) : null}
-      </div>
+          {entry.docs_link ? (
+            <a
+              href={entry.docs_link}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sm border border-glass-hairline-inner bg-glass-panel text-fg-primary hover:text-cyan font-mono text-small uppercase tracking-[0.14em]"
+            >
+              {t('common:external.writeup')} <span aria-hidden="true">↗</span>
+            </a>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* Tech pills */}
       <ul className="mt-6 flex flex-wrap gap-2">

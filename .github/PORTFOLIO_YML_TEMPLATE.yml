@@ -73,11 +73,19 @@ pages_url: https://atlas-console.example.com
 # Optional URL. Surfaces a play button on the detail-page Walkthrough section.
 demo_video: https://www.youtube.com/watch?v=...
 
-# Optional repo-relative paths. Resolved to raw.githubusercontent.com URLs by
-# the manifest builder. Hero-image candidates rendered on the detail page.
-screenshots:
+# Optional. Card hero — accepts an image (png/jpg/gif/webp) or a video
+# (mp4/webm). Same path rules as `media`. When a video is provided, the card
+# autoplays it muted and looping (respecting prefers-reduced-motion).
+# hero: docs/screenshots/hero.png
+
+# Optional repo-relative paths OR absolute http(s) URLs. Resolved to
+# raw.githubusercontent.com by the manifest builder. Accepts a mix of images
+# (png/jpg/gif/webp) and videos (mp4/webm); type is inferred from the file
+# extension at render time. Rendered as the project gallery on the detail page.
+media:
   - docs/screenshots/console-launch.png
   - docs/screenshots/console-anomaly.png
+  - docs/media/walkthrough.mp4
 
 # Optional URL. Long-form writeup link surfaced as a "Writeup ↗" action.
 docs_link: https://atlas-console.example.com/docs/architecture

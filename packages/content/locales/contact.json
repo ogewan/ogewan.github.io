@@ -94,7 +94,7 @@
     }
   },
   "note": {
-    "en": "Note: approximate location only. For exact coordinates, write to me.",
-    "es": "Nota: ubicación aproximada solamente. Para coordenadas exactas, escríbeme."
+    "en": "Note: approximate location only.",
+    "es": "Nota: ubicación aproximada solamente."
   }
 }

@@ -62,6 +62,10 @@
         "note": { "en": "NOTE", "es": "NOTA" }
       },
       "entries": {
+        "v10": {
+          "en": "Private repos now surface (gated by .portfolio.yml + repo-scoped PAT); detail pages hide outbound affordances and label them Private. Hero + media accept videos (mp4/webm) alongside images; cards autoplay muted, looping, reduced-motion-aware. Zero-star rows omitted from the spec table.",
+          "es": "Los repos privados ahora aparecen (con .portfolio.yml + PAT con scope repo); las páginas de detalle ocultan sus salidas y los etiquetan como Private. Hero + media aceptan vídeos (mp4/webm) además de imágenes; las cards los reproducen en mute, en loop, respetando reduced-motion. Filas de cero estrellas omitidas de la spec table."
+        },
         "v09": {
           "en": "Owner-voice copy pass: dropped aerospace framing, repositioned full-stack/platform, real résumé-grounded timeline, two co-authored Nature nodes, universal text-shadow, console easter-egg extracted",
           "es": "Pase de copy en voz del propietario: se quitó el encuadre aeroespacial, reposicionado a full-stack / plataforma, timeline anclado al currículum, dos nodos Nature como coautor, text-shadow universal, easter-egg de consola extraído"

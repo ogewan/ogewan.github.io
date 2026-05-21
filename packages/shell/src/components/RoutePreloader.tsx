@@ -64,15 +64,18 @@ function warmContactChunks() {
   }
 }
 
-function prefetchProjectScreenshots() {
+function prefetchProjectMedia() {
   // Only prefetch real http(s) URLs — fixture entries have placeholder
-  // gradient strings, not URLs. Cap at the first 3 projects' first screenshot
+  // gradient strings, not URLs. Cap at the first 3 projects' first media item
   // each so we don't burn bandwidth on a long manifest. Project cards already
-  // use IntersectionObserver to lazy-prefetch beyond that.
+  // use IntersectionObserver to lazy-prefetch beyond that. Skip videos —
+  // `link.as = 'image'` would be a hint mismatch and the browser would
+  // re-fetch on render anyway.
   const seen = new Set<string>();
   for (const entry of manifest.slice(0, 3)) {
-    const first = entry.screenshots?.[0];
+    const first = entry.media?.[0];
     if (!first || !/^https?:\/\//.test(first)) continue;
+    if (/\.(mp4|webm|mov)(\?|$)/i.test(first)) continue;
     if (seen.has(first)) continue;
     seen.add(first);
     const link = document.createElement('link');
@@ -86,7 +89,7 @@ function prefetchProjectScreenshots() {
 function runPreload() {
   preloadAngularBundle();
   warmContactChunks();
-  prefetchProjectScreenshots();
+  prefetchProjectMedia();
   try {
     sessionStorage.setItem(SESSION_FLAG, '1');
   } catch {

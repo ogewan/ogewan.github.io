@@ -8,6 +8,7 @@ build/
 out/
 .vite/
 .turbo/
+.claude/*.lock
 
 # Coverage and test output
 coverage/
