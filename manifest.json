@@ -73,6 +73,27 @@
     }
   },
   {
+    "slug": "thursday-drill",
+    "repo_name": "thursday-drill",
+    "repo_url": "https://github.com/ogewan/thursday-drill",
+    "private": true,
+    "default_branch": "master",
+    "description": null,
+    "primary_language": "TypeScript",
+    "stars": 0,
+    "pushed_at": "2026-05-23T18:45:26Z",
+    "schema_version": 3,
+    "uuid": "d67345a9-e3b1-4bc2-98a3-3c4343adb02a",
+    "title": "Thursday Drill",
+    "summary": "Proctored interview-prep platform — a multi-curriculum drill workspace that pairs with a Notion study hub. Timed drills graded by real test suites, run through a unified proctor CLI.",
+    "tech": ["typescript", "react", "sqlite", "express", "jest", "vite"],
+    "categories": ["cli", "education"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-04-15",
+    "media": []
+  },
+  {
     "slug": "ogewan.github.io",
     "repo_name": "ogewan.github.io",
     "repo_url": "https://github.com/ogewan/ogewan.github.io",
@@ -81,7 +102,7 @@
     "description": null,
     "primary_language": "TypeScript",
     "stars": 0,
-    "pushed_at": "2026-05-21T19:44:42Z",
+    "pushed_at": "2026-05-21T19:45:22Z",
     "schema_version": 3,
     "uuid": "a4f7c2e1-8b3d-4a91-b6e5-2c9f8d4e1a7b",
     "title": "Portfolio SPA",
@@ -387,27 +408,6 @@
         ]
       }
     }
-  },
-  {
-    "slug": "thursday-drill",
-    "repo_name": "thursday-drill",
-    "repo_url": "https://github.com/ogewan/thursday-drill",
-    "private": true,
-    "default_branch": "master",
-    "description": null,
-    "primary_language": "TypeScript",
-    "stars": 0,
-    "pushed_at": "2026-05-21T06:38:03Z",
-    "schema_version": 3,
-    "uuid": "d67345a9-e3b1-4bc2-98a3-3c4343adb02a",
-    "title": "Thursday Drill",
-    "summary": "Proctored interview-prep platform — a multi-curriculum drill workspace that pairs with a Notion study hub. Timed drills graded by real test suites, run through a unified proctor CLI.",
-    "tech": ["typescript", "react", "sqlite", "express", "jest", "vite"],
-    "categories": ["cli", "education"],
-    "status": "active",
-    "featured": false,
-    "started_at": "2026-04-15",
-    "media": []
   },
   {
     "slug": "comix-ngn",
