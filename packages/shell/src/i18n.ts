@@ -129,6 +129,23 @@ void i18n
     returnNull: false,
   });
 
+// Wraps t() so missing/unknown keys return '' instead of the key itself.
+// Use for any string that the caller will conditionally render
+// (`if (value) ...`). For absolutely-required keys (section titles, page
+// headings), keep using the strict `t` directly so a missing key surfaces
+// as a type error.
+// Accepts any namespace-parameterized TFunction. We type the parameter as
+// `unknown` and cast internally — i18next's TFunction is generic over the
+// namespace/key union and isn't structurally assignable across namespaces,
+// so a permissive boundary is simpler than threading generics through every
+// caller. The returned helper is loosely typed (key: string) on purpose:
+// callers use it precisely *because* they want to ask for keys the strict
+// typing doesn't enumerate.
+export function optional(t: unknown): (key: string, options?: Record<string, unknown>) => string {
+  const call = t as (key: string, options?: Record<string, unknown>) => string;
+  return (key, options) => call(key, { defaultValue: '', ...options });
+}
+
 export default i18n;
 
 declare module 'i18next' {

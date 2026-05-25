@@ -5,6 +5,7 @@ import { Container, GlassPanel, Heading, Text } from '@portfolio/ui';
 import { SchedulePanel } from '../contact/SchedulePanel';
 import { useVisitorLocation } from '../useVisitorLocation';
 import { siteConfig } from '../../data/site-config';
+import { optional } from '../../i18n';
 
 const ContactMap = lazy(() => import('../contact/ContactMap'));
 
@@ -18,7 +19,10 @@ export function ContactSection() {
   // with the original page module's signature.
   void params.locale;
   const { t } = useTranslation(['contact']);
+  const opt = optional(t);
   const visitor = useVisitorLocation();
+  const lead = opt('lead');
+  const note = opt('note');
 
   // Schedule + Map are entirely hidden (heading + glass body) when the env keys
   // that power them are not configured at build time. Schedule needs both
@@ -53,9 +57,11 @@ export function ContactSection() {
           components={{ em: <em className="not-italic text-fg-secondary" /> }}
         />
       </Heading>
-      <Text variant="lead" className="mt-6 max-w-[640px]">
-        {t('lead')}
-      </Text>
+      {lead ? (
+        <Text variant="lead" className="mt-6 max-w-[640px]">
+          {lead}
+        </Text>
+      ) : null}
 
       <Section order={directOrder} title={t('sections.direct.title')}>
         <ul className="border-y border-glass-hairline-inner">
@@ -100,11 +106,16 @@ export function ContactSection() {
             <dd className="text-fg-primary">{t('sections.ground.values.lang')}</dd>
           </dl>
         </GlassPanel>
-        {visitor.state === 'resolved' && visitor.location.confidentCity ? (
-          <Text variant="small" className="mt-4 text-fg-muted">
-            {t('sections.ground.visitorLine', { city: visitor.location.city })}
-          </Text>
-        ) : null}
+        {visitor.state === 'resolved' && visitor.location.confidentCity
+          ? (() => {
+              const line = opt('sections.ground.visitorLine', { city: visitor.location.city });
+              return line ? (
+                <Text variant="small" className="mt-4 text-fg-muted">
+                  {line}
+                </Text>
+              ) : null;
+            })()
+          : null}
       </Section>
 
       {mapOrder ? (
@@ -126,9 +137,11 @@ export function ContactSection() {
         </Section>
       ) : null}
 
-      <Text variant="small" className="mt-12 text-fg-muted">
-        {t('note')}
-      </Text>
+      {note ? (
+        <Text variant="small" className="mt-12 text-fg-muted">
+          {note}
+        </Text>
+      ) : null}
     </Container>
   );
 }

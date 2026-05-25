@@ -2,12 +2,8 @@
   "crumbBack": { "en": "Back to home", "es": "Volver al inicio" },
   "eyebrow": { "en": "04 / Contact", "es": "04 / Contacto" },
   "headline": {
-    "en": "Two ways in. <em>Pick one.</em>",
-    "es": "Dos formas de entrar. <em>Elige una.</em>"
-  },
-  "lead": {
-    "en": "Email for anything substantive. Calendly for a call.",
-    "es": "Email para cualquier cosa de fondo. Calendly para una llamada."
+    "en": "How to reach <em>me.</em>",
+    "es": "Cómo <em>contactarme.</em>"
   },
   "sections": {
     "direct": {

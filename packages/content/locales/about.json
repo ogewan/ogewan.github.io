@@ -3,8 +3,8 @@
   "crumbBadge": { "en": "02 · /about · v1.1", "es": "02 · /about · v1.1" },
   "eyebrow": { "en": "02 / About", "es": "02 / Acerca" },
   "headline": {
-    "en": "<em>End to end.</em>",
-    "es": "<em>De principio a fin.</em>"
+    "en": "More <em>details.</em>",
+    "es": "Más <em>detalles.</em>"
   },
   "profile": {
     "name": { "en": "Name", "es": "Nombre" },
@@ -18,8 +18,8 @@
       "order": { "en": "01", "es": "01" },
       "title": { "en": "Posture", "es": "Postura" },
       "body": {
-        "en": "Software, not 'just UI.' Performance, reliability, accessibility, and security are part of how the thing ships, front end or back. I like product with real workflows, where good engineering is something people feel immediately.",
-        "es": "Software, no 'solo UI.' El rendimiento, la fiabilidad, la accesibilidad y la seguridad son parte de cómo se entrega, en el frontend o en el backend. Me gustan los productos con flujos de trabajo reales, donde la buena ingeniería se nota de inmediato."
+        "en": "Software, not '<em>just UI.</em>' Performance, reliability, accessibility, and security are part of how the thing ships, front end or back. I like product with real workflows, where good engineering is something people feel immediately.",
+        "es": "Software, no '<em>solo UI.</em>' El rendimiento, la fiabilidad, la accesibilidad y la seguridad son parte de cómo se entrega, en el frontend o en el backend. Me gustan los productos con flujos de trabajo reales, donde la buena ingeniería se nota de inmediato."
       },
       "quote": {
         "en": "Not 'just UI.'",

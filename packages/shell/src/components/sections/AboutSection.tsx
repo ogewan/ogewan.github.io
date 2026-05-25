@@ -6,6 +6,7 @@ import { TimelineWrapper } from '../TimelineWrapper';
 import { SectionLink } from '../SectionLink';
 import { siteConfig } from '../../data/site-config';
 import { currentFocusEntry } from '../../data/manifest';
+import { optional } from '../../i18n';
 
 // About section. Identity (profile dl) is sourced from `config.json` via
 // `siteConfig`; the persona sections (Posture/Trajectory/Work) are sourced
@@ -23,7 +24,7 @@ export function AboutSection() {
   const { t } = useTranslation(['about']);
   const { owner, about } = siteConfig;
 
-  const get = (key: string): string => t(key, { defaultValue: '' });
+  const get = optional(t);
 
   const posture = {
     title: get('sections.posture.title'),
@@ -160,7 +161,7 @@ export function AboutSection() {
         <span aria-hidden="true" className="inline-block h-px w-[6px] bg-cyan" />
         {t('eyebrow')}
       </Text>
-      <Heading level={1} variant="display" tabIndex={-1} className="max-w-[18ch]">
+      <Heading level={1} variant="h1" tabIndex={-1} className="max-w-[18ch]">
         <Trans
           i18nKey="headline"
           t={t}
