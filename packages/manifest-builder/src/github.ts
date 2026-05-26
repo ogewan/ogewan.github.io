@@ -74,6 +74,64 @@ export interface FetchedRepo {
   portfolioYmlText: string | null;
 }
 
+// Fetches the same RepoContext fields the bulk crawl returns, but for a
+// single arbitrary repo (typically one the user contributed to but doesn't
+// own). Returns null on any failure — 404, rate limit, auth issue — so the
+// caller can fall back to YAML-supplied values and emit a warning rather
+// than aborting the whole manifest build.
+const SINGLE_REPO_QUERY = /* GraphQL */ `
+  query Repo($owner: String!, $name: String!) {
+    repository(owner: $owner, name: $name) {
+      name
+      description
+      url
+      isPrivate
+      stargazerCount
+      pushedAt
+      defaultBranchRef {
+        name
+      }
+      primaryLanguage {
+        name
+      }
+    }
+  }
+`;
+
+interface GqlSingleRepoResponse {
+  repository: Omit<GqlRepoNode, 'portfolioYml'> | null;
+}
+
+export async function fetchUpstreamMetadata(
+  token: string,
+  owner: string,
+  name: string,
+): Promise<RepoContext | null> {
+  const client = graphql.defaults({
+    headers: { authorization: `token ${token}` },
+  });
+
+  try {
+    const response = await client<GqlSingleRepoResponse>(SINGLE_REPO_QUERY, { owner, name });
+    const repo = response.repository;
+    if (!repo || !repo.defaultBranchRef) return null;
+
+    return {
+      owner,
+      name: repo.name,
+      private: repo.isPrivate,
+      url: repo.url,
+      default_branch: repo.defaultBranchRef.name,
+      description: repo.description,
+      primary_language: repo.primaryLanguage?.name ?? null,
+      stars: repo.stargazerCount,
+      pushed_at: repo.pushedAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchReposWithPortfolioYml(
   token: string,
   login: string,

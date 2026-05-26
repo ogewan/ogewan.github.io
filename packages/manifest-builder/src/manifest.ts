@@ -1,4 +1,4 @@
-import type { CaseStudy, PortfolioYml } from './schema.js';
+import type { CaseStudy, Contributions, PortfolioYml } from './schema.js';
 
 // A single manifest entry: the validated .portfolio.yml fields plus GitHub-sourced
 // enrichment. The shell consumes this shape directly, so anything it needs at render
@@ -31,6 +31,11 @@ export interface ManifestEntry {
   media: string[];
   docs_link: PortfolioYml['docs_link'];
   case_study?: CaseStudy;
+  contributions?: Contributions;
+  // 'github' for repos auto-discovered via the GraphQL crawl, 'external' for
+  // entries authored under `<root>/.portfolio/<slug>/.portfolio.yml`. Lets the
+  // shell disambiguate origin (e.g. badge an OSS contribution differently).
+  source: 'github' | 'external';
 }
 
 export interface ManifestWarning {
@@ -101,6 +106,84 @@ export function enrichEntry(yml: PortfolioYml, repo: RepoContext): ManifestEntry
     media,
     docs_link: yml.docs_link,
     ...(yml.case_study !== undefined ? { case_study: yml.case_study } : {}),
+    ...(yml.contributions !== undefined ? { contributions: yml.contributions } : {}),
+    source: 'github',
+  };
+}
+
+// Rewrites a co-located asset reference in a `.portfolio/<slug>/.portfolio.yml`
+// to the path the deployed shell will serve from (assets are copied into
+// `packages/shell/public/external/<slug>/` at build time). Absolute http(s)
+// URLs pass through, matching `resolveScreenshotUrl`'s behavior.
+export function resolveExternalAssetUrl(path: string, slug: string, assetBaseUrl: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
+  const cleanPath = path.replace(/^\.?\/+/, '');
+  const base = assetBaseUrl.replace(/\/+$/, '');
+  return `${base}/${slug}/${cleanPath}`;
+}
+
+// Builds a manifest entry for a locally-authored `.portfolio/<slug>` project.
+// When `upstreamContext` is provided (live GitHub fetch succeeded), its fields
+// fill repo metadata. YAML-supplied fields don't override repo metadata here
+// because none of the relevant fields exist on PortfolioYml — overrides for
+// stars/description/etc. aren't part of the schema. If you need to override,
+// add the override fields to the YAML schema first.
+export function enrichExternalEntry(
+  yml: PortfolioYml,
+  slug: string,
+  assetBaseUrl: string,
+  upstreamContext: RepoContext | null,
+): ManifestEntry {
+  const hero = yml.hero ? resolveExternalAssetUrl(yml.hero, slug, assetBaseUrl) : undefined;
+  const media = (yml.media ?? []).map((path) => resolveExternalAssetUrl(path, slug, assetBaseUrl));
+
+  // Synthesize a RepoContext for entries without an upstream. `pushed_at`
+  // falls back to the YAML's most recent date so sortManifest doesn't sink
+  // these to the bottom by treating them as ancient.
+  const fallbackPushed = yml.ended_at ? `${yml.ended_at}T00:00:00Z` : `${yml.started_at}T00:00:00Z`;
+
+  const repo: RepoContext = upstreamContext ?? {
+    owner: yml.upstream?.owner ?? '',
+    name: yml.upstream?.repo ?? slug,
+    private: false,
+    url: yml.upstream ? `https://github.com/${yml.upstream.owner}/${yml.upstream.repo}` : '',
+    default_branch: 'main',
+    description: null,
+    primary_language: null,
+    stars: 0,
+    pushed_at: fallbackPushed,
+  };
+
+  return {
+    slug,
+    repo_name: repo.name,
+    repo_url: repo.url,
+    private: repo.private,
+    default_branch: repo.default_branch,
+    description: repo.description,
+    primary_language: repo.primary_language,
+    stars: repo.stars,
+    pushed_at: repo.pushed_at,
+    schema_version: yml.schema_version,
+    uuid: yml.uuid,
+    title: yml.title,
+    summary: yml.summary,
+    tech: yml.tech,
+    categories: yml.categories,
+    status: yml.status,
+    featured: yml.featured,
+    order: yml.order,
+    ...(yml.role !== undefined ? { role: yml.role } : {}),
+    started_at: yml.started_at,
+    ended_at: yml.ended_at,
+    pages_url: yml.pages_url,
+    demo_video: yml.demo_video,
+    ...(hero !== undefined ? { hero } : {}),
+    media,
+    docs_link: yml.docs_link,
+    ...(yml.case_study !== undefined ? { case_study: yml.case_study } : {}),
+    ...(yml.contributions !== undefined ? { contributions: yml.contributions } : {}),
+    source: 'external',
   };
 }
 

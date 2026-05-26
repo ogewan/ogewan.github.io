@@ -28,6 +28,11 @@ packages/ng-elements/dist/
 # ng-elements bundle is copied into the shell's public/ at build time
 packages/shell/public/ng-elements/
 
+# External-project assets are staged here from .portfolio/<slug>/ during the
+# build (see .github/workflows/build-and-deploy.yml). The canonical source
+# lives in .portfolio/ at the repo root; this dir is generated.
+packages/shell/public/external/
+
 # Editor and IDE
 .vscode/
 !.vscode/extensions.json

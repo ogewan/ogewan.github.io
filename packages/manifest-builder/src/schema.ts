@@ -75,6 +75,49 @@ export type CaseStudy = z.infer<typeof CaseStudySchema>;
 export type LocalizedString = z.infer<typeof LocalizedStringSchema>;
 export type LocalizedStringArray = z.infer<typeof LocalizedStringArraySchema>;
 
+// `upstream` names a GitHub repo to enrich an external entry against. Accepts
+// either the structured `{ owner, repo }` form or a `"owner/repo"` shorthand
+// that the transform normalizes to the structured shape. Only meaningful for
+// entries under `.portfolio/<slug>/.portfolio.yml`; entries discovered on
+// GitHub already have their own RepoContext and ignore this field.
+const UpstreamSchema = z.union([
+  z.object({ owner: z.string().min(1), repo: z.string().min(1) }).strict(),
+  z
+    .string()
+    .regex(/^[^/\s]+\/[^/\s]+$/, 'expected "owner/repo"')
+    .transform((value) => {
+      // Regex above guarantees exactly one slash and non-empty halves.
+      const [owner, repo] = value.split('/') as [string, string];
+      return { owner, repo };
+    }),
+]);
+
+export type Upstream = z.infer<typeof UpstreamSchema>;
+
+// External / OSS-contribution entries need a place to describe what the
+// author actually did on a project they don't own. `summary` is required when
+// `contributions` is present; bullets and PR/commit links are optional. EN is
+// source-of-truth, ES is optional and falls back at render time — matches the
+// existing `case_study` localization pattern.
+const ContributionsSchema = z
+  .object({
+    summary: LocalizedStringSchema,
+    items: z.array(LocalizedStringSchema).optional(),
+    links: z
+      .array(
+        z
+          .object({
+            label: z.string().min(1),
+            url: z.string().url(),
+          })
+          .strict(),
+      )
+      .optional(),
+  })
+  .strict();
+
+export type Contributions = z.infer<typeof ContributionsSchema>;
+
 export const PortfolioYmlSchema = z
   .object({
     schema_version: z.literal(PORTFOLIO_YML_SCHEMA_VERSION),
@@ -106,6 +149,14 @@ export const PortfolioYmlSchema = z
     media: z.array(z.string().min(1)).optional(),
     docs_link: z.string().url().optional(),
     case_study: CaseStudySchema.optional(),
+    // External-entry only: names the upstream GitHub repo to enrich against.
+    // The manifest builder fetches live metadata (stars, pushed_at, language)
+    // when present; YAML-supplied fields win on a field-by-field basis.
+    upstream: UpstreamSchema.optional(),
+    // The author's contribution to a project they don't own. Required at
+    // author-time for external entries (enforced by the builder, not the
+    // schema, since the schema is shared with self-mode entries).
+    contributions: ContributionsSchema.optional(),
   })
   .strict();
 

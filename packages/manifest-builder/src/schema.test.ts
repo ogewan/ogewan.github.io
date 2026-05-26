@@ -158,4 +158,56 @@ describe('PortfolioYmlSchema — edge cases', () => {
     expect(PortfolioYmlSchema.safeParse({ ...base, ended_at: '2025-01-01' }).success).toBe(true);
     expect(PortfolioYmlSchema.safeParse({ ...base, ended_at: 'sometime' }).success).toBe(false);
   });
+
+  it('accepts upstream in "owner/repo" shorthand and normalizes to structured form', () => {
+    const result = PortfolioYmlSchema.safeParse({ ...base, upstream: 'octocat/hello-world' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.upstream).toEqual({ owner: 'octocat', repo: 'hello-world' });
+    }
+  });
+
+  it('accepts upstream in structured { owner, repo } form', () => {
+    const result = PortfolioYmlSchema.safeParse({
+      ...base,
+      upstream: { owner: 'octocat', repo: 'hello-world' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects upstream shorthand without exactly one slash', () => {
+    expect(PortfolioYmlSchema.safeParse({ ...base, upstream: 'noslash' }).success).toBe(false);
+    expect(PortfolioYmlSchema.safeParse({ ...base, upstream: 'a/b/c' }).success).toBe(false);
+  });
+
+  it('accepts a populated contributions block', () => {
+    const result = PortfolioYmlSchema.safeParse({
+      ...base,
+      contributions: {
+        summary: { en: 'Added incremental builds.', es: 'Añadí builds incrementales.' },
+        items: [{ en: 'Shipped caching layer.' }],
+        links: [{ label: 'PR #42', url: 'https://github.com/x/y/pull/42' }],
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects contributions without summary', () => {
+    const result = PortfolioYmlSchema.safeParse({
+      ...base,
+      contributions: { items: [{ en: 'Did stuff.' }] },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects contribution link with malformed URL', () => {
+    const result = PortfolioYmlSchema.safeParse({
+      ...base,
+      contributions: {
+        summary: { en: 'Helped out.' },
+        links: [{ label: 'PR', url: 'not-a-url' }],
+      },
+    });
+    expect(result.success).toBe(false);
+  });
 });

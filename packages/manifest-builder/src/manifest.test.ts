@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { PortfolioYml } from './schema.js';
 import {
   enrichEntry,
+  enrichExternalEntry,
+  resolveExternalAssetUrl,
   resolveScreenshotUrl,
   sortManifest,
   type ManifestEntry,
@@ -70,6 +72,118 @@ describe('enrichEntry', () => {
     void _media;
     const entry = enrichEntry(rest as PortfolioYml, repo);
     expect(entry.media).toEqual([]);
+  });
+
+  it('marks github-sourced entries with source: github', () => {
+    expect(enrichEntry(yml, repo).source).toBe('github');
+  });
+});
+
+describe('resolveExternalAssetUrl', () => {
+  it('rewrites repo-relative paths under /external/<slug>/', () => {
+    expect(resolveExternalAssetUrl('hero.png', 'my-oss', '/external')).toBe(
+      '/external/my-oss/hero.png',
+    );
+  });
+
+  it('strips leading "./" and slashes', () => {
+    expect(resolveExternalAssetUrl('./hero.png', 'my-oss', '/external')).toBe(
+      '/external/my-oss/hero.png',
+    );
+    expect(resolveExternalAssetUrl('/hero.png', 'my-oss', '/external')).toBe(
+      '/external/my-oss/hero.png',
+    );
+  });
+
+  it('passes absolute URLs through untouched', () => {
+    const abs = 'https://cdn.example.com/hero.png';
+    expect(resolveExternalAssetUrl(abs, 'my-oss', '/external')).toBe(abs);
+  });
+
+  it('respects a trailing slash on assetBaseUrl', () => {
+    expect(resolveExternalAssetUrl('hero.png', 'my-oss', '/external/')).toBe(
+      '/external/my-oss/hero.png',
+    );
+  });
+});
+
+describe('enrichExternalEntry', () => {
+  const externalYml: PortfolioYml = {
+    schema_version: 3,
+    uuid: '33333333-3333-4333-8333-333333333333',
+    title: 'External Project',
+    summary: 'An OSS project I contributed to.',
+    tech: ['rust'],
+    categories: [],
+    status: 'active',
+    featured: false,
+    started_at: '2024-03-01',
+    upstream: { owner: 'someone', repo: 'cool-lib' },
+    contributions: {
+      summary: { en: 'Added incremental compilation.' },
+    },
+    hero: 'hero.png',
+    media: ['shot-1.png', 'https://cdn.example/external.png'],
+  };
+
+  const upstreamContext: RepoContext = {
+    owner: 'someone',
+    name: 'cool-lib',
+    private: false,
+    url: 'https://github.com/someone/cool-lib',
+    default_branch: 'trunk',
+    description: 'A cool library.',
+    primary_language: 'Rust',
+    stars: 1234,
+    pushed_at: '2025-04-10T00:00:00Z',
+  };
+
+  it('rewrites hero/media to /external/<slug>/... and tags source=external', () => {
+    const entry = enrichExternalEntry(externalYml, 'cool-lib', '/external', upstreamContext);
+    expect(entry.source).toBe('external');
+    expect(entry.slug).toBe('cool-lib');
+    expect(entry.hero).toBe('/external/cool-lib/hero.png');
+    expect(entry.media).toEqual([
+      '/external/cool-lib/shot-1.png',
+      'https://cdn.example/external.png',
+    ]);
+  });
+
+  it('uses upstream context for stars/description/pushed_at when provided', () => {
+    const entry = enrichExternalEntry(externalYml, 'cool-lib', '/external', upstreamContext);
+    expect(entry.stars).toBe(1234);
+    expect(entry.description).toBe('A cool library.');
+    expect(entry.primary_language).toBe('Rust');
+    expect(entry.pushed_at).toBe('2025-04-10T00:00:00Z');
+    expect(entry.repo_url).toBe('https://github.com/someone/cool-lib');
+    expect(entry.default_branch).toBe('trunk');
+  });
+
+  it('synthesizes a fallback context when no upstream metadata is available', () => {
+    const entry = enrichExternalEntry(externalYml, 'cool-lib', '/external', null);
+    expect(entry.stars).toBe(0);
+    expect(entry.description).toBeNull();
+    expect(entry.primary_language).toBeNull();
+    expect(entry.default_branch).toBe('main');
+    // Falls back to started_at so sort doesn't sink it.
+    expect(entry.pushed_at).toBe('2024-03-01T00:00:00Z');
+    // Without upstream context we still derive a repo_url from yml.upstream.
+    expect(entry.repo_url).toBe('https://github.com/someone/cool-lib');
+  });
+
+  it('uses ended_at as pushed_at fallback when present', () => {
+    const entry = enrichExternalEntry(
+      { ...externalYml, ended_at: '2025-02-15' },
+      'cool-lib',
+      '/external',
+      null,
+    );
+    expect(entry.pushed_at).toBe('2025-02-15T00:00:00Z');
+  });
+
+  it('carries through contributions block', () => {
+    const entry = enrichExternalEntry(externalYml, 'cool-lib', '/external', upstreamContext);
+    expect(entry.contributions?.summary.en).toBe('Added incremental compilation.');
   });
 });
 

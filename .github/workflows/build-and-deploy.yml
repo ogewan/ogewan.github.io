@@ -91,6 +91,25 @@ jobs:
             echo "manifest.json unchanged; skipping commit"
           fi
 
+      - name: Stage external project assets
+        # External (locally-authored) portfolio entries live at
+        # .portfolio/<slug>/.portfolio.yml with hero/media files alongside the
+        # yml. The manifest builder rewrites their asset paths to
+        # /external/<slug>/<file>; this step copies the actual files into
+        # the shell's public/ so Vite picks them up at build time. The .yml
+        # itself is excluded — it's metadata, not a deployed asset.
+        run: |
+          if [ -d .portfolio ]; then
+            mkdir -p packages/shell/public/external
+            for dir in .portfolio/*/; do
+              name=$(basename "$dir")
+              mkdir -p "packages/shell/public/external/$name"
+              rsync -a --exclude='.portfolio.yml' "$dir" "packages/shell/public/external/$name/"
+            done
+          else
+            echo "no .portfolio/ directory; skipping external asset staging"
+          fi
+
       - name: Build Angular elements bundle
         run: pnpm --filter @portfolio/ng-elements build
 
