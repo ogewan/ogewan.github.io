@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Container, Heading, Text, focusRingClassName } from '@portfolio/ui';
 import { manifest, allCategories } from '../../data/manifest';
 import { ProjectCard } from '../ProjectCard';
@@ -44,7 +44,11 @@ export function ProjectsSection() {
             {t('eyebrow')}
           </Text>
           <Heading level={1} variant="h1" tabIndex={-1}>
-            {t('headline')}
+            <Trans
+              i18nKey="headline"
+              t={t}
+              components={{ em: <em className="not-italic text-fg-secondary" /> }}
+            />
           </Heading>
         </div>
         <Text variant="small" className="max-w-sm">
