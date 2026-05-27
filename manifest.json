@@ -70,7 +70,8 @@
           }
         ]
       }
-    }
+    },
+    "source": "github"
   },
   {
     "slug": "ogewan.github.io",
@@ -81,7 +82,7 @@
     "description": null,
     "primary_language": "TypeScript",
     "stars": 0,
-    "pushed_at": "2026-05-25T18:38:01Z",
+    "pushed_at": "2026-05-27T05:16:20Z",
     "schema_version": 3,
     "uuid": "a4f7c2e1-8b3d-4a91-b6e5-2c9f8d4e1a7b",
     "title": "Portfolio SPA",
@@ -104,7 +105,8 @@
     "started_at": "2026-04-24",
     "hero": "https://raw.githubusercontent.com/ogewan/ogewan.github.io/main/docs/screenshots/hero.png",
     "media": [],
-    "docs_link": "https://github.com/username/portfolio#readme"
+    "docs_link": "https://github.com/username/portfolio#readme",
+    "source": "github"
   },
   {
     "slug": "twine-deck",
@@ -152,7 +154,8 @@
           }
         ]
       }
-    }
+    },
+    "source": "github"
   },
   {
     "slug": "youtubeman",
@@ -215,7 +218,8 @@
           }
         ]
       }
-    }
+    },
+    "source": "github"
   },
   {
     "slug": "thursday-drill",
@@ -236,7 +240,8 @@
     "status": "active",
     "featured": false,
     "started_at": "2026-04-15",
-    "media": []
+    "media": [],
+    "source": "github"
   },
   {
     "slug": "bomberman.ai",
@@ -309,7 +314,8 @@
           }
         ]
       }
-    }
+    },
+    "source": "github"
   },
   {
     "slug": "superchrome",
@@ -330,7 +336,8 @@
     "status": "active",
     "featured": false,
     "started_at": "2026-01-23",
-    "media": []
+    "media": [],
+    "source": "github"
   },
   {
     "slug": "polyocr",
@@ -407,7 +414,8 @@
           }
         ]
       }
-    }
+    },
+    "source": "github"
   },
   {
     "slug": "comix-ngn",
@@ -431,6 +439,7 @@
     "pages_url": "https://comixngn.js.org/",
     "hero": "https://raw.githubusercontent.com/ogewan/comix-ngn/master/.portfolio/hero.png",
     "media": [],
-    "docs_link": "https://github.com/ogewan/comix-ngn/wiki/How-to-Script"
+    "docs_link": "https://github.com/ogewan/comix-ngn/wiki/How-to-Script",
+    "source": "github"
   }
 ]
