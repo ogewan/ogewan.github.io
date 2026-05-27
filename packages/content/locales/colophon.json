@@ -62,6 +62,10 @@
         "note": { "en": "NOTE", "es": "NOTA" }
       },
       "entries": {
+        "v11": {
+          "en": "Manifest builder accepts locally-authored external project entries (`.portfolio/<slug>/`) for OSS contributions you don't own. `optional()` i18n helper softens missing keys. Project detail pages drop the redundant subtitle. SPA deep-link replay fix on Pages.",
+          "es": "El manifest builder acepta entradas locales para proyectos externos (`.portfolio/<slug>/`) — para contribuciones OSS que no son tuyas. Helper `optional()` para claves i18n ausentes. Páginas de detalle sin el subtítulo redundante. Fix de deep-link SPA en Pages."
+        },
         "v10": {
           "en": "Private repos now surface (gated by .portfolio.yml + repo-scoped PAT); detail pages hide outbound affordances and label them Private. Hero + media accept videos (mp4/webm) alongside images; cards autoplay muted, looping, reduced-motion-aware. Zero-star rows omitted from the spec table.",
           "es": "Los repos privados ahora aparecen (con .portfolio.yml + PAT con scope repo); las páginas de detalle ocultan sus salidas y los etiquetan como Private. Hero + media aceptan vídeos (mp4/webm) además de imágenes; las cards los reproducen en mute, en loop, respetando reduced-motion. Filas de cero estrellas omitidas de la spec table."
