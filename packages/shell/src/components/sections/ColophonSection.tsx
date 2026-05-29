@@ -172,7 +172,7 @@ export function ColophonSection() {
           <CreditGroup
             label={t('sections.credits.groups.influences')}
             items={[
-              'Ted Chiang · prose discipline',
+              'Brittany Chiang · prose discipline',
               'Pentagram · type confidence',
               'Coursey · field-report tone',
             ]}

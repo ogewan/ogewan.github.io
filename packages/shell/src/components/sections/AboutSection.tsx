@@ -58,7 +58,13 @@ export function AboutSection() {
       title: posture.title,
       render: () => (
         <>
-          <Text>{posture.body}</Text>
+          <Text>
+            <Trans
+              i18nKey="sections.posture.body"
+              t={t}
+              components={{ em: <em className="not-italic text-fg-secondary" /> }}
+            />
+          </Text>
           {posture.quote ? <PullQuote>{posture.quote}</PullQuote> : null}
         </>
       ),

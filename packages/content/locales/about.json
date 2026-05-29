@@ -14,18 +14,6 @@
     "email": { "en": "Email", "es": "Email" }
   },
   "sections": {
-    "posture": {
-      "order": { "en": "01", "es": "01" },
-      "title": { "en": "Posture", "es": "Postura" },
-      "body": {
-        "en": "Software, not '<em>just UI.</em>' Performance, reliability, accessibility, and security are part of how the thing ships, front end or back. I like product with real workflows, where good engineering is something people feel immediately.",
-        "es": "Software, no '<em>solo UI.</em>' El rendimiento, la fiabilidad, la accesibilidad y la seguridad son parte de cómo se entrega, en el frontend o en el backend. Me gustan los productos con flujos de trabajo reales, donde la buena ingeniería se nota de inmediato."
-      },
-      "quote": {
-        "en": "Not 'just UI.'",
-        "es": "No 'solo UI.'"
-      }
-    },
     "trajectory": {
       "order": { "en": "02", "es": "02" },
       "title": { "en": "Trajectory", "es": "Trayectoria" },
@@ -39,13 +27,13 @@
       "title": { "en": "What I work on / how I work", "es": "En qué trabajo / cómo trabajo" },
       "subhead1": { "en": "What I work on.", "es": "En qué trabajo." },
       "body1": {
-        "en": "Full-stack web for SaaS products, internal tools, and research platforms: the UI that carries real workflows, the Node services behind it, and the platform layers that hold a suite together. Design systems and shared component libraries that survive years of iteration. Observability and AppSec when 'works on my machine' isn't the bar. WebGL / R3F when the visualization is the product.",
-        "es": "Web full-stack para productos SaaS, herramientas internas y plataformas de investigación: la UI que carga flujos de trabajo reales, los servicios en Node detrás, y las capas de plataforma que mantienen cohesionada una suite. Sistemas de diseño y librerías de componentes compartidos que sobreviven años de iteración. Observabilidad y AppSec cuando 'funciona en mi máquina' no es el estándar. WebGL / R3F cuando la visualización es el producto."
+        "en": "High performance software developed for the web including SaaS products, internal tools, research platforms, and video games. Design systems and shared component libraries to streamline developer experience. Observability and AppSec to expect the unexpected.",
+        "es": "Software de alto rendimiento desarrollado para la web, incluyendo productos SaaS, herramientas internas y plataformas de investigación. Sistemas de diseño y bibliotecas de componentes compartidos para optimizar la experiencia del desarrollador. Observabilidad y AppSec para esperar lo inesperado."
       },
       "subhead2": { "en": "How I work.", "es": "Cómo trabajo." },
       "body2": {
-        "en": "Top-line first, then the detail. Align with design and backend early, since the data contract decides how much churn comes later. Ship the smallest version that still feels complete, de-risk the scary parts up front, keep it reviewable. Simplify, standardize, measure. Complexity creep is normal; you manage it on purpose. Real dates on real commits.",
-        "es": "Lo importante primero, luego el detalle. Alinearse con diseño y backend temprano, ya que el contrato de datos decide cuánta fricción viene después. Entregar la versión más pequeña que aún se sienta completa, mitigar las partes difíciles desde el principio, mantenerlo revisable. Simplificar, estandarizar, medir. El crecimiento de la complejidad es normal; se gestiona a propósito. Fechas reales en commits reales."
+        "en": "Development is discovery. Native performance but cross platform as a priority. A detailed roadmap to make out the forest from the trees but rapid prototyping to get the lay of the land. ",
+        "es": "El desarrollo es descubrimiento. Rendimiento nativo pero multiplataforma como prioridad. Un roadmap detallado para distinguir el bosque de los árboles pero prototipado rápido para conocer el terreno."
       }
     },
     "currently": {
@@ -61,7 +49,7 @@
     },
     "shelf": {
       "order": { "en": "06", "es": "06" },
-      "title": { "en": "What I keep on the shelf", "es": "Lo que tengo en el estante" }
+      "title": { "en": "My shelf", "es": "Mi estante" }
     }
   },
   "cta": {
