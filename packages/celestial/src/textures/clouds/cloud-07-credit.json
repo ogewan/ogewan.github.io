@@ -1,0 +1,10 @@
+{
+  "slug": "cloud-07",
+  "name": "MODIS Cloud Fraction — Monthly composite (September 2024)",
+  "instrument": "MODIS (Terra satellite)",
+  "releaseDate": "2024-09-01",
+  "pageUrl": "https://neo.gsfc.nasa.gov/view.php?datasetId=MODAL2_M_CLD_FR&date=2024-09-01",
+  "sourceUrl": "https://neo.gsfc.nasa.gov/archive/rgb/MODAL2_M_CLD_FR/MODAL2_M_CLD_FR_2024-09.PNG",
+  "license": "Public domain (NASA)",
+  "credit": "NASA Earth Observations (NEO) / MODIS Atmosphere Science Team, NASA Goddard Space Flight Center"
+}

@@ -1,0 +1,10 @@
+{
+  "slug": "cloud-01",
+  "name": "Blue Marble — Combined cloud coverage",
+  "instrument": "MODIS (Terra satellite)",
+  "releaseDate": "2002-01-01",
+  "pageUrl": "https://visibleearth.nasa.gov/images/57747",
+  "sourceUrl": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+  "license": "Public domain (NASA)",
+  "credit": "NASA Goddard Space Flight Center"
+}
