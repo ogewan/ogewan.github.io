@@ -23,7 +23,7 @@ const MODE_LINE = import.meta.env.DEV ? '> mode · dev' : '> mode · prod';
 const BOX: readonly string[] = [
   '┌' + '─'.repeat(WIDTH) + '┐',
   '│ ' + padInside('$ seun-ogedengbe.portfolio') + '│',
-  '│ ' + padInside('> /colophon · v1.3') + '│',
+  '│ ' + padInside('> /colophon · v' + __APP_VERSION__) + '│',
   '│ ' + padInside(MODE_LINE) + '│',
   //'│ ' + padInside('> if you\'re reading this, hi.') + '│',
   '└' + '─'.repeat(WIDTH) + '┘',

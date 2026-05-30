@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { sitemapPlugin } from './vite-plugin-sitemap';
 import siteConfig from '../../config.json';
+import shellPkg from './package.json' with { type: 'json' };
 
 const REPO_ROOT = resolve(__dirname, '../..');
 const TIMELINE_GENERATOR = resolve(REPO_ROOT, 'packages/content/scripts/generate-timeline.mjs');
@@ -87,6 +88,12 @@ export default defineConfig(() => {
       }),
     ],
     base: baseUrl,
+    define: {
+      // Single source of truth for the site's display version. Read by the
+      // SiteHeader bottom-left signature and the colophon easter-egg.
+      // Bump @portfolio/shell's package.json `version` to release.
+      __APP_VERSION__: JSON.stringify(shellPkg.version),
+    },
     server: {
       port: 5173,
     },
