@@ -403,7 +403,7 @@
     <script>
       (function () {
         // BUMP when a default changes and old visitors should be migrated.
-        var STATE_VERSION = '2026-05-30-nasa-default';
+        var STATE_VERSION = '2026-05-30-earthpos-default';
         var VERSION_KEY = 'portfolio:state-version';
 
         // Vite substitutes %MODE% at HTML transform time. The version-gated
@@ -454,12 +454,6 @@
             var storedMode = window.localStorage.getItem(EARTH_KEY);
             mode = storedMode === 'procedural' ? 'procedural' : 'nasa';
           }
-          if (params.get(Q) !== mode) {
-            params.set(Q, mode);
-            var qs = params.toString();
-            var next = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
-            window.history.replaceState(null, '', next);
-          }
           // Match the React context's storage convention: persist only when
           // the value diverges from the default ('nasa'); clear otherwise.
           if (mode === 'procedural') {
@@ -467,11 +461,60 @@
           } else {
             window.localStorage.removeItem(EARTH_KEY);
           }
-          // Step 3: cloud-texture module init bridge.
+
+          // Step 3: earthPos URL ↔ storage resolution. Same shape as Step 2 —
+          // URL wins when present-and-valid; otherwise stored value; otherwise
+          // 'auto'. The 'auto' fallback is deterministic at pre-paint, even
+          // when geolocation would later resolve to 'local' — the rail's
+          // first-resolve effect upgrades 'auto' → 'local' once geo lands,
+          // IFF the user hasn't manually picked anything this session. That
+          // means a STATE_VERSION wipe (which clears the stored value) plus
+          // a granted geo prompt produces ?earthPos=local on the very next
+          // visit, satisfying "version mismatch resets to local".
+          //
+          // URL value `local` corresponds to the rail's 'visitor' key (the
+          // "You" pin). All other URL values are 1:1 with rail keys.
+          var POS_KEY = 'portfolio:earth-pos';
+          var QP = 'earthPos';
+          var VALID_POS = {
+            local: 1, auto: 1, houston: 1, sf: 1, nyc: 1, reykjavik: 1,
+            london: 1, stpetersburg: 1, beijing: 1, tokyo: 1, sydney: 1,
+          };
+          var rawPos = params.get(QP);
+          var pos;
+          if (rawPos && Object.prototype.hasOwnProperty.call(VALID_POS, rawPos)) {
+            pos = rawPos;
+          } else {
+            var storedPos = window.localStorage.getItem(POS_KEY);
+            pos = (storedPos && Object.prototype.hasOwnProperty.call(VALID_POS, storedPos))
+              ? storedPos
+              : 'auto';
+          }
+          // Storage convention: 'local' is the post-promote default, so we
+          // only clear when it's 'local'. Explicit 'auto' is persisted (so a
+          // denied-geo visitor who picks AUTO doesn't accidentally re-promote
+          // on the next visit when geo gets granted).
+          if (pos === 'local') {
+            window.localStorage.removeItem(POS_KEY);
+          } else {
+            window.localStorage.setItem(POS_KEY, pos);
+          }
+
+          // Consolidated URL stamp — write both params in one replaceState.
+          var needStamp = params.get(Q) !== mode || params.get(QP) !== pos;
+          if (needStamp) {
+            params.set(Q, mode);
+            params.set(QP, pos);
+            var qs = params.toString();
+            var next = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+            window.history.replaceState(null, '', next);
+          }
+
+          // Step 4: cloud-texture module init bridge.
           window.__earthSystemCloudInit = mode === 'nasa' ? 'nasa' : null;
         } catch (e) {
-          // URL parsing failure — React will still render with the in-code
-          // default ('nasa').
+          // URL parsing failure — React will still render with in-code
+          // defaults ('nasa' + 'auto'-→-'local').
         }
       })();
     </script>
