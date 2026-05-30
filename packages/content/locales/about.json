@@ -14,6 +14,12 @@
     "email": { "en": "Email", "es": "Email" }
   },
   "sections": {
+    "posture": {
+      "order": { "en": "", "es": "" },
+      "title": { "en": "", "es": "" },
+      "body": { "en": "", "es": "" },
+      "quote": { "en": "", "es": "" }
+    },
     "trajectory": {
       "order": { "en": "02", "es": "02" },
       "title": { "en": "Trajectory", "es": "Trayectoria" },
