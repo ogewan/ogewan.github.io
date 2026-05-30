@@ -82,7 +82,7 @@
     "description": "WebGL-based viewer for volumetric data",
     "primary_language": "TypeScript",
     "stars": 25,
-    "pushed_at": "2026-05-26T17:00:01Z",
+    "pushed_at": "2026-05-29T03:30:53Z",
     "schema_version": 3,
     "uuid": "126241fb-867d-49b6-8361-206c3957b1b8",
     "title": "Neuroglancer (Seung Lab fork)",
@@ -168,7 +168,7 @@
     "description": null,
     "primary_language": "TypeScript",
     "stars": 0,
-    "pushed_at": "2026-05-27T06:49:11Z",
+    "pushed_at": "2026-05-30T09:26:26Z",
     "schema_version": 3,
     "uuid": "a4f7c2e1-8b3d-4a91-b6e5-2c9f8d4e1a7b",
     "title": "Portfolio SPA",
@@ -195,52 +195,25 @@
     "source": "github"
   },
   {
-    "slug": "twine-deck",
-    "repo_name": "twine-deck",
-    "repo_url": "https://github.com/ogewan/twine-deck",
-    "private": true,
-    "default_branch": "main",
-    "description": null,
-    "primary_language": "TypeScript",
+    "slug": "superchrome",
+    "repo_name": "superchrome",
+    "repo_url": "https://github.com/ogewan/superchrome",
+    "private": false,
+    "default_branch": "master",
+    "description": "A multi chrome extension to fix things that bother me.",
+    "primary_language": "JavaScript",
     "stars": 0,
-    "pushed_at": "2026-05-25T04:31:05Z",
+    "pushed_at": "2026-05-30T04:19:32Z",
     "schema_version": 3,
-    "uuid": "c9d9a44d-51e6-48c0-b15b-f4d644957e56",
-    "title": "Twine Deck",
-    "summary": "A desktop launcher and enhancement shell for Twine interactive fiction — wraps the self-contained HTML files Twine produces inside an Electron app that adds a managed library, a modern save system, variable inspection, and optional mod injection.",
-    "tech": ["electron", "react", "typescript", "vite", "better-sqlite3", "tailwindcss", "zustand"],
-    "categories": ["desktop-app", "developer-tools", "interactive-fiction"],
+    "uuid": "7c3e9a21-5b4d-4f8a-9c1e-2d6f0a3b8e74",
+    "title": "SuperChrome",
+    "summary": "A Chrome extension (Manifest V3) for tab and browser management — tab grouping, a URL manager, and memory/process insight.",
+    "tech": ["javascript", "chrome-extension", "manifest-v3"],
+    "categories": ["browser-extension"],
     "status": "active",
     "featured": false,
-    "started_at": "2026-04-21",
+    "started_at": "2026-01-23",
     "media": [],
-    "case_study": {
-      "background": {
-        "en": [
-          "Twine produces self-contained HTML files for interactive fiction, but offers nothing around them — no managed library, no save handling beyond the story format's own, no way to inspect or edit a running story's state. Twine Deck is a desktop shell that wraps those HTML files inside an Electron application, adding a managed library, a modern save system, variable inspection, and optional mod injection, all without changing how the story itself runs.",
-          "The desktop app gives each story a managed library with cover art, tags, and playtime tracking; unlimited named profiles and saves with no slot numbers; a draggable in-game panel for save, load, and profile switching; a live typed editor for the running story's variables; reusable cheat presets; and scoped mod and userscript injection. A companion Node and MongoDB server is planned for a community catalog, accounts, and folder-based sync."
-        ]
-      },
-      "pull_quote": {
-        "en": "The codebase is written to be read."
-      },
-      "approach": {
-        "body": {
-          "en": "Electron splits JavaScript into three contexts — a main process that owns the SQLite database and filesystem, renderer processes that run the React UI, and preload scripts that form a narrow bridge between them. All persistence flows through the main process over typed IPC channels; the renderer never touches the database directly."
-        },
-        "steps": [
-          {
-            "en": "Each Twine story runs inside its own WebContentsView — a sandboxed browser tab — with a dedicated preload script injected beforehand."
-          },
-          {
-            "en": "The preload hooks into the story format's save API and exposes a narrow, validated bridge back to the main process; the story cannot call anything the bridge does not explicitly expose."
-          },
-          {
-            "en": "The floating control panel for saves, profiles, and variables lives in the main window's renderer above the story view, so the story's own code cannot hide or interfere with it."
-          }
-        ]
-      }
-    },
     "source": "github"
   },
   {
@@ -252,7 +225,7 @@
     "description": null,
     "primary_language": "JavaScript",
     "stars": 0,
-    "pushed_at": "2026-05-24T21:14:05Z",
+    "pushed_at": "2026-05-29T20:13:06Z",
     "schema_version": 3,
     "uuid": "2da69ec2-0674-4e53-b32c-31479c76b18e",
     "title": "YouTube Tabs Manager",
@@ -301,6 +274,55 @@
           },
           {
             "en": "Sync manager pushes structural changes to Google Drive and merges remote state on a 5-minute tick."
+          }
+        ]
+      }
+    },
+    "source": "github"
+  },
+  {
+    "slug": "twine-deck",
+    "repo_name": "twine-deck",
+    "repo_url": "https://github.com/ogewan/twine-deck",
+    "private": true,
+    "default_branch": "main",
+    "description": null,
+    "primary_language": "TypeScript",
+    "stars": 0,
+    "pushed_at": "2026-05-25T04:31:05Z",
+    "schema_version": 3,
+    "uuid": "c9d9a44d-51e6-48c0-b15b-f4d644957e56",
+    "title": "Twine Deck",
+    "summary": "A desktop launcher and enhancement shell for Twine interactive fiction — wraps the self-contained HTML files Twine produces inside an Electron app that adds a managed library, a modern save system, variable inspection, and optional mod injection.",
+    "tech": ["electron", "react", "typescript", "vite", "better-sqlite3", "tailwindcss", "zustand"],
+    "categories": ["desktop-app", "developer-tools", "interactive-fiction"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-04-21",
+    "media": [],
+    "case_study": {
+      "background": {
+        "en": [
+          "Twine produces self-contained HTML files for interactive fiction, but offers nothing around them — no managed library, no save handling beyond the story format's own, no way to inspect or edit a running story's state. Twine Deck is a desktop shell that wraps those HTML files inside an Electron application, adding a managed library, a modern save system, variable inspection, and optional mod injection, all without changing how the story itself runs.",
+          "The desktop app gives each story a managed library with cover art, tags, and playtime tracking; unlimited named profiles and saves with no slot numbers; a draggable in-game panel for save, load, and profile switching; a live typed editor for the running story's variables; reusable cheat presets; and scoped mod and userscript injection. A companion Node and MongoDB server is planned for a community catalog, accounts, and folder-based sync."
+        ]
+      },
+      "pull_quote": {
+        "en": "The codebase is written to be read."
+      },
+      "approach": {
+        "body": {
+          "en": "Electron splits JavaScript into three contexts — a main process that owns the SQLite database and filesystem, renderer processes that run the React UI, and preload scripts that form a narrow bridge between them. All persistence flows through the main process over typed IPC channels; the renderer never touches the database directly."
+        },
+        "steps": [
+          {
+            "en": "Each Twine story runs inside its own WebContentsView — a sandboxed browser tab — with a dedicated preload script injected beforehand."
+          },
+          {
+            "en": "The preload hooks into the story format's save API and exposes a narrow, validated bridge back to the main process; the story cannot call anything the bridge does not explicitly expose."
+          },
+          {
+            "en": "The floating control panel for saves, profiles, and variables lives in the main window's renderer above the story view, so the story's own code cannot hide or interfere with it."
           }
         ]
       }
@@ -401,28 +423,6 @@
         ]
       }
     },
-    "source": "github"
-  },
-  {
-    "slug": "superchrome",
-    "repo_name": "superchrome",
-    "repo_url": "https://github.com/ogewan/superchrome",
-    "private": false,
-    "default_branch": "master",
-    "description": "A multi chrome extension to fix things that bother me.",
-    "primary_language": "JavaScript",
-    "stars": 0,
-    "pushed_at": "2026-05-21T09:54:47Z",
-    "schema_version": 3,
-    "uuid": "7c3e9a21-5b4d-4f8a-9c1e-2d6f0a3b8e74",
-    "title": "SuperChrome",
-    "summary": "A Chrome extension (Manifest V3) for tab and browser management — tab grouping, a URL manager, and memory/process insight.",
-    "tech": ["javascript", "chrome-extension", "manifest-v3"],
-    "categories": ["browser-extension"],
-    "status": "active",
-    "featured": false,
-    "started_at": "2026-01-23",
-    "media": [],
     "source": "github"
   },
   {
