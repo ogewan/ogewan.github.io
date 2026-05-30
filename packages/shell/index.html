@@ -434,12 +434,26 @@
         }
 
         try {
-          // Step 2: earthSystem URL ↔ storage resolution.
+          // Step 2: earthSystem URL ↔ storage resolution. URL wins when
+          // present (shareable links are authoritative). When absent, fall
+          // back to the stored preference so a visitor who picked
+          // 'procedural' via the dev console keeps that choice across
+          // cold loads of the bare URL. Only fall through to the in-code
+          // default ('nasa') when neither URL nor storage says otherwise.
+          // The version-migration step above already wiped portfolio:* on
+          // a STATE_VERSION bump, so a stale stored value from before the
+          // migration won't survive into this read.
           var EARTH_KEY = 'portfolio:earth-texture-mode';
           var Q = 'earthSystem';
           var params = new URLSearchParams(window.location.search);
           var raw = params.get(Q);
-          var mode = (raw === 'nasa' || raw === 'procedural') ? raw : 'nasa';
+          var mode;
+          if (raw === 'nasa' || raw === 'procedural') {
+            mode = raw;
+          } else {
+            var storedMode = window.localStorage.getItem(EARTH_KEY);
+            mode = storedMode === 'procedural' ? 'procedural' : 'nasa';
+          }
           if (params.get(Q) !== mode) {
             params.set(Q, mode);
             var qs = params.toString();
