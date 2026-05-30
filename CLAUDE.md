@@ -38,9 +38,9 @@ pnpm --filter @portfolio/manifest-builder test  # 25 tests
 pnpm --filter @portfolio/ng-elements build      # ng custom-element bundle
 pnpm --filter @portfolio/shell build            # production build; check chunk sizes
 unset ELECTRON_RUN_AS_NODE && pnpm dev          # dev server
-pnpm test:visual --quality=quality --screenshot=q9-N-quality.png
-pnpm test:visual --quality=static  --screenshot=q9-N-static.png
-pnpm test:visual --quality=simple  --screenshot=q9-N-simple.png
+pnpm test:visual --quality=quality --screenshot=<feature>/q9-N-quality.png
+pnpm test:visual --quality=static  --screenshot=<feature>/q9-N-static.png
+pnpm test:visual --quality=simple  --screenshot=<feature>/q9-N-simple.png
 pnpm capture:scenes                             # refresh static-mode scene PNGs
 ```
 
@@ -53,4 +53,5 @@ pnpm capture:scenes                             # refresh static-mode scene PNGs
 - `ARCHITECTURE.md` and `CONTINUE.md` at repo root are gitignored — never commit them.
 - `mockup/` is gitignored — design source of truth. Read `mockup/project/tokens.html` for token values.
 - `packages/celestial/src/screenshots/*.png` ARE committed — they drive `static` quality mode.
+- `.screenshots/` (gitignored) holds Playwright/dev shots; **never write loose files at the root** — always under a feature-named subfolder (e.g. `.screenshots/moon-fix/foo.png`). Use `archive/` for one-off or obsolete shots. `test:visual --screenshot=<feature>/<name>.png` autocreates the subfolder.
 - `packages/celestial/src/textures/*.webp` are 34-byte 1×1 stubs — canvas placeholder overrides them at runtime via `isLikelyStubTexture`.

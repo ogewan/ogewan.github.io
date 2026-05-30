@@ -22,6 +22,29 @@ import {
   getMoonAngleOverride,
   setMoonAngleOverride,
   getMoonCurrentAngle,
+  getEarthHidden,
+  setEarthHidden,
+  getMoonAmbientOverride,
+  setMoonAmbientOverride,
+  setMoonCameraFocus,
+  getCloudLayerSnapshot,
+  type CloudLayerSpec,
+  getCloudOpacity,
+  setCloudOpacity,
+  DEFAULT_CLOUD_OPACITY,
+  getCloudBrightness,
+  setCloudBrightness,
+  DEFAULT_CLOUD_BRIGHTNESS,
+  getCloudContrast,
+  setCloudContrast,
+  DEFAULT_CLOUD_CONTRAST,
+  getCloudCoverage,
+  setCloudCoverage,
+  DEFAULT_CLOUD_COVERAGE,
+  getSunDirectionOverride,
+  setSunDirectionOverride,
+  setSunFromPosition,
+  setSunFromTime,
   getProjectsRingsRotationRate,
   setProjectsRingsRotationRate,
   getProjectsSceneRotationRate,
@@ -229,7 +252,12 @@ function resetEarthDefaults(): void {
   setEarthRotationRate(SCENE_DEFAULTS.earth.rotationRate);
   setCloudDriftRate(SCENE_DEFAULTS.earth.cloudDriftRate);
   setCloudTextureMode(SCENE_DEFAULTS.earth.cloudTextureMode);
+  setCloudOpacity(DEFAULT_CLOUD_OPACITY);
+  setCloudBrightness(DEFAULT_CLOUD_BRIGHTNESS);
+  setCloudContrast(DEFAULT_CLOUD_CONTRAST);
+  setCloudCoverage(DEFAULT_CLOUD_COVERAGE);
   setMoonAngleOverride(null);
+  setSunDirectionOverride(null);
   registry.setEarthTestMode?.(SCENE_DEFAULTS.earth.testMode);
   registry.setEarthTextureMode?.(SCENE_DEFAULTS.earth.textureMode);
   console.log('[portfolio] earth defaults reset');
@@ -598,6 +626,82 @@ export function installDevConsole(): void {
           }
           setCloudTextureMode(mode);
         },
+
+        // Inspect the current session's cloud-layer pick. Each entry is
+        // { url, driftRate } — N = 1 in degraded quality, 2 or 3 otherwise,
+        // sampled from packages/celestial/src/textures/clouds/cloud-*.webp.
+        //   portfolio.earth.clouds.layers()   → [{url, driftRate}, …]
+        layers(): readonly CloudLayerSpec[] {
+          return getCloudLayerSnapshot();
+        },
+
+        // Global cloud-layer opacity. Applied uniformly to every active layer
+        // each frame; default 0.45. Persists to localStorage.
+        //   portfolio.earth.clouds.opacity()       → number
+        //   portfolio.earth.clouds.opacity(0.6)    → set
+        //   portfolio.earth.clouds.opacity(0)      → fully transparent (hides clouds)
+        opacity(value?: number): number | void {
+          if (value === undefined) return getCloudOpacity();
+          if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) {
+            console.warn(
+              `[portfolio] earth.clouds.opacity(v): v must be a finite number in [0, 1].`,
+            );
+            return;
+          }
+          setCloudOpacity(value);
+        },
+
+        // Cloud RGB multiplier applied before tone mapping. Push day-side
+        // clouds into the bright end of ACES so they read as reflective.
+        // Default 1.6. Pair with contrast > 1 for crisp highlights.
+        //   portfolio.earth.clouds.brightness()       → number
+        //   portfolio.earth.clouds.brightness(1.6)    → default
+        //   portfolio.earth.clouds.brightness(2.5)    → very bright (clamps via tone mapping)
+        brightness(value?: number): number | void {
+          if (value === undefined) return getCloudBrightness();
+          if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+            console.warn(
+              `[portfolio] earth.clouds.brightness(v): v must be a non-negative finite number.`,
+            );
+            return;
+          }
+          setCloudBrightness(value);
+        },
+
+        // pow() exponent applied to density. > 1 = sharper transition between
+        // sky and cloud (more sky, brighter peaks). < 1 = softer, more haze.
+        // Default 1.3.
+        //   portfolio.earth.clouds.contrast()         → number
+        //   portfolio.earth.clouds.contrast(2.0)      → sharper, more sky
+        //   portfolio.earth.clouds.contrast(0.7)      → softer, more haze
+        contrast(value?: number): number | void {
+          if (value === undefined) return getCloudContrast();
+          if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+            console.warn(
+              `[portfolio] earth.clouds.contrast(v): v must be a positive finite number.`,
+            );
+            return;
+          }
+          setCloudContrast(value);
+        },
+
+        // Coverage threshold for the fbm mask. Lower = denser fields (less
+        // sky); higher = more clear sky between cloud patches. Default 0.4.
+        // Smoothstep band is fixed at +0.25, so cloudCoverage in [0, 0.75]
+        // is the useful range.
+        //   portfolio.earth.clouds.coverage()         → number
+        //   portfolio.earth.clouds.coverage(0.2)      → dense overcast
+        //   portfolio.earth.clouds.coverage(0.6)      → broken / patchy
+        coverage(value?: number): number | void {
+          if (value === undefined) return getCloudCoverage();
+          if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) {
+            console.warn(
+              `[portfolio] earth.clouds.coverage(v): v must be a finite number in [0, 1].`,
+            );
+            return;
+          }
+          setCloudCoverage(value);
+        },
       },
 
       // Get/set moon orbital position (radians). Overrides the UTC-derived
@@ -612,6 +716,107 @@ export function installDevConsole(): void {
           return;
         }
         setMoonAngleOverride(radians ?? null);
+      },
+
+      // Sun-direction overrides. Override is in EARTH-LOCAL space — the
+      // per-frame `applyQuaternion(earth)` transform still runs, so
+      // geographic relationships stay correct relative to a rotating earth.
+      // For a static lit hemisphere on a static planet, pair with
+      // `portfolio.earth.rotationSpeed(0)`.
+      //
+      // sunPosition: subsolar point as (lat, lng) in degrees. (0, 0) puts the
+      // sun overhead Greenwich at the equator (UTC noon at equinox).
+      //   portfolio.earth.sunPosition(0, 0)         → equatorial noon-UTC
+      //   portfolio.earth.sunPosition(23.45, 0)     → June-solstice subsolar lat
+      //   portfolio.earth.sunPosition(0, -90)       → 18:00 UTC equivalent
+      //   portfolio.earth.sunPosition()             → release back to UTC tracking
+      sunPosition(lat?: number, lng?: number): void {
+        if (lat === undefined && lng === undefined) {
+          setSunDirectionOverride(null);
+          return;
+        }
+        if (
+          typeof lat !== 'number' ||
+          typeof lng !== 'number' ||
+          !Number.isFinite(lat) ||
+          !Number.isFinite(lng)
+        ) {
+          console.warn(
+            `[portfolio] earth.sunPosition(lat, lng): both must be finite numbers (omit both to clear).`,
+          );
+          return;
+        }
+        setSunFromPosition(lat, lng);
+      },
+
+      // sunTime: subsolar point computed as if it were `hourUtc` (0..24) on a
+      // given day-of-year (1..365, optional — defaults to today). Reuses the
+      // same math as the default UTC-driven path.
+      //   portfolio.earth.sunTime(12)              → noon-UTC today
+      //   portfolio.earth.sunTime(0, 172)          → midnight-UTC on June solstice
+      //   portfolio.earth.sunTime()                → release back to UTC tracking
+      sunTime(hourUtc?: number, dayOfYear?: number): void {
+        if (hourUtc === undefined) {
+          setSunDirectionOverride(null);
+          return;
+        }
+        if (typeof hourUtc !== 'number' || !Number.isFinite(hourUtc)) {
+          console.warn(`[portfolio] earth.sunTime(h, d?): h must be a finite number.`);
+          return;
+        }
+        if (
+          dayOfYear !== undefined &&
+          (typeof dayOfYear !== 'number' || !Number.isFinite(dayOfYear))
+        ) {
+          console.warn(`[portfolio] earth.sunTime(h, d?): d must be a finite number if provided.`);
+          return;
+        }
+        setSunFromTime(hourUtc, dayOfYear);
+      },
+
+      // Inspect the current sun-direction override (null = UTC tracking).
+      //   portfolio.earth.sunOverride()  → { x, y, z } | null
+      sunOverride(): { x: number; y: number; z: number } | null {
+        const v = getSunDirectionOverride();
+        return v ? { x: v.x, y: v.y, z: v.z } : null;
+      },
+
+      // Hide / show / toggle the earth mesh (and clouds + city dots — the
+      // whole earthRef group). Moon stays visible since it's a sibling group.
+      // Useful for inspecting the moon without earth crowding the frame.
+      //   portfolio.earth.hide() / show() / toggle()
+      hide(): void {
+        setEarthHidden(true);
+      },
+      show(): void {
+        setEarthHidden(false);
+      },
+      toggle(): void {
+        setEarthHidden(!getEarthHidden());
+      },
+
+      // Dolly the camera onto the moon and lookAt it (overrides CameraDriver
+      // until off() called or the scene changes). Pair with hide() and
+      // moonLight() to inspect the texture in detail.
+      //   portfolio.earth.moonFocus()       → on
+      //   portfolio.earth.moonFocus(false)  → off (camera resumes scene anchor)
+      moonFocus(on: boolean = true): void {
+        setMoonCameraFocus(Boolean(on));
+      },
+
+      // Boost the moon's ambient term so the unlit hemisphere is visible
+      // (default 0.05 keeps the night side near-black). 0.5 reads the whole
+      // moon as a uniformly-lit sphere — ideal for confirming the texture.
+      //   portfolio.earth.moonLight()       → current override (null = default 0.05)
+      //   portfolio.earth.moonLight(0.5)    → boost ambient
+      //   portfolio.earth.moonLight(null)   → release
+      moonLight(value?: number | null): number | null | void {
+        if (value === undefined) return getMoonAmbientOverride();
+        if (value !== null && (typeof value !== 'number' || !Number.isFinite(value))) {
+          console.warn(`[portfolio] earth.moonLight(v): v must be a finite number or null.`);
+          return;
+        }
+        setMoonAmbientOverride(value ?? null);
       },
 
       //   portfolio.earth.moonWatch()  → toggle live angle logging (once/sec)
@@ -1135,12 +1340,24 @@ export function installDevConsole(): void {
           '  portfolio.earth.cloudSpeed()                // get cloud drift rate, rad/sec (default 0.015)',
           '  portfolio.earth.cloudSpeed(rate)            // set; 0 halts clouds. Persists in localStorage.',
           "  portfolio.earth.clouds.textureMode()         // null | 'nasa' — get cloud layer mode",
-          "  portfolio.earth.clouds.textureMode('nasa')  // enable NASA cloud texture (earth-clouds-2k.webp)",
-          '  portfolio.earth.clouds.textureMode(null)    // disable cloud layer (default)',
+          "  portfolio.earth.clouds.textureMode('nasa')  // enable multi-layer NASA clouds (2–3 random from clouds/)",
+          '  portfolio.earth.clouds.textureMode(null)    // disable clouds (default)',
+          '  portfolio.earth.clouds.layers()              // → [{url, driftRate}, …] for the current session pick',
+          '  portfolio.earth.clouds.opacity()             // get global cloud-layer opacity (default 0.45)',
+          '  portfolio.earth.clouds.opacity(v)            // set; 0 hides clouds, 1 fully opaque. Persists in localStorage.',
+          '  portfolio.earth.clouds.brightness(v?)        // RGB multiplier pre tone-mapping (default 1.6)',
+          '  portfolio.earth.clouds.contrast(v?)          // pow() on density: >1 sharper, <1 softer (default 1.3)',
+          '  portfolio.earth.clouds.coverage(v?)          // fbm threshold: lower=denser, higher=more sky (default 0.4)',
+          '  portfolio.earth.sunPosition(lat, lng)        // override subsolar point in degrees (no args = clear)',
+          '  portfolio.earth.sunTime(hour, day?)          // override as if it were `hour` UTC on `day` of year',
+          '  portfolio.earth.sunOverride()                // → current override {x,y,z} or null',
           '  portfolio.earth.moonAngle()                 // get moon orbit override (null = UTC tracking)',
           '  portfolio.earth.moonAngle(Math.PI/2)        // lock moon to angle for screenshots',
           '  portfolio.earth.moonAngle(null)             // release moon back to UTC tracking',
           '  portfolio.earth.moonWatch()                 // toggle live angle logging (prints once/sec)',
+          '  portfolio.earth.hide() / show() / toggle()  // hide earth mesh (moon stays visible)',
+          '  portfolio.earth.moonFocus(on?)              // dolly camera onto moon; moonFocus(false) to release',
+          '  portfolio.earth.moonLight(v?)               // boost moon ambient (default 0.05); 0.5 = uniformly lit',
           '',
           'Projects-scene rings:',
           '  portfolio.rings.show() / hide() / toggle()',

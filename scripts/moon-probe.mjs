@@ -1,27 +1,29 @@
 #!/usr/bin/env node
 /**
- * Moon texture probe — captures the moon at a fixed orbit position in both
- * texture modes and crops to the earth+moon area so the difference is legible.
+ * Moon texture probe — captures the moon zoomed in (camera dollied via
+ * portfolio.earth.moonFocus(), earth hidden, ambient boosted) so the LRO
+ * surface vs the procedural grey is unambiguously distinguishable.
  *
  *   node scripts/moon-probe.mjs
  *
- * Requires the dev server at http://localhost:5173.
- * Saves to .screenshots/:
+ * Auto-detects the dev server port. Saves to .screenshots/moon-fix/:
  *   moon-probe-procedural.png  — uniform grey sphere (base colour)
- *   moon-probe-nasa.png        — should show LRO surface (grey + dark maria)
+ *   moon-probe-nasa.png        — LRO surface (grey + dark maria visible)
  */
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { detectPortfolioPort } from './_dev-port.mjs';
 
-const BASE_URL  = 'http://localhost:5173/en/about';
+const port = await detectPortfolioPort();
+const BASE_URL = `http://localhost:${port}/en/about`;
 // 1920×1080 so the earth/moon are larger on screen.
 const VIEWPORT  = { width: 1920, height: 1080 };
 // Full viewport — side-by-side comparison of procedural vs NASA moon.
 const CROP      = null;
 // Moon at PI*0.35 — foreground, lit side, not occluded by earth.
 const MOON_ANGLE = Math.PI * 1.469;
-const DIR = resolve(process.cwd(), '.screenshots');
+const DIR = resolve(process.cwd(), '.screenshots', 'moon-fix');
 mkdirSync(DIR, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -44,12 +46,37 @@ async function probe(textureMode, screenshotName) {
       window.portfolio.earth.rotationSpeed(0);
       window.portfolio.earth.textureMode(mode);
       window.portfolio.earth.moonAngle(angle);
+      window.portfolio.earth.hide();
+      window.portfolio.earth.moonLight(0.5);
+      window.portfolio.earth.moonFocus(true);
     },
     { mode: textureMode, angle: MOON_ANGLE },
   );
 
-  // NASA mode fetches four webp files; give them time to decode and upload.
-  await page.waitForTimeout(textureMode === 'nasa' ? 5000 : 1000);
+  // NASA mode fetches the LRO webp; give it time to decode and upload.
+  await page.waitForTimeout(textureMode === 'nasa' ? 5000 : 1500);
+
+  // Diagnostic: read moon shader uniforms (exposed on window.__moonMaterial in dev).
+  const uniformProbe = await page.evaluate(() => {
+    const m = window.__moonMaterial;
+    const u = m?.uniforms;
+    const stateU = window.__moonUniforms;
+    const sameRef = m && stateU && m.uniforms === stateU;
+    return {
+      hasMaterial: !!m,
+      sameUniformsRef: sameRef,
+      currentTextureMode: window.portfolio?.earth?.textureMode(),
+      stateUseMap: stateU?.useMap?.value,
+      stateAmbient: stateU?.ambient?.value,
+      stateMoonMapW: stateU?.moonMap?.value?.image?.width ?? null,
+      stateMoonMapIsCanvas: stateU?.moonMap?.value?.isCanvasTexture ?? false,
+      matUseMap: u?.useMap?.value,
+      matAmbient: u?.ambient?.value,
+      matMoonMapW: u?.moonMap?.value?.image?.width ?? null,
+      matMoonMapIsCanvas: u?.moonMap?.value?.isCanvasTexture ?? false,
+    };
+  });
+  console.log(`PROBE (${textureMode}):`, JSON.stringify(uniformProbe));
 
   const path = resolve(DIR, screenshotName);
   await page.screenshot({ path, ...(CROP ? { clip: CROP } : {}) });

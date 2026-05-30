@@ -245,13 +245,45 @@ function buildTexture(palette: Palette): THREE.CanvasTexture {
   return tex;
 }
 
+// Flat-color CanvasTexture. Small canvas (the texture is never sampled
+// visibly when its purpose is to keep a sampler complete) configured the same
+// way buildTexture() configures its output, so it drops into any sampler slot
+// without driver-specific behavior differences.
+function buildFlatTexture(color: string): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    const fallback = new THREE.DataTexture(new Uint8Array([204, 205, 208, 255]), 1, 1);
+    fallback.needsUpdate = true;
+    fallback.colorSpace = THREE.SRGBColorSpace;
+    return fallback as unknown as THREE.CanvasTexture;
+  }
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.anisotropy = 4;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 export function makePlaceholderEarthTextures(): {
   day: THREE.CanvasTexture;
   night: THREE.CanvasTexture;
+  moon: THREE.CanvasTexture;
 } {
   return {
     day: buildTexture(DAY_PALETTE),
     night: buildTexture(NIGHT_PALETTE),
+    // Flat gray matching the moon shader's baseColor (#cccdd0). Never visible
+    // in procedural mode (useMap=0 selects baseColor in GLSL); exists so the
+    // moonMap sampler is always backed by a renderable texture, avoiding the
+    // incomplete-sampler state that bound the moon to a draw-call-broken
+    // texture when seeded with an image-less `new THREE.Texture()`.
+    moon: buildFlatTexture('#cccdd0'),
   };
 }
 

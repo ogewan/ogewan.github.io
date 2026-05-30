@@ -32,6 +32,39 @@ export {
   setEarthRotationRate,
 } from './earth-rotation-rate.js';
 export {
+  getEarthHidden,
+  setEarthHidden,
+  getMoonAmbientOverride,
+  setMoonAmbientOverride,
+  getMoonCameraFocus,
+  setMoonCameraFocus,
+} from './earth-debug.js';
+export {
+  CLOUD_TEXTURE_URLS,
+  type CloudLayerSpec,
+  pickCloudLayers,
+  getCloudLayerDriftRate,
+  getCloudLayerSnapshot,
+} from './cloud-layers.js';
+export { DEFAULT_CLOUD_OPACITY, getCloudOpacity, setCloudOpacity } from './earth-cloud-opacity.js';
+export {
+  DEFAULT_CLOUD_BRIGHTNESS,
+  DEFAULT_CLOUD_CONTRAST,
+  DEFAULT_CLOUD_COVERAGE,
+  getCloudBrightness,
+  setCloudBrightness,
+  getCloudContrast,
+  setCloudContrast,
+  getCloudCoverage,
+  setCloudCoverage,
+} from './earth-cloud-look.js';
+export {
+  getSunDirectionOverride,
+  setSunDirectionOverride,
+  setSunFromPosition,
+  setSunFromTime,
+} from './sun-direction-override.js';
+export {
   DEFAULT_CLOUD_DRIFT_RATE,
   getCloudDriftRate,
   setCloudDriftRate,

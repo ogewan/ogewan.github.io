@@ -1,12 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { createRef, useEffect, useMemo, useRef, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import type { SceneName } from '../../scenes.js';
 import { useCelestialFocus } from '../../CelestialContext.js';
 import { CANONICAL_CITIES } from '../../cities.js';
 import { getEarthRotationRate } from '../../earth-rotation-rate.js';
-import { getCloudDriftRate } from '../../earth-cloud-rate.js';
+import { pickCloudLayers, getCloudLayerDriftRate } from '../../cloud-layers.js';
+import { getCloudOpacity } from '../../earth-cloud-opacity.js';
+import { getCloudBrightness, getCloudContrast, getCloudCoverage } from '../../earth-cloud-look.js';
+import { getSunDirectionOverride } from '../../sun-direction-override.js';
+import { getEarthHidden, getMoonAmbientOverride, getMoonCameraFocus } from '../../earth-debug.js';
 import { getMoonAngleOverride, updateMoonAngle } from '../../moon-orbit-angle.js';
 import { useEarthTextureMode } from '../../EarthTextureModeContext.js';
 import { useEarthTestMode } from '../../EarthTestModeContext.js';
@@ -30,7 +34,6 @@ import {
 import { useCloudTextureMode } from '../../earth-cloud-texture-mode.js';
 import earthDayUrl from '../../textures/earth-day-4k.webp';
 import earthNightUrl from '../../textures/earth-night-4k.webp';
-import earthCloudsUrl from '../../textures/earth-clouds-2k.webp';
 import moonUrl from '../../textures/moon-4k.webp';
 
 // Earth scene — Phase 9.1.
@@ -134,7 +137,6 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   const { textureMode } = useEarthTextureMode();
 
   const earthRef = useRef<THREE.Group>(null);
-  const cloudsRef = useRef<THREE.Mesh>(null);
   const moonOrbitRef = useRef<THREE.Group>(null);
   const moonRef = useRef<THREE.Mesh>(null);
   const focusTweenRef = useRef<gsap.core.Tween | null>(null);
@@ -148,7 +150,21 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   const placeholder = useMemo(() => makePlaceholderEarthTextures(), []);
   const [dayMap, setDayMap] = useState<THREE.Texture>(placeholder.day);
   const [nightMap, setNightMap] = useState<THREE.Texture>(placeholder.night);
-  const [cloudsMap, setCloudsMap] = useState<THREE.Texture | null>(null);
+  // Multi-layer clouds: pick 2–3 random texture URLs at session start (1 in
+  // degraded). Each layer gets its own mesh, own ref, and its own drift rate
+  // (70–130% of base) so the composite reads as moving weather rather than a
+  // rigid skin. See cloud-layers.ts.
+  const cloudLayers = useMemo(
+    () => pickCloudLayers({ degraded: settings.degraded }),
+    [settings.degraded],
+  );
+  const cloudLayerRefs = useMemo(
+    () => cloudLayers.map(() => createRef<THREE.Mesh>()),
+    [cloudLayers],
+  );
+  const [cloudLayerTextures, setCloudLayerTextures] = useState<Array<THREE.Texture | null>>(() =>
+    cloudLayers.map(() => null),
+  );
   const [moonTex, setMoonTex] = useState<THREE.Texture | null>(null);
 
   // Imperative texture load with per-texture error tolerance. If a file fails
@@ -223,7 +239,6 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   const effectiveDayMap = textureMode === 'nasa' ? (dayMap ?? placeholder.day) : placeholder.day;
   const effectiveNightMap =
     textureMode === 'nasa' ? (nightMap ?? placeholder.night) : placeholder.night;
-  const effectiveCloudsMap = cloudsMap;
 
   const uniforms = useMemo(
     () => ({
@@ -251,7 +266,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
       baseColor: { value: new THREE.Color('#cccdd0') },
       ambient: { value: 0.05 },
       shadowFactor: { value: 0 },
-      moonMap: { value: new THREE.Texture() },
+      moonMap: { value: placeholder.moon as THREE.Texture },
       useMap: { value: 0 },
     }),
     [sunDirectionUniform],
@@ -259,56 +274,73 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
 
   useEffect(() => {
     const active = moonTex !== null && textureMode === 'nasa';
-    moonUniforms.moonMap.value = moonTex ?? new THREE.Texture();
-    moonUniforms.useMap.value = active ? 1 : 0;
-    // Force material to re-bind the texture slot when the reference changes.
-    if (moonRef.current) {
-      (moonRef.current.material as THREE.ShaderMaterial).needsUpdate = true;
-    }
-  }, [moonTex, textureMode, moonUniforms]);
+    // R3F clones the uniforms object when constructing the material, so the
+    // `moonUniforms` ref we built with useMemo is NOT the same object as
+    // `moonRef.current.material.uniforms`. Mutating the React-side ref has no
+    // effect on the GPU; we must reach into the material's actual uniforms.
+    const mat = moonRef.current?.material as THREE.ShaderMaterial | undefined;
+    if (!mat) return;
+    const mu = mat.uniforms;
+    if (mu.moonMap) mu.moonMap.value = moonTex ?? placeholder.moon;
+    if (mu.useMap) mu.useMap.value = active ? 1 : 0;
+    mat.needsUpdate = true;
+  }, [moonTex, textureMode, placeholder.moon]);
 
-  // Cloud uniforms. cloudMap is updated imperatively when effectiveCloudsMap
-  // changes (same pattern as moonUniforms). sunDirection is the shared ref so
-  // the per-frame mutation in useFrame propagates here too.
-  const cloudUniforms = useMemo(
-    () => ({
-      cloudMap: { value: new THREE.Texture() },
-      sunDirection: sunDirectionUniform,
-      cloudOpacity: { value: 0.45 },
-    }),
-    [sunDirectionUniform],
-  );
-
+  // Load each layer's webp when cloudTextureMode === 'nasa'. Independent of
+  // earth textureMode. When mode is cleared, all slots revert to null and the
+  // sync effect below blanks each material's cloudMap uniform.
   useEffect(() => {
-    if (effectiveCloudsMap) cloudUniforms.cloudMap.value = effectiveCloudsMap;
-  }, [effectiveCloudsMap, cloudUniforms]);
-
-  // Load NASA cloud texture when cloudTextureMode === 'nasa', independent of
-  // earth textureMode. Reverts to null (hides cloud layer) when mode is cleared.
-  useEffect(() => {
-    if (cloudTextureMode !== 'nasa') {
-      setCloudsMap(null);
+    if (cloudTextureMode !== 'nasa' || cloudLayers.length === 0) {
+      setCloudLayerTextures(cloudLayers.map(() => null));
       return;
     }
     const loader = new THREE.TextureLoader();
     let cancelled = false;
-    loader.load(
-      earthCloudsUrl,
-      (tex) => {
-        if (cancelled || isLikelyStubTexture(tex)) return;
-        tex.wrapS = THREE.RepeatWrapping;
-        tex.needsUpdate = true;
-        setCloudsMap(tex);
-      },
-      undefined,
-      (err) => {
-        if (!cancelled) console.warn('[celestial] cloud texture load failed:', err);
-      },
-    );
+    cloudLayers.forEach((spec, idx) => {
+      loader.load(
+        spec.url,
+        (tex) => {
+          if (cancelled || isLikelyStubTexture(tex)) return;
+          tex.wrapS = THREE.RepeatWrapping;
+          tex.needsUpdate = true;
+          setCloudLayerTextures((prev) => {
+            if (prev[idx] === tex) return prev;
+            const next = prev.slice();
+            next[idx] = tex;
+            return next;
+          });
+        },
+        undefined,
+        (err) => {
+          if (!cancelled) console.warn(`[celestial] cloud layer ${idx} load failed:`, err);
+        },
+      );
+    });
     return () => {
       cancelled = true;
     };
-  }, [cloudTextureMode]);
+  }, [cloudTextureMode, cloudLayers]);
+
+  // Memo'd uniforms per layer. R3F clones uniforms at material construction
+  // and re-applies them whenever the prop reference changes — so we let useMemo
+  // return a NEW object whenever cloudLayerTextures[idx] changes, and R3F's
+  // re-apply path picks up the new texture. This mirrors the earth uniforms
+  // pattern at line 234 and sidesteps the R3F-uniforms-clone bug entirely
+  // (the moon's through-ref path doesn't work here because the inline JSX
+  // uniforms would stomp the value on each render).
+  const cloudUniformsList = useMemo(
+    () =>
+      cloudLayers.map((spec, idx) => ({
+        cloudMap: { value: cloudLayerTextures[idx] ?? null },
+        sunDirection: sunDirectionUniform,
+        cloudOpacity: { value: 0.45 },
+        cloudBrightness: { value: 1.6 },
+        cloudContrast: { value: 1.3 },
+        cloudCoverage: { value: 0.4 },
+        layerSeed: { value: new THREE.Vector2(spec.seed[0], spec.seed[1]) },
+      })),
+    [cloudLayers, cloudLayerTextures, sunDirectionUniform],
+  );
 
   // Auto-rotation. Rate read per-frame from getEarthRotationRate() so the
   // dev console can change it live (incl. negative for reverse, 0 to halt).
@@ -335,15 +367,40 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   // real moon's synodic phase at session open.
   const moonOrbitOffset = useMemo(() => moonOrbitOffsetFromUtc(new Date()), []);
 
+  const camera = useThree((s) => s.camera);
+  const focusCamPosVec = useRef(new THREE.Vector3());
+
   useFrame((_, delta) => {
     if (focus.mode === 'auto' && earthRef.current && !focusTweenRef.current?.isActive()) {
       earthRef.current.rotation.y += getEarthRotationRate() * delta;
     }
-    if (cloudsRef.current && !settings.degraded) {
-      cloudsRef.current.rotation.y += getCloudDriftRate() * delta;
+    // Drift each cloud layer at its own captured rate (70–130% of base) so the
+    // composite reads as moving weather. In degraded quality the pool was
+    // narrowed to one layer at pick-time so this loop is a single iteration.
+    // Poll the global cloud-look knobs and write them through the material's
+    // actual uniforms (memo'd uniforms ref wouldn't propagate — same R3F
+    // clone gotcha that bit the moon path).
+    const cloudOpacity = getCloudOpacity();
+    const cloudBrightness = getCloudBrightness();
+    const cloudContrast = getCloudContrast();
+    const cloudCoverage = getCloudCoverage();
+    for (let i = 0; i < cloudLayerRefs.length; i++) {
+      const mesh = cloudLayerRefs[i]?.current;
+      if (!mesh) continue;
+      mesh.rotation.y += getCloudLayerDriftRate(i) * delta;
+      const cu = (mesh.material as THREE.ShaderMaterial).uniforms;
+      if (cu.cloudOpacity) cu.cloudOpacity.value = cloudOpacity;
+      if (cu.cloudBrightness) cu.cloudBrightness.value = cloudBrightness;
+      if (cu.cloudContrast) cu.cloudContrast.value = cloudContrast;
+      if (cu.cloudCoverage) cu.cloudCoverage.value = cloudCoverage;
     }
     if (earthRef.current) {
-      sunWorldRef.current.copy(sunLocal).applyQuaternion(earthRef.current.quaternion);
+      // Dev-console can override the UTC-derived sun vector in earth-local
+      // space; falls back to `sunLocal` when null. The earth.quaternion
+      // transform after still applies, so positions remain geographic-frame
+      // correct relative to the rotating earth.
+      const sunSrc = getSunDirectionOverride() ?? sunLocal;
+      sunWorldRef.current.copy(sunSrc).applyQuaternion(earthRef.current.quaternion);
       uniforms.sunDirection.value.copy(sunWorldRef.current);
     }
 
@@ -377,7 +434,31 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
         // min<=max, so we ramp 0→1 across the penumbra and invert.)
         shadowFactor = 1 - THREE.MathUtils.smoothstep(lateralLen, UMBRA_INNER, UMBRA_OUTER);
       }
-      moonUniforms.shadowFactor.value = shadowFactor;
+      // R3F clones the uniforms object at material-construction time, so
+      // per-frame mutations must target moonRef.current.material.uniforms,
+      // not the React-side moonUniforms ref.
+      const moonMat = moonRef.current.material as THREE.ShaderMaterial;
+      const mu = moonMat.uniforms;
+      if (mu.shadowFactor) mu.shadowFactor.value = shadowFactor;
+      if (mu.ambient) mu.ambient.value = getMoonAmbientOverride() ?? 0.05;
+
+      // Dev-console overrides (polled per-frame, no React state). When the
+      // moonFocus flag is set, dolly the camera to a point on the sun-facing
+      // side of the moon so the lit hemisphere faces the camera — otherwise
+      // the camera could land behind a near-new-phase moon and we'd see
+      // mostly the unlit side. Overrides whatever CameraDriver tweened to;
+      // cleared by calling moonFocus(false); next scene change restores via
+      // CameraDriver.
+      if (getMoonCameraFocus()) {
+        focusCamPosVec.current.copy(sunWorldRef.current).multiplyScalar(MOON_RADIUS * 4);
+        focusCamPosVec.current.add(moonWorldVec);
+        camera.position.copy(focusCamPosVec.current);
+        camera.lookAt(moonWorldVec);
+      }
+    }
+
+    if (earthRef.current) {
+      earthRef.current.visible = !getEarthHidden();
     }
   });
 
@@ -409,8 +490,10 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
   // Geometry density: lower on mobile to keep frame budget under control.
   const segments = settings.isMobile ? 32 : 64;
   // Clouds hidden in test mode regardless of device — the test material is
-  // unlit and cloud overlay would obscure the city markers.
-  const showClouds = !settings.degraded && !testMode && cloudsMap !== null;
+  // unlit and cloud overlay would obscure the city markers. Mount as soon as
+  // mode flips to 'nasa' even before textures finish loading; the through-ref
+  // sync effect populates each material's cloudMap once the loader fires.
+  const showClouds = !testMode && cloudTextureMode === 'nasa' && cloudLayers.length > 0;
 
   // Precompute city marker positions + per-dot shader uniforms once. The dots
   // are children of the rotating earth group, so they rotate with the planet
@@ -468,18 +551,20 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
             />
           )}
         </mesh>
-        {showClouds ? (
-          <mesh ref={cloudsRef}>
-            <sphereGeometry args={[1.005, segments, segments]} />
-            <shaderMaterial
-              vertexShader={cloudVertexShader}
-              fragmentShader={cloudFragmentShader}
-              uniforms={cloudUniforms}
-              transparent={true}
-              depthWrite={false}
-            />
-          </mesh>
-        ) : null}
+        {showClouds
+          ? cloudLayers.map((_spec, idx) => (
+              <mesh key={idx} ref={cloudLayerRefs[idx]!}>
+                <sphereGeometry args={[1.005, segments, segments]} />
+                <shaderMaterial
+                  vertexShader={cloudVertexShader}
+                  fragmentShader={cloudFragmentShader}
+                  uniforms={cloudUniformsList[idx]!}
+                  transparent={true}
+                  depthWrite={false}
+                />
+              </mesh>
+            ))
+          : null}
         {testMode
           ? cityPositions.map(({ key, position, uniforms: dotUniforms }) => (
               <mesh key={key} position={position}>

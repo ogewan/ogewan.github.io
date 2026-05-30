@@ -23,3 +23,16 @@ declare module '*.bin?url' {
   const url: string;
   export default url;
 }
+
+// Vite's `import.meta.glob` — declared locally so the celestial package can
+// use bulk asset discovery without pulling in vite/client types.
+interface ImportMeta {
+  glob(
+    pattern: string,
+    options?: {
+      eager?: boolean;
+      query?: string;
+      import?: string;
+    },
+  ): Record<string, unknown>;
+}

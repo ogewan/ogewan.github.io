@@ -19,7 +19,7 @@
  */
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { detectPortfolioPort } from './_dev-port.mjs';
 
 const args = Object.fromEntries(
@@ -36,6 +36,7 @@ const port = await detectPortfolioPort();
 const url = `http://localhost:${port}${args.url ?? '/en/'}`;
 console.log(`Targeting portfolio dev server at http://localhost:${port}`);
 const quality = args.quality ?? null; // 'quality' | 'static' | 'simple' | null
+const textureMode = args['texture-mode'] ?? null; // 'procedural' | 'nasa' | null
 const screenshotName = args.screenshot ?? 'visual.png';
 const reducedMotion = args['reduced-motion'] === 'true' ? 'reduce' : 'no-preference';
 // The loading overlay sits at z-index max with a 2000ms minimum visible time
@@ -67,6 +68,12 @@ if (quality) {
   await ctx.addInitScript((q) => {
     window.localStorage.setItem('portfolio:quality', q);
   }, quality);
+}
+
+if (textureMode) {
+  await ctx.addInitScript((m) => {
+    window.localStorage.setItem('portfolio:earth-texture-mode', m);
+  }, textureMode);
 }
 
 if (skipOverlay) {
@@ -125,6 +132,7 @@ if (scrollTo) {
 }
 
 const screenshotPath = resolve(screenshotsDir, screenshotName);
+mkdirSync(dirname(screenshotPath), { recursive: true });
 await page.screenshot({ path: screenshotPath, fullPage });
 console.log(`Screenshot saved: ${screenshotPath}`);
 
