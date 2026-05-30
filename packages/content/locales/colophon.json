@@ -62,6 +62,10 @@
         "note": { "en": "NOTE", "es": "NOTA" }
       },
       "entries": {
+        "v12": {
+          "en": "Earth backdrop refresh — moon texture render bug fixed (R3F clones shader uniforms at material construction), multi-layer NASA cloud system from a pool of 9 sources with 3D-fbm coverage masking and silver-lining scatter, sun-direction overrides, `?earthSystem=` URL sync with state-version migration.",
+          "es": "Refresco del fondo terrestre — corregido el bug de renderizado de la textura lunar (R3F clona los uniformes del shader al construir el material), sistema de nubes NASA multicapa desde un pool de 9 fuentes con máscara de cobertura fbm 3D y dispersión silver-lining, overrides de dirección solar, sync con `?earthSystem=` y migración por versión de estado."
+        },
         "v11": {
           "en": "Manifest builder accepts locally-authored external project entries (`.portfolio/<slug>/`) for OSS contributions you don't own. `optional()` i18n helper softens missing keys. Project detail pages drop the redundant subtitle. SPA deep-link replay fix on Pages.",
           "es": "El manifest builder acepta entradas locales para proyectos externos (`.portfolio/<slug>/`) — para contribuciones OSS que no son tuyas. Helper `optional()` para claves i18n ausentes. Páginas de detalle sin el subtítulo redundante. Fix de deep-link SPA en Pages."

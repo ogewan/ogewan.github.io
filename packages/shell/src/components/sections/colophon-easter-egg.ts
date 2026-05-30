@@ -14,10 +14,17 @@ const padInside = (s: string): string =>
   // the (WIDTH)-dash top/bottom borders.
   s.padEnd(WIDTH - 1, ' ');
 
+// import.meta.env.DEV is resolved at build time by Vite — true under
+// `pnpm dev`, false in the production bundle. Surfaced in the console box
+// so visitors (and future me reading transcripts) can tell at a glance
+// which build is running.
+const MODE_LINE = import.meta.env.DEV ? '> mode · dev' : '> mode · prod';
+
 const BOX: readonly string[] = [
   '┌' + '─'.repeat(WIDTH) + '┐',
   '│ ' + padInside('$ seun-ogedengbe.portfolio') + '│',
-  '│ ' + padInside('> /colophon · v1.2') + '│',
+  '│ ' + padInside('> /colophon · v1.3') + '│',
+  '│ ' + padInside(MODE_LINE) + '│',
   //'│ ' + padInside('> if you\'re reading this, hi.') + '│',
   '└' + '─'.repeat(WIDTH) + '┘',
 ];
