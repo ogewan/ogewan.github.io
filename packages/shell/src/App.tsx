@@ -23,6 +23,7 @@ import { CelestialDebug } from './pages/dev/CelestialDebug';
 import { LocaleSync } from './components/LocaleSync';
 import { RootRedirect } from './components/RootRedirect';
 import { DevConsoleBridge } from './dev/DevConsoleBridge';
+import { EarthSystemUrlSync } from './EarthSystemUrlSync';
 
 // The /_dev branch is only mounted in non-production builds. Tree-shaken
 // completely out of the prod bundle by Vite via the import.meta.env.PROD
@@ -82,6 +83,7 @@ export function App() {
                             </SiteLayout>
                           </div>
                           {DEV_BRIDGE}
+                          <EarthSystemUrlSync />
                         </ActiveSceneProvider>
                       </BackgroundConfigProvider>
                     </BlackHoleConfigProvider>

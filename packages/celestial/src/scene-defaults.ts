@@ -24,14 +24,18 @@ export const SCENE_DEFAULTS = {
     // rad/sec cloud-layer drift (independent of earth body rotation).
     cloudDriftRate: 0.015,
     // Cloud texture mode: null = no clouds; 'nasa' = load earth-clouds-2k.webp.
-    cloudTextureMode: null as 'nasa' | null,
+    // Defaults to 'nasa' so the cloud layer is on out of the box. Set null
+    // to hide clouds entirely. Tied to earth.textureMode through the
+    // `portfolio.earth.system.textureMode()` orchestrator + URL sync.
+    cloudTextureMode: 'nasa' as 'nasa' | null,
     // UV-checker shader + bright city-marker dots — diagnostic only.
     testMode: false,
-    // Texture mode: 'procedural' = canvas-drawn placeholder maps (default);
-    // 'nasa' = load real Blue Marble / Black Marble webps from textures/.
-    // In 'nasa' mode, stubs (isLikelyStubTexture) silently fall back to
-    // procedural so the scene always renders correctly.
-    textureMode: 'procedural' as EarthTextureMode,
+    // Texture mode: 'nasa' (default) loads real Blue Marble / Black Marble
+    // webps from textures/ for earth, moon, and clouds. 'procedural' uses
+    // canvas-drawn placeholder maps (no clouds). In 'nasa' mode, stubs
+    // (isLikelyStubTexture) silently fall back to procedural so the scene
+    // always renders correctly. URL `?earthSystem=` overrides this default.
+    textureMode: 'nasa' as EarthTextureMode,
   },
   contact: {
     // Active nebula variant. Source-of-truth lives in the URL `?neb`

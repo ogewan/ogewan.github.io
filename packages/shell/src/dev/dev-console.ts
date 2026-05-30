@@ -568,9 +568,34 @@ export function installDevConsole(): void {
         registry.setEarthTestMode(Boolean(on));
       },
 
+      // Orchestrated earth+moon+clouds toggle. Earth and moon share a single
+      // texture mode (the moon texture loads in the same useEffect as the
+      // earth maps); clouds get 'nasa' when earth is 'nasa', null otherwise.
+      // The URL `?earthSystem=` mirror is updated reactively by
+      // EarthSystemUrlSync — calling this method here drives that sync.
+      //   portfolio.earth.system.textureMode()              → current mode
+      //   portfolio.earth.system.textureMode('nasa')        → real NASA textures + clouds
+      //   portfolio.earth.system.textureMode('procedural')  → canvas placeholders, no clouds
+      system: {
+        textureMode(mode?: string): EarthTextureMode | void {
+          if (mode === undefined) {
+            return registry.getEarthTextureMode?.() ?? SCENE_DEFAULTS.earth.textureMode;
+          }
+          if (!isEarthTextureMode(mode)) {
+            console.warn(
+              `[portfolio] earth.system.textureMode(m): m must be one of ${EARTH_TEXTURE_MODES.join(' | ')}.`,
+            );
+            return;
+          }
+          if (!registry.setEarthTextureMode) return notRegistered('earth.system.textureMode');
+          registry.setEarthTextureMode(mode);
+          setCloudTextureMode(mode === 'nasa' ? 'nasa' : null);
+        },
+      },
+
       // portfolio.earth.textureMode()                → current mode
       // portfolio.earth.textureMode('nasa')          → switch to NASA textures (requires real webp files)
-      // portfolio.earth.textureMode('procedural')    → switch back to canvas (default)
+      // portfolio.earth.textureMode('procedural')    → switch back to canvas
       textureMode(mode?: string): EarthTextureMode | void {
         if (mode === undefined) {
           return registry.getEarthTextureMode?.() ?? SCENE_DEFAULTS.earth.textureMode;
@@ -1332,9 +1357,10 @@ export function installDevConsole(): void {
           '',
           'Earth test mode:',
           '  portfolio.earth.test(on?)                   // on=true by default; UV checker + red city dots',
+          "  portfolio.earth.system.textureMode(m?)      // set earth+moon+clouds at once; m='nasa'|'procedural' (URL-synced)",
           "  portfolio.earth.textureMode()               // → current mode ('procedural' | 'nasa')",
           "  portfolio.earth.textureMode('nasa')         // switch to NASA textures (requires real webp files in textures/)",
-          "  portfolio.earth.textureMode('procedural')   // switch back to canvas (default)",
+          "  portfolio.earth.textureMode('procedural')   // switch back to canvas",
           '  portfolio.earth.rotationSpeed()             // get current rate, in rad/sec (default 0.025)',
           '  portfolio.earth.rotationSpeed(rate)         // set; negative reverses, 0 halts. Persists in localStorage.',
           '  portfolio.earth.cloudSpeed()                // get cloud drift rate, rad/sec (default 0.015)',

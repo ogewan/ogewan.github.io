@@ -3,7 +3,21 @@ import { useState, useEffect } from 'react';
 export type CloudTextureMode = 'nasa' | null;
 
 const EVENT = 'portfolio:cloud-texture-mode';
-let _current: CloudTextureMode = null;
+
+// Initial value bridged from the index.html pre-React script
+// (window.__earthSystemCloudInit), which derives it from ?earthSystem=. Lets
+// the cloud layer mount in the correct mode on first render — no need to
+// wait for EarthSystemUrlSync's mount effect.
+function readInitial(): CloudTextureMode {
+  if (typeof window === 'undefined') return 'nasa';
+  const w = window as unknown as { __earthSystemCloudInit?: CloudTextureMode };
+  if (w.__earthSystemCloudInit === 'nasa' || w.__earthSystemCloudInit === null) {
+    return w.__earthSystemCloudInit;
+  }
+  return 'nasa';
+}
+
+let _current: CloudTextureMode = readInitial();
 
 export function getCloudTextureMode(): CloudTextureMode {
   return _current;

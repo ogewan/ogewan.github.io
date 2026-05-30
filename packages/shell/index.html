@@ -387,6 +387,80 @@
       </div>
     </div>
     <div id="root"></div>
+    <!-- Earth-system pre-init. Runs before main.tsx so:
+           1. Bumped STATE_VERSION wipes stale portfolio:* localStorage so
+              old visitors pick up new defaults on the very next load.
+              (Bump STATE_VERSION below whenever a default changes and you
+              want existing users migrated.)
+           2. URL ?earthSystem= is resolved to a concrete mode (default
+              'nasa' if absent or unrecognised), stamped back to the URL,
+              and persisted to localStorage so the React earth-texture
+              context's lazy localStorage read sees it on first render.
+           3. window.__earthSystemCloudInit is set for the cloud-texture
+              module to consume at module init.
+         Avoids a one-frame procedural flash before the URL-sync effect
+         fires. -->
+    <script>
+      (function () {
+        // BUMP when a default changes and old visitors should be migrated.
+        var STATE_VERSION = '2026-05-30-nasa-default';
+        var VERSION_KEY = 'portfolio:state-version';
+
+        // Vite substitutes %MODE% at HTML transform time. The version-gated
+        // wipe is a production-only migration aid — in dev we keep stale
+        // localStorage so iterating on knobs across HMR reloads doesn't
+        // wipe your tuning every time STATE_VERSION bumps.
+        var IS_DEV = "%MODE%" === "development";
+
+        try {
+          // Step 1: version-gated state wipe. If the stored version differs,
+          // remove every portfolio:* key so each module's lazy readStored()
+          // returns its in-code default on the next access.
+          var stored = window.localStorage.getItem(VERSION_KEY);
+          if (!IS_DEV && stored !== STATE_VERSION) {
+            var toRemove = [];
+            for (var i = 0; i < window.localStorage.length; i++) {
+              var k = window.localStorage.key(i);
+              if (k && k.indexOf('portfolio:') === 0) toRemove.push(k);
+            }
+            for (var j = 0; j < toRemove.length; j++) {
+              window.localStorage.removeItem(toRemove[j]);
+            }
+            window.localStorage.setItem(VERSION_KEY, STATE_VERSION);
+          }
+        } catch (e) {
+          // localStorage disabled (private mode etc.) — fall through; the
+          // session will use in-code defaults anyway.
+        }
+
+        try {
+          // Step 2: earthSystem URL ↔ storage resolution.
+          var EARTH_KEY = 'portfolio:earth-texture-mode';
+          var Q = 'earthSystem';
+          var params = new URLSearchParams(window.location.search);
+          var raw = params.get(Q);
+          var mode = (raw === 'nasa' || raw === 'procedural') ? raw : 'nasa';
+          if (params.get(Q) !== mode) {
+            params.set(Q, mode);
+            var qs = params.toString();
+            var next = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+            window.history.replaceState(null, '', next);
+          }
+          // Match the React context's storage convention: persist only when
+          // the value diverges from the default ('nasa'); clear otherwise.
+          if (mode === 'procedural') {
+            window.localStorage.setItem(EARTH_KEY, 'procedural');
+          } else {
+            window.localStorage.removeItem(EARTH_KEY);
+          }
+          // Step 3: cloud-texture module init bridge.
+          window.__earthSystemCloudInit = mode === 'nasa' ? 'nasa' : null;
+        } catch (e) {
+          // URL parsing failure — React will still render with the in-code
+          // default ('nasa').
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
