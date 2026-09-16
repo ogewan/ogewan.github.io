@@ -7,7 +7,7 @@
 //
 // Persisted to localStorage so a "set it and reload" workflow holds.
 
-export const DEFAULT_CLOUD_OPACITY = 0.45;
+export const DEFAULT_CLOUD_OPACITY = 0.15;
 
 const STORAGE_KEY = 'portfolio:earth-cloud-opacity';
 

@@ -7,7 +7,7 @@ import { useCelestialFocus } from '../../CelestialContext.js';
 import { CANONICAL_CITIES } from '../../cities.js';
 import { getEarthRotationRate } from '../../earth-rotation-rate.js';
 import { pickCloudLayers, getCloudLayerDriftRate } from '../../cloud-layers.js';
-import { getCloudOpacity } from '../../earth-cloud-opacity.js';
+import { DEFAULT_CLOUD_OPACITY, getCloudOpacity } from '../../earth-cloud-opacity.js';
 import { getCloudBrightness, getCloudContrast, getCloudCoverage } from '../../earth-cloud-look.js';
 import { getSunDirectionOverride } from '../../sun-direction-override.js';
 import { getEarthHidden, getMoonAmbientOverride, getMoonCameraFocus } from '../../earth-debug.js';
@@ -333,7 +333,7 @@ export function EarthScene({ scene, previousScene, sunDirection }: EarthScenePro
       cloudLayers.map((spec, idx) => ({
         cloudMap: { value: cloudLayerTextures[idx] ?? null },
         sunDirection: sunDirectionUniform,
-        cloudOpacity: { value: 0.45 },
+        cloudOpacity: { value: DEFAULT_CLOUD_OPACITY },
         cloudBrightness: { value: 1.6 },
         cloudContrast: { value: 1.3 },
         cloudCoverage: { value: 0.4 },

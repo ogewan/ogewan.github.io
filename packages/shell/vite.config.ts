@@ -5,6 +5,7 @@ import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { sitemapPlugin } from './vite-plugin-sitemap';
+import { stripCommentsPlugin } from './vite-plugin-strip-comments';
 import siteConfig from '../../config.json';
 import shellPkg from './package.json' with { type: 'json' };
 
@@ -86,6 +87,7 @@ export default defineConfig(() => {
         baseUrl,
         repoRoot: resolve(__dirname, '../..'),
       }),
+      stripCommentsPlugin(),
     ],
     base: baseUrl,
     define: {
