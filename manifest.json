@@ -8,7 +8,7 @@
     "description": null,
     "primary_language": "TypeScript",
     "stars": 0,
-    "pushed_at": "2026-10-15T04:39:42Z",
+    "pushed_at": "2026-10-20T07:55:01Z",
     "schema_version": 3,
     "uuid": "c30e0e74-7ae4-4cbd-a353-f9014708a6e4",
     "title": "Project O'Neil",
@@ -82,7 +82,7 @@
     "description": "WebGL-based viewer for volumetric data",
     "primary_language": "TypeScript",
     "stars": 25,
-    "pushed_at": "2026-10-15T21:28:39Z",
+    "pushed_at": "2026-10-22T21:36:28Z",
     "schema_version": 3,
     "uuid": "126241fb-867d-49b6-8361-206c3957b1b8",
     "title": "Neuroglancer (Seung Lab fork)",
@@ -160,6 +160,92 @@
     "source": "external"
   },
   {
+    "slug": "youtubeman",
+    "repo_name": "youtubeman",
+    "repo_url": "https://github.com/ogewan/youtubeman",
+    "private": true,
+    "default_branch": "master",
+    "description": null,
+    "primary_language": "JavaScript",
+    "stars": 0,
+    "pushed_at": "2026-10-24T04:44:38Z",
+    "schema_version": 3,
+    "uuid": "2da69ec2-0674-4e53-b32c-31479c76b18e",
+    "title": "YouTube Tabs Manager",
+    "summary": "Chrome MV3 side-panel extension that tracks open YouTube tabs, reports live playback analytics, and manages a library of watched videos with sort/filter, tags, and Google Drive sync.",
+    "tech": [
+      "chrome-extension",
+      "manifest-v3",
+      "javascript",
+      "service-worker",
+      "youtube-data-api",
+      "google-drive-api",
+      "oauth2"
+    ],
+    "categories": ["browser-extension", "productivity"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-02-04",
+    "media": [],
+    "case_study": {
+      "background": {
+        "en": [
+          "A Chrome MV3 side-panel extension for people who keep too many YouTube tabs open. It tracks every open YouTube tab, scrapes best-effort metadata, and listens to the HTML5 video element to report live playback progress — building toward one goal: at most one playback tab open at a time.",
+          "The architecture treats the background service worker as the single source of truth. It owns an in-memory store of tabs and videos, persists the library across worker restarts, and broadcasts read-only snapshots to the side panel ~every 750ms. Content scripts run in two worlds — a MAIN-world bridge reads YouTube's internal ytInitialPlayerResponse, while an ISOLATED-world script hooks the video element and relays progress.",
+          "Two cross-cutting features layer on top. Playlist-based auto-tagging registers playlists (manually, via OAuth-discovered owned playlists, or by scraping on navigation including Watch Later) and contributes each playlist's name as a dynamically-computed tag. Cross-browser sync round-trips the library, analytics, tags, and playlists through Google Drive's hidden appDataFolder, so multiple browsers signed into the same Google account share one logical library."
+        ]
+      },
+      "pull_quote": {
+        "en": "One playback tab, one library — synced across every browser you sign into."
+      },
+      "approach": {
+        "body": {
+          "en": "State flows in one direction — content script to service worker to side panel — which keeps the UI a pure read-only replica and avoids race conditions across Chrome's process boundaries. Sync uses a hybrid transport: tiny values ride Chrome's native storage.sync, heavy data goes through Drive, and per-device state stays local. Deletions propagate via per-id tombstones with a 30-day TTL so a removal on one browser doesn't get resurrected by a stale copy on another."
+        },
+        "steps": [
+          {
+            "en": "MAIN-world bridge reads YouTube's internal player data and posts metadata to the ISOLATED content script."
+          },
+          {
+            "en": "ISOLATED script tracks the video element and forwards progress to the service worker."
+          },
+          {
+            "en": "Service worker maintains the canonical store, persists the library, and broadcasts snapshots."
+          },
+          {
+            "en": "Side panel renders each snapshot as a read-only replica with sort, filter, and tagging."
+          },
+          {
+            "en": "Sync manager pushes structural changes to Google Drive and merges remote state on a 5-minute tick."
+          }
+        ]
+      }
+    },
+    "source": "github"
+  },
+  {
+    "slug": "superchrome",
+    "repo_name": "superchrome",
+    "repo_url": "https://github.com/ogewan/superchrome",
+    "private": false,
+    "default_branch": "master",
+    "description": "A multi chrome extension to fix things that bother me.",
+    "primary_language": "JavaScript",
+    "stars": 0,
+    "pushed_at": "2026-10-23T04:26:03Z",
+    "schema_version": 3,
+    "uuid": "7c3e9a21-5b4d-4f8a-9c1e-2d6f0a3b8e74",
+    "title": "SuperChrome",
+    "summary": "A Chrome extension (Manifest V3) for tab and browser management — tab grouping, a URL manager, and memory/process insight.",
+    "tech": ["javascript", "chrome-extension", "manifest-v3"],
+    "categories": ["browser-extension"],
+    "status": "active",
+    "featured": false,
+    "started_at": "2026-01-23",
+    "media": [],
+    "source": "github"
+  },
+  {
     "slug": "ogewan.github.io",
     "repo_name": "ogewan.github.io",
     "repo_url": "https://github.com/ogewan/ogewan.github.io",
@@ -168,7 +254,7 @@
     "description": null,
     "primary_language": "TypeScript",
     "stars": 0,
-    "pushed_at": "2026-09-27T02:06:41Z",
+    "pushed_at": "2026-10-18T06:43:02Z",
     "schema_version": 3,
     "uuid": "a4f7c2e1-8b3d-4a91-b6e5-2c9f8d4e1a7b",
     "title": "Portfolio SPA",
@@ -237,92 +323,6 @@
           },
           {
             "en": "The floating control panel for saves, profiles, and variables lives in the main window's renderer above the story view, so the story's own code cannot hide or interfere with it."
-          }
-        ]
-      }
-    },
-    "source": "github"
-  },
-  {
-    "slug": "superchrome",
-    "repo_name": "superchrome",
-    "repo_url": "https://github.com/ogewan/superchrome",
-    "private": false,
-    "default_branch": "master",
-    "description": "A multi chrome extension to fix things that bother me.",
-    "primary_language": "JavaScript",
-    "stars": 0,
-    "pushed_at": "2026-08-05T05:54:42Z",
-    "schema_version": 3,
-    "uuid": "7c3e9a21-5b4d-4f8a-9c1e-2d6f0a3b8e74",
-    "title": "SuperChrome",
-    "summary": "A Chrome extension (Manifest V3) for tab and browser management — tab grouping, a URL manager, and memory/process insight.",
-    "tech": ["javascript", "chrome-extension", "manifest-v3"],
-    "categories": ["browser-extension"],
-    "status": "active",
-    "featured": false,
-    "started_at": "2026-01-23",
-    "media": [],
-    "source": "github"
-  },
-  {
-    "slug": "youtubeman",
-    "repo_name": "youtubeman",
-    "repo_url": "https://github.com/ogewan/youtubeman",
-    "private": true,
-    "default_branch": "master",
-    "description": null,
-    "primary_language": "JavaScript",
-    "stars": 0,
-    "pushed_at": "2026-05-29T20:13:06Z",
-    "schema_version": 3,
-    "uuid": "2da69ec2-0674-4e53-b32c-31479c76b18e",
-    "title": "YouTube Tabs Manager",
-    "summary": "Chrome MV3 side-panel extension that tracks open YouTube tabs, reports live playback analytics, and manages a library of watched videos with sort/filter, tags, and Google Drive sync.",
-    "tech": [
-      "chrome-extension",
-      "manifest-v3",
-      "javascript",
-      "service-worker",
-      "youtube-data-api",
-      "google-drive-api",
-      "oauth2"
-    ],
-    "categories": ["browser-extension", "productivity"],
-    "status": "active",
-    "featured": false,
-    "started_at": "2026-02-04",
-    "media": [],
-    "case_study": {
-      "background": {
-        "en": [
-          "A Chrome MV3 side-panel extension for people who keep too many YouTube tabs open. It tracks every open YouTube tab, scrapes best-effort metadata, and listens to the HTML5 video element to report live playback progress — building toward one goal: at most one playback tab open at a time.",
-          "The architecture treats the background service worker as the single source of truth. It owns an in-memory store of tabs and videos, persists the library across worker restarts, and broadcasts read-only snapshots to the side panel ~every 750ms. Content scripts run in two worlds — a MAIN-world bridge reads YouTube's internal ytInitialPlayerResponse, while an ISOLATED-world script hooks the video element and relays progress.",
-          "Two cross-cutting features layer on top. Playlist-based auto-tagging registers playlists (manually, via OAuth-discovered owned playlists, or by scraping on navigation including Watch Later) and contributes each playlist's name as a dynamically-computed tag. Cross-browser sync round-trips the library, analytics, tags, and playlists through Google Drive's hidden appDataFolder, so multiple browsers signed into the same Google account share one logical library."
-        ]
-      },
-      "pull_quote": {
-        "en": "One playback tab, one library — synced across every browser you sign into."
-      },
-      "approach": {
-        "body": {
-          "en": "State flows in one direction — content script to service worker to side panel — which keeps the UI a pure read-only replica and avoids race conditions across Chrome's process boundaries. Sync uses a hybrid transport: tiny values ride Chrome's native storage.sync, heavy data goes through Drive, and per-device state stays local. Deletions propagate via per-id tombstones with a 30-day TTL so a removal on one browser doesn't get resurrected by a stale copy on another."
-        },
-        "steps": [
-          {
-            "en": "MAIN-world bridge reads YouTube's internal player data and posts metadata to the ISOLATED content script."
-          },
-          {
-            "en": "ISOLATED script tracks the video element and forwards progress to the service worker."
-          },
-          {
-            "en": "Service worker maintains the canonical store, persists the library, and broadcasts snapshots."
-          },
-          {
-            "en": "Side panel renders each snapshot as a read-only replica with sort, filter, and tagging."
-          },
-          {
-            "en": "Sync manager pushes structural changes to Google Drive and merges remote state on a 5-minute tick."
           }
         ]
       }
